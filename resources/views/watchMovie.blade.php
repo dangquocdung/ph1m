@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<title>Watch Movie - {{ $movie->title }}</title>
+	<title>{{__('staticwords.watchmovie')}} - {{ $movie->title }}</title>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1 user-scalable=no" />
@@ -12,6 +12,25 @@
 	$text = $cpy->cpy_text;
 	$app_url = config('app.url');
 	?>
+	<style>
+		
+		.UVPSubtitle
+		{
+			font-family:Arial !important;
+			text-align:center !important;
+			color:{{$cpy->subtitle_color}}!important;
+			text-shadow: 0px 0px 1px #000000 !important;
+			font-size:{{$cpy->subtitle_font_size}}px!important;
+			line-height:{{$cpy->subtitle_font_size}}px!important;
+		    font-weight:600 !important;
+			margin:0px !important;
+			padding:0px !important;
+			margin-left:20px !important;
+			margin-right:20px !important;
+			margin-bottom:12px !important;
+		}
+	</style>
+	
 
 	<script type="text/javascript">
 		var cpy = "<?= $text ?>";
@@ -69,12 +88,22 @@
 					displayType:"fullscreen",
 					initializeOnlyWhenVisible:"no",
 					useVectorIcons:"no",
+					fillEntireVideoScreen:"yes",
+					fillEntireposterScreen:"yes",
+					goFullScreenOnButtonPlay:"yes",
+					playsinline:"yes",
 					fillEntireVideoScreen:"no",
+					@if(!isset($movie->password) && $movie->password == NULL)
 					privateVideoPassword:"428c841430ea18a70f7b06525d4b748a",
+					@endif
 					useHEXColorsForSkin:"no",
 					normalHEXButtonsColor:"#FF0000",
 					selectedHEXButtonsColor:"#000000",
+					@if(isset($cpy->player_google_analytics_id))
+					googleAnalyticsTrackingCode:"{{$cpy->player_google_analytics_id}}",
+					@else
 					googleAnalyticsTrackingCode:"",
+					@endif
 					showPreloader:"yes",
 					
 					useDeepLinking:"no",
@@ -127,7 +156,7 @@
 					showPlaylistsByDefault:"no",
 					thumbnailSelectedType:"opacity",
 
-					buttonsMargins:0,
+					buttonsMargins:15,
 					thumbnailMaxWidth:350, 
 					thumbnailMaxHeight:350,
 					horizontalSpaceBetweenThumbnails:40,
@@ -188,7 +217,11 @@
 					showQualityButton:"yes",
 					showInfoButton:"yes",
 					showDownloadButton:"yes",
+					@if($cpy->chromecast ==1)
 					showChromecastButton:"yes",
+					@else
+					showChromecastButton:"no",
+					@endif
 					
 					@if($cpy->share_opt ==1)
 					showShareButton:"yes",
@@ -291,7 +324,24 @@
 					atbButtonTextNormalColor:"#888888",
 					atbButtonTextSelectedColor:"#FFFFFF",
 					atbButtonBackgroundNormalColor:"#FFFFFF",
-					atbButtonBackgroundSelectedColor:"#000000"
+					atbButtonBackgroundSelectedColor:"#000000",
+					// context menu
+                    showContextmenu:'yes',
+                    showScriptDeveloper:"no",
+                    contextMenuBackgroundColor:"#1F1F1F",
+                    contextMenuBorderColor:"#1F1F1F",
+                    contextMenuSpacerColor:"#333",
+                    contextMenuItemNormalColor:"#888888",
+                    contextMenuItemSelectedColor:"#FFFFFF",
+                    contextMenuItemDisabledColor:"#333",
+					//thumbnails preview
+                    thumbnailsPreviewWidth:196,
+                    thumbnailsPreviewHeight:110,
+                    thumbnailsPreviewBackgroundColor:"#000000",
+                    thumbnailsPreviewBorderColor:"#666",
+                    thumbnailsPreviewLabelBackgroundColor:"#666",
+                    thumbnailsPreviewLabelFontColor:"#FFF",
+                    rewindTime:10
 				});	
 			});
 			
@@ -363,6 +413,12 @@
 		data-start-at-time="{{date('H:i:s',strtotime($endtime))}}"
 		
 		data-video-source="{{ ($slink->ready_url) }}"
+		
+		@elseif(isset($slink->upload_video) && $slink->upload_video !="")
+		
+		
+		
+		data-video-source="{{ ($slink->upload_video) }}"
 
 		@else
 		
@@ -373,7 +429,7 @@
 		@foreach($movie->subtitles as $sub)
 		{source:'{{ url('subtitles/'.$sub->sub_t) }}', label:'{{ $sub->sub_lang }}'},
 		@endforeach
-		]" data-downloadable="no" data-thumbnails-preview="{{url('content/thumbnails.vtt')}}"> 
+		]" data-downloadable="no" data-thumbnails-preview="{{url('content/thumbnails.vtt')}}" @if(isset($pass) && $pass !=NULL) data-is-private="yes" data-private-video-password="{{ $pass }}" @endif> 
 		
 		@php
 		$skipads = App\Ads::where('ad_location','=', 'skip')->get();
@@ -387,17 +443,17 @@
 
 				data-source="{{ asset('adv_upload/video/'.$skipad->ad_video) }}" 
 				@else
-				data-source="{{ $skipad->ad_url }}" @endif data-time-start="{{ $skipad->time }}" data-time-to-hold-ads={{ $skipad->ad_hold }} data-thumbnail-source="{{asset('images/movies/thumbnails/'.$movie->thumbnail)}}" data-link="{{ $skipad->ad_target }}" data-target="_blank"></li>
+				data-source="{{ $skipad->ad_url }}" @endif data-time-start="{{ $skipad->time }}" data-time-to-hold-ads="{{ $skipad->ad_hold }}"data-thumbnail-source="{{asset('images/movies/thumbnails/'.$movie->thumbnail)}}" data-link="{{ $skipad->ad_target }}" data-target="_blank"></li>
 			</ul>
 			@endif
 
 			<div data-video-short-description="">
-				<p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">Title: </span>{{ $movie->title }}</p>
-				<p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">Description: </span>{{ $movie->detail }}</p>
+				<p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">{{__('staticwords.title')}}: </span>{{ $movie->title }}</p>
+				<p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">{{__('staticwords.description')}}: </span>{{ $movie->detail }}</p>
 			</div>
 			<div>
-				<p class="classicDarkThumbnailTitle">Title: </span>{{ $movie->title }}</p>
-				<p class="minimalDarkThumbnailDesc">Description: </span>{{ $movie->detail }}</p>
+				<p class="classicDarkThumbnailTitle">{{__('staticwords.title')}}: </span>{{ $movie->title }}</p>
+				<p class="minimalDarkThumbnailDesc">{{__('staticwords.description')}}: </span>{{ $movie->detail }}</p>
 			</div>
 
 			@php

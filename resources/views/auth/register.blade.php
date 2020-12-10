@@ -33,14 +33,19 @@
           
           <div class="signup__overlay"></div>
         </div>
+         <div class="signup-thumbnail">
+          @if($logo != null)
+              <a href="{{url('/')}}" title="{{$w_title}}"><img src="{{asset('images/logo/'.$logo)}}" class="img-responsive" alt="{{$w_title}}"></a>
+            @endif  
+        </div>
       </div>
       <div class="col-sm-6 col-md-4 pad-0">
         <div class="container__child signup__form">
           <form method="POST" action="{{ route('register') }}">
             {{ csrf_field() }}
             <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
-              <label for="name">Username</label>
-              <input id="name" type="text" class="form-control" name="name" placeholder="Please Enter Your Username" value="{{ old('name') }}" required autofocus>
+              <label for="name">{{__('staticwords.username')}}</label>
+              <input id="name" type="text" class="form-control" name="name" placeholder="{{__('staticwords.enteryourusername')}}"value="{{ old('name') }}" required autofocus>
               @if ($errors->has('name'))
                 <span class="help-block">
                   <strong>{{ $errors->first('name') }}</strong>
@@ -48,8 +53,8 @@
               @endif
             </div>
             <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-              <label for="email">Email</label>
-              <input id="email" type="text" class="form-control" name="email" placeholder="Please Enter Your Email" value="{{ old('email') }}" required autofocus>
+              <label for="email">{{__('staticwords.email')}}</label>
+              <input id="email" type="text" class="form-control" name="email" placeholder="{{__('staticwords.enteryouremail')}}" value="{{ old('email') }}" required autofocus>
               @if ($errors->has('email'))
                 <span class="help-block">
                   <strong>{{ $errors->first('email') }}</strong>
@@ -57,8 +62,8 @@
               @endif
             </div>
             <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-              <label for="password">Password</label>
-              <input id="password" type="password" class="form-control" name="password" placeholder="Please Enter Your Password" value="{{ old('password') }}" required>
+              <label for="password">{{__('staticwords.password')}}</label>
+              <input id="password" type="password" class="form-control" name="password" placeholder="{{__('staticwords.enteryourpassword')}}" value="{{ old('password') }}" required>
                 @if ($errors->has('password'))
                   <span class="help-block">
                     <strong>{{ $errors->first('password') }}</strong>
@@ -66,11 +71,27 @@
                 @endif
             </div>
             <div class="form-group">
-              <label for="password-confirm">Repeat Password</label>
-              <input id="password-confirm" type="password" class="form-control" name="password_confirmation" placeholder="Please Enter Your Password Again" required>
+              <label for="password-confirm">{{__('staticwords.repeatpassword')}}</label>
+              <input id="password-confirm" type="password" class="form-control" name="password_confirmation" placeholder="{{__('staticwords.enteryourpasswordagain')}}" required>
             </div>
+
+            @php
+              $config=App\Config::first();
+            @endphp
+            @if($config->captcha == 1)
+              <div class="form-group{{ $errors->has('g-recaptcha-response') ? ' has-error' : '' }}">
+                  {!! app('captcha')->display() !!}
+                  @if ($errors->has('g-recaptcha-response'))
+                      <span class="help-block">
+                          <strong>{{ $errors->first('g-recaptcha-response') }}</strong>
+                      </span>
+                  @endif
+              </div>
+            @endif
+            <br/>
+
             <div class="m-t-lg">
-              <input class="btn btn--form btn--form-login" type="submit" value="Register" />
+              <input class="btn btn--form btn--form-login" type="submit" value={{__('staticwords.register')}} />
               <div class="social-login">
                 <div class="row">
                     @php
@@ -78,17 +99,20 @@
               @endphp
                   <div class="col-md-12">
                     @if($config->fb_login==1)
-                <a href="{{ url('/auth/facebook') }}" class="btn btn--form btn--form-login fb-btn" title="Login With Facebook"><i class="fa fa-facebook-f"></i> Register With Facebook</a>
+                <a href="{{ url('/auth/facebook') }}" class="btn btn--form btn--form-login fb-btn" title={{__('staticwords.registerwithfacebook')}}><i class="fa fa-facebook-f"></i> {{__('staticwords.registerwithfacebook')}}</a>
                 @endif
                   @if($config->google_login==1)
-                <a href="{{ url('/auth/google') }}" class="btn btn--form btn--form-login gplus-btn" title="Login With Google"><i class="fa fa-google"></i> Register With Google</a>
+                <a href="{{ url('/auth/google') }}" class="btn btn--form btn--form-login gplus-btn" title={{__('staticwords.registerwithgoogle')}}><i class="fa fa-google"></i> {{__('staticwords.registerwithgoogle')}}</a>
+                @endif
+                @if($config->amazon_login==1)
+                <a href="{{ url('/auth/amazon') }}" class="btn btn--form btn--form-login amazon-btn" title={{__('staticwords.registerwithamazon')}}><i class="fa fa-amazon"></i> {{__('staticwords.registerwithamazon')}}</a>
                 @endif
                   @if($config->gitlab_login==1)
-                 <a style="background: linear-gradient(270deg, #48367d 0%, #241842 100%);" href="{{ url('/auth/gitlab') }}" class="btn btn--form btn--form-login" title="Login With Gitlab"><i class="fa fa-gitlab"></i> Register With GitLab</a>
+                 <a style="background: linear-gradient(270deg, #48367d 0%, #241842 100%);" href="{{ url('/auth/gitlab') }}" class="btn btn--form btn--form-login" title={{__('staticwords.registerwithgitlab')}}><i class="fa fa-gitlab"></i> {{__('staticwords.registerwithgitlab')}}</a>
                  @endif                  </div>
                 </div>
               </div>
-              <a class="signup__link" href="{{url('login')}}">I am already a member</a>
+              <a class="signup__link" href="{{url('login')}}">{{__('staticwords.iamalreadyamember')}}</a>
             </div>
           </form>  
         </div>
@@ -102,5 +126,6 @@
   <script type="text/javascript" src="{{asset('js/jquery.curtail.min.js')}}"></script> <!-- menumaker js -->
   <script type="text/javascript" src="{{asset('js/jquery.scrollSpeed.js')}}"></script> <!-- owl carousel js -->
   <script type="text/javascript" src="{{asset('js/custom-js.js')}}"></script>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
 </body>
 </html>

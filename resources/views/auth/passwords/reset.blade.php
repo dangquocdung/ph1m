@@ -29,16 +29,13 @@
           </div>
           <div class="thumbnail__content text-center">
             {!! $auth_customize->detail !!}
-          </div>
-          <!-- <div class="thumbnail__links">
-            <ul class="list-inline m-b-0 text-center">
-              <li><a href="#" target="_blank"><i class="fa fa-globe"></i></a></li>
-              <li><a href="https://www.behance.net/alexdevero" target="_blank"><fa class="fa fa-behance"></fa></a></li>
-              <li><a href="https://github.com/alexdevero" target="_blank"><i class="fa fa-github"></i></a></li>
-              <li><a href="https://twitter.com/alexdevero" target="_blank"><i class="fa fa-twitter"></i></a></li>
-            </ul>
-          </div> -->
+          </div>          
           <div class="signup__overlay"></div>
+        </div>
+         <div class="signup-thumbnail">
+          @if($logo != null)
+              <a href="{{url('/')}}" title="{{$w_title}}"><img src="{{asset('images/logo/'.$logo)}}" class="img-responsive" alt="{{$w_title}}"></a>
+            @endif  
         </div>
       </div>
       <div class="col-sm-6 col-md-4 pad-0">
@@ -47,8 +44,8 @@
             {{ csrf_field() }}
             <input type="hidden" name="token" value="{{ $token }}">
             <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-              <label for="email">Email</label>
-              <input id="email" type="text" class="form-control" name="email" placeholder="Please Enter Your Email" value="{{ $email or old('email') }}" required autofocus>
+              <label for="email">{{__('staticwords.email')}}</label>
+              <input id="email" type="text" class="form-control" name="email" placeholder="{{__('staticwords.enteryouremail')}}" value="{{ $email or old('email') }}" required autofocus>
               @if ($errors->has('email'))
                 <span class="help-block">
                   <strong>{{ $errors->first('email') }}</strong>
@@ -56,8 +53,8 @@
               @endif
             </div>
             <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-              <label for="password">New Password</label>
-              <input id="password" type="password" class="form-control" name="password" placeholder="Please Enter Your New Password" required>
+              <label for="password">{{__('staticwords.newpassword')}}</label>
+              <input id="password" type="password" class="form-control" name="password" placeholder="{{__('staticwords.enteryournewpassword')}}" required>
               @if ($errors->has('password'))
                 <span class="help-block">
                   <strong>{{ $errors->first('password') }}</strong>
@@ -65,11 +62,11 @@
               @endif
             </div>
             <div class="form-group">
-              <label for="password-confirm">Repeat Password</label>
-              <input id="password-confirm" type="password" class="form-control" name="password_confirmation" placeholder="Please Enter Your Password Again" required>
+              <label for="password-confirm">{{__('staticwords.repeatpassword')}}</label>
+              <input id="password-confirm" type="password" class="form-control" name="password_confirmation" placeholder="{{__('staticwords.enteryourpassowrdagain')}}" required>
             </div>
             <div class="m-t-lg">
-              <input class="btn btn--form btn--form-login" type="submit" value="Reset Password" />
+              <input class="btn btn--form btn--form-login" type="submit" value="{{__('staticwords.resetpassword')}}" />
             </div>
           </form>
         </div>

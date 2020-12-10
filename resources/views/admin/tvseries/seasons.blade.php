@@ -16,9 +16,15 @@
         <div id="createForm">
           {!! Form::open(['method' => 'POST', 'action' => 'TvSeriesController@store_seasons', 'files' => true]) !!}
             <div class="form-group{{ $errors->has('season_no') ? ' has-error' : '' }}">
+              <input type="hidden" name="tvseries" value="{{$tv_series->title}}">
               {!! Form::label('season_no', 'Season No.') !!}
-              {!! Form::number('season_no', null, ['class' => 'form-control', 'min' => '1']) !!}
+              {!! Form::number('season_no', null, ['class' => 'form-control', 'min' => '0']) !!}
               <small class="text-danger">{{ $errors->first('season_no') }}</small>
+            </div>
+            <div class="form-group{{ $errors->has('season_slug') ? ' has-error' : '' }}">
+              {!! Form::label('season_slug', 'Season Slug') !!}
+              {!! Form::text('season_slug', null, ['class' => 'form-control', 'min' => '0']) !!}
+              <small class="text-danger">{{ $errors->first('season_slug') }}</small>
             </div>
             <div class="form-group{{ $errors->has('a_language') ? ' has-error' : '' }}">
                 {!! Form::label('a_language', 'Audio Languages') !!}
@@ -70,32 +76,31 @@
                 </div>
               </div>
             </div>
-            <div class="pad_plus_border">
-              <div class="form-group{{ $errors->has('subtitle') ? ' has-error' : '' }}">
-                <div class="row">
-                  <div class="col-xs-6">
-                    {!! Form::label('subtitle', 'Subtitle') !!}
-                  </div>
-                  <div class="col-xs-5 pad-0">
-                    <label class="switch">
-                      {!! Form::checkbox('subtitle', 1, 0, ['class' => 'checkbox-switch']) !!}
-                      <span class="slider round"></span>
-                    </label>
-                  </div>
+
+            <div class="form-group{{ $errors->has('is_protect') ? ' has-error' : '' }}">
+              <div class="row">
+                <div class="col-xs-6">
+                  {!! Form::label('is_protect', 'Protected Video ?') !!}
                 </div>
-                <div class="col-xs-12">
-                  <small class="text-danger">{{ $errors->first('subtitle') }}</small>
+                <div class="col-xs-5 pad-0">
+                  <label class="switch">
+                    <input type="checkbox" name="is_protect" class="checkbox-switch" id="is_protect">
+                    <span class="slider round"></span>
+                  </label>
                 </div>
               </div>
-              <div class="form-group{{ $errors->has('subtitle_list') ? ' has-error' : '' }} subtitle_list">
-                  {!! Form::label('subtitle_list', 'Subtitles List') !!}
-                  <div class="input-group">
-                    {!! Form::select('subtitle_list[]', $a_lans, null, ['class' => 'form-control select2', 'multiple']) !!}
-                    <a href="#" data-toggle="modal" data-target="#AddLangModal" class="input-group-addon"><i class="material-icons left">add</i></a>
-                  </div>
-                  <small class="text-danger">{{ $errors->first('subtitle_list') }}</small>
+              <div class="col-xs-12">
+                <small class="text-danger">{{ $errors->first('is_protect') }}</small>
               </div>
             </div>
+            <div class="search form-group{{ $errors->has('password') ? ' has-error' : '' }} is_protect" style="display: none;">
+              {!! Form::label('password', 'Protected Password For Video') !!}
+              {!! Form::password('password', null, ['class' => 'form-control','id'=>'password']) !!}
+              <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+             
+            </div>
+             <small class="text-danger">{{ $errors->first('password') }}</small>
+          
             {{ Form::hidden('tv_series_id', $id) }}
             <div class="switch-field">
               <div class="switch-title">Want IMDB Ratings And More Or Custom?</div>
@@ -115,6 +120,11 @@
                 {!! Form::label('publish_year', 'Publish year') !!}
                 {!! Form::number('publish_year', null, ['class' => 'form-control', 'min' => '0']) !!}
                 <small class="text-danger">{{ $errors->first('publish_year') }}</small>
+              </div>
+              <div class="form-group{{ $errors->has('trailer_url') ? ' has-error' : '' }}">
+                {!! Form::label('trailer_url', 'Trailer URL') !!}
+                {!! Form::text('trailer_url', null, ['class' => 'form-control','placeholder'=>'Please enter trailer url']) !!}
+                <small class="text-danger">{{ $errors->first('trailer_url') }}</small>
               </div>
               <div class="form-group{{ $errors->has('detail') ? ' has-error' : '' }}">
                 {!! Form::label('detail', 'Description') !!}
@@ -146,30 +156,21 @@
                   }
                 }
                 $a_lans = $all_languages->diff($old_lans);
-
-                // get old subtitle language values
-                $old_subtitles = collect();
-                $a_subs = collect();
-                if ($season->subtitle == 1) {
-                  if ($season->subtitle_list != null){
-                    $old_list = explode(',', $season->subtitle_list);
-                    for ($i = 0; $i < count($old_list); $i++) {
-                      $old2 = App\AudioLanguage::find($old_list[$i]);
-                      if ( isset($old2) ) {
-                        $old_subtitles->push($old2);
-                      }
-                    }
-                  }
-                }
-                $a_subs = $all_languages->diff($old_subtitles);
+               
 
             @endphp
             <div id="editForm{{$season->id}}" class="edit-form">
               {!! Form::model($season, ['method' => 'PATCH', 'files' => true, 'action' => ['TvSeriesController@update_seasons', $season->id]]) !!}
+               <input type="hidden" name="tvseries" value="{{$tv_series->title}}">
                 <div class="form-group{{ $errors->has('season_no') ? ' has-error' : '' }}">
                   {!! Form::label('season_no', 'Season No.') !!}
-                  {!! Form::number('season_no', null, ['class' => 'form-control', 'min' => '1']) !!}
+                  {!! Form::number('season_no', null, ['class' => 'form-control', 'min' => '0']) !!}
                   <small class="text-danger">{{ $errors->first('season_no') }}</small>
+                </div>
+                <div class="form-group{{ $errors->has('season_slug') ? ' has-error' : '' }}">
+                  {!! Form::label('season_slug', 'Season Slug') !!}
+                  {!! Form::text('season_slug', null, ['class' => 'form-control', 'min' => '0']) !!}
+                  <small class="text-danger">{{ $errors->first('season_slug') }}</small>
                 </div>
                 {{ Form::hidden('tv_series_id', $id) }}
                 <div class="form-group{{ $errors->has('a_language') ? ' has-error' : '' }}">
@@ -191,41 +192,7 @@
                   </div>
                   <small class="text-danger">{{ $errors->first('a_language') }}</small>
                 </div>
-                <div class="form-group{{ $errors->has('subtitle') ? ' has-error' : '' }}">
-                  <div class="row">
-                    <div class="col-xs-6">
-                      {!! Form::label('subtitle', 'Subtitle') !!}
-                    </div>
-                    <div class="col-xs-5 pad-0">
-                      <label class="switch">
-                        {!! Form::checkbox('subtitle', 1, $season->subtitle, ['class' => 'checkbox-switch']) !!}
-                        <span class="slider round"></span>
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-xs-12">
-                    <small class="text-danger">{{ $errors->first('subtitle') }}</small>
-                  </div>
-                </div>
-                <div class="form-group{{ $errors->has('subtitle_list') ? ' has-error' : '' }} subtitle_list">
-                  {!! Form::label('subtitle_list', 'Subtitles List') !!}
-                  <div class="input-group">
-                    <select name="subtitle_list[]" id="subtitle_list" class="form-control select2" multiple="multiple">
-                      @if(isset($old_subtitles) && count($old_subtitles) > 0)
-                        @foreach($old_subtitles as $old)
-                          <option value="{{$old->id}}" selected="selected">{{$old->language}}</option>
-                        @endforeach
-                      @endif
-                      @if(isset($a_subs))
-                        @foreach($a_subs as $rest)
-                          <option value="{{$rest->id}}">{{$rest->language}}</option>
-                        @endforeach
-                      @endif
-                    </select>
-                    <a href="#" data-toggle="modal" data-target="#AddLangModal" class="input-group-addon"><i class="material-icons left">add</i></a>
-                  </div>
-                  <small class="text-danger">{{ $errors->first('subtitle_list') }}</small>
-                </div>
+               
                 <div class="form-group">
                   <div class="row">
                     <div class="col-xs-6">
@@ -267,6 +234,31 @@
                     </div>
                   </div>
                 </div>
+                
+                <div class="form-group{{ $errors->has('is_protect') ? ' has-error' : '' }}">
+                  <div class="row">
+                    <div class="col-xs-6">
+                      {!! Form::label('is_protect', 'Protected Video ?') !!}
+                    </div>
+                    <div class="col-xs-5 pad-0">
+                      <label class="switch">
+                        <input type="checkbox" name="is_protect" {{ $season->is_protect == 1 ? 'checked' : '' }} class="checkbox-switch" id="is_protect">
+                        <span class="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-xs-12">
+                    <small class="text-danger">{{ $errors->first('is_protect') }}</small>
+                  </div>
+                </div>
+                <div class="search form-group{{ $errors->has('password') ? ' has-error' : '' }} is_protect" style="{{ $season->is_protect == 1 ? '' : 'display:none' }}">
+                  {!! Form::label('password', 'Protected Password For Video') !!}
+                  <input type="password" id="password" name="password" value="{{ $season->password }}" class="form-control">
+                  <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                  
+                </div>
+                <small class="text-danger">{{ $errors->first('password') }}</small>
+
                 <div class="switch-field">
                   <div class="switch-title">Want IMDB Ratings And More Or Custom?</div>
                   <input type="radio" id="switch_left{{$season->id}}" class="imdb_btn" name="tmdb" value="Y" {{$season->tmdb == 'Y' ? 'checked' : ''}}/>
@@ -317,13 +309,15 @@
     							</div>
 
 
-
-
-
                   <div class="form-group{{ $errors->has('publish_year') ? ' has-error' : '' }}">
                     {!! Form::label('publish_year', 'Publish year') !!}
                     {!! Form::number('publish_year', null, ['class' => 'form-control', 'min' => '0']) !!}
                     <small class="text-danger">{{ $errors->first('publish_year') }}</small>
+                  </div>
+                  <div class="form-group{{ $errors->has('trailer_url') ? ' has-error' : '' }}">
+                    {!! Form::label('trailer_url', 'Trailer URL') !!}
+                    {!! Form::text('trailer_url', null, ['class' => 'form-control','placeholder'=>'Please enter trailer url']) !!}
+                    <small class="text-danger">{{ $errors->first('trailer_url') }}</small>
                   </div>
                   <div class="form-group{{ $errors->has('detail') ? ' has-error' : '' }}">
                     {!! Form::label('detail', 'Description') !!}
@@ -362,6 +356,7 @@
                 <td>
                   @if ($season->thumbnail != null)
                     <img src="{{ asset('images/tvseries/thumbnails/'.$season->thumbnail) }}" width="45px" class="img-responsive" alt="image">
+                   
                   @endif
                 </td>
                 <td>
@@ -498,6 +493,16 @@
         }
       });
     });
+
+    $('input[name="is_protect"]').click(function(){
+      if($(this).prop("checked") == true){
+        $('.is_protect').fadeIn();
+      }
+      else if($(this).prop("checked") == false){
+        $('.is_protect').fadeOut();
+      }
+    }); 
+
     $('.for-custom-image input').click(function(){
       if($(this).prop("checked") == true){
         $('.upload-image-main-block').fadeIn();
@@ -546,5 +551,17 @@
 
     
      });
+</script>
+<script type="text/javascript">
+    $(".toggle-password").click(function() {
+
+  $(this).toggleClass("fa-eye fa-eye-slash");
+  var input = $($(this).attr("toggle"));
+  if (input.attr("type") == "password") {
+    input.attr("type", "text");
+  } else {
+    input.attr("type", "password");
+  }
+});
 </script>
 @endsection

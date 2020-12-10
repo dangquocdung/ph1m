@@ -42,7 +42,10 @@
               @endif
               <small class="text-danger">{{ $errors->first('tv_series_id') }}</small>
             </div>
-            <div class="form-group{{ $errors->has('slide_image') ? ' has-error' : '' }} input-file-block">
+
+             
+
+            <div style="{{ $home_slide->type == 'v' ? "display: none" : "" }}" id="slider_image" class="form-group{{ $errors->has('slide_image') ? ' has-error' : '' }} input-file-block">
               {!! Form::label('slide_image', 'Slide Image') !!}
               <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Upload slide Image"></i>
               {!! Form::file('slide_image', ['class' => 'input-file', 'id'=>'slide_image']) !!}
@@ -53,6 +56,8 @@
               <p class="info">Choose slide image</p>
               <small class="text-danger">{{ $errors->first('slide_image') }}</small>
             </div>
+            
+           
             <div class="form-group{{ $errors->has('active') ? ' has-error' : '' }}">
               <div class="row">
                 <div class="col-xs-3">
@@ -106,6 +111,7 @@
           };
 
       });
+      
     });
   </script>
 @endsection

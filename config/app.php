@@ -182,11 +182,11 @@ return [
         App\Providers\RouteServiceProvider::class,
         Laravel\Cashier\CashierServiceProvider::class, 
       
-        Pbmedia\LaravelFFMpeg\FFMpegServiceProvider::class,
         Unicodeveloper\Paystack\PaystackServiceProvider::class,      
         Kevupton\LaravelCoinpayments\Providers\LaravelCoinpaymentsServiceProvider::class,
         Vimeo\Laravel\VimeoServiceProvider::class,
           Yajra\DataTables\DataTablesServiceProvider::class,
+        Anhskohbo\NoCaptcha\NoCaptchaServiceProvider::class,
     ],
 
     /*
@@ -240,10 +240,11 @@ return [
         'Nav' => DevMarketer\EasyNav\EasyNavFacade::class,
         'Tracker' => PragmaRX\Tracker\Vendor\Laravel\Facade::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
-        'FFMpeg' => Pbmedia\LaravelFFMpeg\FFMpegFacade::class,
         'Vimeo' => Vimeo\Laravel\Facades\Vimeo::class,
         'Paystack' => Unicodeveloper\Paystack\Facades\Paystack::class,
-         'Datatables' => Yajra\DataTables\Facades\DataTables::class,
+        'Datatables' => Yajra\DataTables\Facades\DataTables::class,
+        'NoCaptcha' => Anhskohbo\NoCaptcha\Facades\NoCaptcha::class,
+        'SeoHelper' => App\Helpers\SeoHelper::class,
        
     ],
 

@@ -37,4 +37,17 @@ class Menu extends Model
     {
       return $this->hasMany('App\MenuVideo', 'menu_id');
     }
+
+    public function menusections(){
+      return $this->hasMany('App\MenuSection','menu_id');
+    }
+
+    public function getblogs()
+    {
+       return $this->hasMany('App\BlogMenu', 'menu_id');
+    }
+
+    public function getpackage(){
+      return $this->hasMany('App\PackageMenu', 'menu_id');
+    }
 }

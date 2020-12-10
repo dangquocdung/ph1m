@@ -39,30 +39,30 @@ class HomeSliderController extends Controller
      */
     public function store(Request $request)
     {
+
         $request->validate([
-           'slide_image' => 'required|image|mimes:png,jpeg,jpg,gif'
+            'slide_image' => 'required|image|mimes:png,jpeg,jpg,gif',
         ]);
 
         $input = $request->all();
 
-        if ($file = $request->file('slide_image'))
-        {
-          $name = 'slide_' . time() . $file->getClientOriginalName();
-          if ($request->movie_id != null && $request->movie_id != '')
-          {
-            $file->move('images/home_slider/movies/', $name);
-          } elseif ($request->tv_series_id != null && $request->tv_series_id != '') {
-            $file->move('images/home_slider/shows/', $name);
-          }
-          $input['slide_image'] = $name;
+        if ($file = $request->file('slide_image')) {
+            $name = 'slide_' . time() . $file->getClientOriginalName();
+            if ($request->movie_id != null && $request->movie_id != '') {
+                $file->move('images/home_slider/movies/', $name);
+            } elseif ($request->tv_series_id != null && $request->tv_series_id != '') {
+                $file->move('images/home_slider/shows/', $name);
+            } else {
+                $file->move('images/home_slider/', $name);
+            }
+            $input['slide_image'] = $name;
         }
 
-        if (!isset($input['active']))
-        {
-          $input['active'] = 0;
+        if (!isset($input['active'])) {
+            $input['active'] = 0;
         }
 
-        $input['position'] = (HomeSlider::count()+1);
+        $input['position'] = (HomeSlider::count() + 1);
 
         HomeSlider::create($input);
 
@@ -97,6 +97,10 @@ class HomeSliderController extends Controller
             $movie_list = Movie::pluck('title', 'id')->all();
             $tv_series_list = TvSeries::pluck('title', 'id')->all();
             return view('admin.homeslider.edit', compact('home_slide', 'movie_list', 'tv_series_list', 'tv_series_dtl'));
+        } else {
+            $movie_list = Movie::pluck('title', 'id')->all();
+            $tv_series_list = TvSeries::pluck('title', 'id')->all();
+            return view('admin.homeslider.edit', compact('home_slide', 'movie_list', 'tv_series_list'));
         }
 
     }
@@ -108,41 +112,49 @@ class HomeSliderController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         $request->validate([
-            'slide_image' => 'nullable|image|mimes:png,jpeg,jpg,gif'
+            'slide_image' => 'required|image|mimes:png,jpeg,jpg,gif',
         ]);
 
         $input = $request->all();
 
+        $input = $request->all();
         $slide = HomeSlider::findOrFail($id);
 
-        if ($file = $request->file('slide_image'))
-        {
-          $name = 'slide_' . time() . $file->getClientOriginalName();
-          if ($request->movie_id != null && $request->movie_id != '')
-          {
-            if ($slide->slide_image != null) {
-              $image_file = @file_get_contents(public_path().'/images/home_slider/'. $slide->slide_image);
-              if($image_file){
-                unlink(public_path(). '/images/home_slider/movies' . $slide->slide_image);
-              }
+        if ($file = $request->file('slide_image')) {
+            $name = 'slide_' . time() . $file->getClientOriginalName();
+            if ($request->movie_id != null && $request->movie_id != '') {
+                if ($slide->slide_image != null) {
+                    $image_file = @file_get_contents(public_path() . '/images/home_slider/' . $slide->slide_image);
+                    if ($image_file) {
+                        unlink(public_path() . '/images/home_slider/movies' . $slide->slide_image);
+                    }
+                }
+                $file->move('images/home_slider/movies', $name);
+            } elseif ($request->tv_series_id != null && $request->tv_series_id != '') {
+                if ($slide->slide_image != null) {
+                    $image_file = @file_get_contents(public_path() . '/images/home_slider/' . $slide->slide_image);
+                    if ($image_file) {
+                        unlink(public_path() . '/images/home_slider/shows' . $slide->slide_image);
+                    }
+                }
+                $file->move('images/home_slider/shows', $name);
+            } else {
+                if ($slide->slide_image != null) {
+                    $image_file = @file_get_contents(public_path() . '/images/home_slider/' . $slide->slide_image);
+                    if ($image_file) {
+                        unlink(public_path() . '/images/home_slider/' . $slide->slide_image);
+                    }
+                }
+                $file->move('images/home_slider/', $name);
             }
-            $file->move('images/home_slider/movies', $name);
-          } elseif ($request->tv_series_id != null && $request->tv_series_id != '') {
-            if ($slide->slide_image != null) {
-              $image_file = @file_get_contents(public_path().'/images/home_slider/'. $slide->slide_image);
-              if($image_file){
-                unlink(public_path(). '/images/home_slider/shows' . $slide->slide_image);
-              }
-            }
-            $file->move('images/home_slider/shows', $name);
-          }
-          $input['slide_image'] = $name;
+            $input['slide_image'] = $name;
+
         }
 
-        if (!isset($input['active']))
-        {
-          $input['active'] = 0;
+        if (!isset($input['active'])) {
+            $input['active'] = 0;
         }
 
         $slide->update($input);
@@ -158,84 +170,77 @@ class HomeSliderController extends Controller
         $home_slide = HomeSlider::findOrFail($id);
 
         if ($home_slide->slide_image != null) {
-          if ($home_slide->movie_id != null) {
-            $content = @file_get_contents(public_path() . '/images/home_slider/movies/'.$home_slide->slide_image);
-            if ($content) {
-              unlink(public_path() . '/images/home_slider/movies/'.$home_slide->slide_image);
+            if ($home_slide->movie_id != null) {
+                $content = @file_get_contents(public_path() . '/images/home_slider/movies/' . $home_slide->slide_image);
+                if ($content) {
+                    unlink(public_path() . '/images/home_slider/movies/' . $home_slide->slide_image);
+                }
+            } elseif ($home_slide->tv_series_id != null) {
+                $content = @file_get_contents(public_path() . '/images/home_slider/shows/' . $home_slide->slide_image);
+                if ($content) {
+                    unlink(public_path() . '/images/home_slider/shows/' . $home_slide->slide_image);
+                }
             }
-          }
-          elseif($home_slide->tv_series_id != null) {
-            $content = @file_get_contents(public_path() . '/images/home_slider/shows/'.$home_slide->slide_image);
-            if ($content) {
-              unlink(public_path() . '/images/home_slider/shows/'.$home_slide->slide_image);
-            }
-          }
         }
         $home_slide->delete();
         return back()->with('deleted', 'Slide has been deleted');
     }
 
-
     public function slide_reposition(Request $request)
     {
-      if($request->item != null)
-      {
-          $items = explode('&', $request->item);
-          $all_ids = collect();
-          foreach ($items as $key => $value) {
-              $all_ids->push(substr($value, 7));
-          }
+        if ($request->item != null) {
+            $items = explode('&', $request->item);
+            $all_ids = collect();
+            foreach ($items as $key => $value) {
+                $all_ids->push(substr($value, 7));
+            }
 
-          $i = 0;
+            $i = 0;
 
-          foreach($all_ids as $id)
-          {
-              $i++;
-              $item = HomeSlider::findOrFail($id);
-              $item->position = $i;
-              $item->save();
-          }
+            foreach ($all_ids as $id) {
+                $i++;
+                $item = HomeSlider::findOrFail($id);
+                $item->position = $i;
+                $item->save();
+            }
 
-          return response()->json(['success' => true]);
+            return response()->json(['success' => true]);
 
-      }
-
-      else
-      {
-          return response()->json(['success' => false]);
-      }
+        } else {
+            return response()->json(['success' => false]);
+        }
     }
 
     public function bulk_delete(Request $request)
     {
-      $validator = Validator::make($request->all(), [
-          'checked' => 'required',
-      ]);
+        $validator = Validator::make($request->all(), [
+            'checked' => 'required',
+        ]);
 
-      if ($validator->fails()) {
-          return back()->with('deleted', 'Please select one of them to delete');
-      }
-
-      foreach ($request->checked as $checked) {
-        $home_slide = HomeSlider::findOrFail($checked);
-
-        if ($home_slide->slide_image != null) {
-          if ($home_slide->movie_id != null) {
-            $content = @file_get_contents(public_path() . '/images/home_slider/movies/'. $home_slide->slide_image);
-            if ($content) {
-              unlink(public_path() . '/images/home_slider/movies/'. $home_slide->slide_image);
-            }
-          } else if ($home_slide->tv_series_id != null) {
-            $content = @file_get_contents(public_path() . '/images/home_slider/shows/'. $home_slide->slide_image);
-            if ($content) {
-              unlink(public_path() . '/images/home_slider/shows/'. $home_slide->slide_image);
-            }
-          }
+        if ($validator->fails()) {
+            return back()->with('deleted', 'Please select one of them to delete');
         }
 
-        $home_slide->delete();
-      }
+        foreach ($request->checked as $checked) {
+            $home_slide = HomeSlider::findOrFail($checked);
 
-      return back()->with('deleted', 'Slides has been deleted');
+            if ($home_slide->slide_image != null) {
+                if ($home_slide->movie_id != null) {
+                    $content = @file_get_contents(public_path() . '/images/home_slider/movies/' . $home_slide->slide_image);
+                    if ($content) {
+                        unlink(public_path() . '/images/home_slider/movies/' . $home_slide->slide_image);
+                    }
+                } else if ($home_slide->tv_series_id != null) {
+                    $content = @file_get_contents(public_path() . '/images/home_slider/shows/' . $home_slide->slide_image);
+                    if ($content) {
+                        unlink(public_path() . '/images/home_slider/shows/' . $home_slide->slide_image);
+                    }
+                }
+            }
+
+            $home_slide->delete();
+        }
+
+        return back()->with('deleted', 'Slides has been deleted');
     }
 }

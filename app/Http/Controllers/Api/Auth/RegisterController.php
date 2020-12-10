@@ -19,51 +19,67 @@ class RegisterController extends Controller
 {
     use IssueTokenTrait;
 
-	private $client;
+  private $client;
 
-	public function __construct(){
-		$this->client = Client::find(2);
-	}
+  public function __construct(){
+    $this->client = Client::find(2);
+  }
 
     public function register(Request $request){
 
-    	$this->validate($request, [
-    		'name' => 'required',
-    		'email' => 'required|email|unique:users,email',
-    		'password' => 'required|min:6'
-    	]);
+      $this->validate($request, [
+        'name' => 'required',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:6'
+      ]);
 
-    	$user = User::create([
-    		'name' => request('name'),
-    		'email' => request('email'),
-    		'password' => bcrypt(request('password')),
+      $user = User::create([
+        'name' => request('name'),
+        'email' => request('email'),
+        'password' => bcrypt(request('password')),
             'is_blocked' => '0',
+            'status'=>'1',
             'verifyToken' => Str::random(5),
-    	]);
+      ]);
 
         $config = Config::first();
         if($config->free_sub==1){
           $this->freesubscribe($user);
         }
-        if($config->verify_email == 1){        
-            try{
-                Mail::to($user->email)->send(new verifyEmail($user));
-                return response()->json('ok', 200);
-            }
-            catch(\Swift_TransportException $e){
-                return response()->json('Mail Sending Error', 400);
-            }
+        if($config->verify_email == 1){ 
+           $thisuser=User::findOrfail($user->id);
+            $thisuser->status = 0;
+            $thisuser->save();
+
+                try{
+                    Mail::to($user->email)->send(new verifyEmail($user));
+                    return response()->json('Verification email sent !', 301);
+                   
+                   
+                }
+                catch(\Exception $e){
+                    return $e->getMessage();
+                    return response()->json('Mail Sending Error', 400);
+                }
+                
+                 return $this->issueToken($request, 'password'); 
+          
+            
         }
 
         if($config->wel_eml == 1){
-          try{
+            
+            try{
                 Mail::to(request('email'))->send(new WelcomeUser($user));
+                 return $this->issueToken($request, 'password');
             }
-            catch(\Swift_TransportException $e){
-                return response()->json('Registration done. Mail Sending Error', 200);
+            catch(\Exception $e){
+                return response()->json('Registraion successfull but mail not sent !', 200);
             }
-            return $this->issueToken($request, 'password');
+            
         }
+        
+        return $this->issueToken($request, 'password');
     }
 
     public function freesubscribe($thisuser){

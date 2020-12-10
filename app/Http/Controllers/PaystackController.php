@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Mail\SendInvoiceMailable;
 use App\Package;
 use App\Menu;
+use App\Multiplescreen;
+use Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Mail;
@@ -56,14 +57,42 @@ class PaystackController extends Controller
         'subscription_to' => $end_date
       ]);
       if ($created_subscription) {
-        try{
-        Mail::send('user.invoice', ['paypal_sub' => $created_subscription, 'invoice' => null], function($message) use ($com_email, $user_email) {
-          $message->from($com_email)->to($user_email)->subject('Invoice');
-        });
-        }catch(\Swift_TransportException $e){
-          header( "refresh:5;url=./" );
-          dd("Payment Successfully ! but Invoice will not sent because admin not updated the mail setting in admin dashboard ! Redirecting you to homepage... !");
-        }
+         $auth = Auth::user();
+                $screen = $plan->screens;
+              if($screen > 0){
+                $multiplescreen = Multiplescreen::where('user_id',$auth->id)->first();
+                 if(isset($multiplescreen)){
+                    $multiplescreen->update([
+                      'pkg_id' => $plan->id,
+                      'user_id' => $auth->id,
+                      'screen1' => $screen >= 1 ? $auth->name :  null,
+                      'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                      'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                      'screen4' => $screen >= 4 ? 'Screen4' :  null
+                    ]);
+                }
+                else{
+                    $multiplescreen = Multiplescreen::create([
+                      'pkg_id' => $plan->id,
+                      'user_id' => $auth->id,
+                      'screen1' => $screen >= 1 ? $auth->name :  null,
+                      'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                      'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                      'screen4' => $screen >= 4 ? 'Screen4' :  null
+                    ]);
+                 }
+              }
+        if(env('MAIL_DRIVER') != NULL && env('MAIL_HOST') != NULL && env('MAIL_PORT') != NULL) {
+          try{
+            Mail::send('user.invoice', ['paypal_sub' => $created_subscription, 'invoice' => null], function($message) use ($com_email, $user_email) {
+            $message->from($com_email)->to($user_email)->subject('Invoice');
+            });
+          }catch(\Swift_TransportException $e){
+            header( "refresh:5;url=./" );
+            dd("Payment Successfully ! but Invoice will not sent because admin not updated the mail setting in admin dashboard ! Redirecting you to homepage... !");
+          }
+        } 
+        
       }
 
       if (isset($menus) && count($menus) > 0) {

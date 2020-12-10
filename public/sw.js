@@ -1,6 +1,6 @@
-const CACHE_NAME = 'em-ANK-HAR-Cache-v1';
+const CACHE_NAME = 'em-ANK-KAL-Cache-v1';
 const URLS_TO_CACHE = [
-    "/offline",
+    "/public/offline",
 ];
 self.addEventListener("install", function(event) {
     event.waitUntil(

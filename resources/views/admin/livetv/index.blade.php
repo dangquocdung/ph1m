@@ -6,9 +6,7 @@
       <a href="{{route('livetv.create')}}" class="btn btn-danger btn-md"><i class="material-icons left">add</i> Create LIVETV</a>
       <!-- Delete Modal -->
       <a type="button" class="btn btn-danger btn-md" data-toggle="modal" data-target="#bulk_delete"><i class="material-icons left">delete</i> Delete Selected</a>   
-      @if (Session::has('changed_language'))
-        <a href="{{ route('tmdb_movie_translate') }}" class="btn btn-danger btn-md"><i class="material-icons left">translate</i> Translate all to {{Session::get('changed_language')}}</a>   
-      @endif
+     
       <!-- Modal -->
       <div id="bulk_delete" class="delete-modal modal fade" role="dialog">
         <div class="modal-dialog modal-sm">

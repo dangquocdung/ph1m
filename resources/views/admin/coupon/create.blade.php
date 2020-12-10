@@ -9,8 +9,8 @@
           {!! Form::open(['method' => 'POST', 'action' => 'CouponController@store']) !!}
             <div class="form-group{{ $errors->has('coupon_code') ? ' has-error' : '' }}">
                 {!! Form::label('coupon_code', 'Coupon Code (Stripe Coupon Id)') !!}
-                <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter unique coupon code"></i>
-                {!! Form::text('coupon_code', null, ['class' => 'form-control', 'required' => 'required', 'placeholder' => 'Please enter unique coupon code']) !!}
+                <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter unique coupon code eg: SALE50"></i>
+                {!! Form::text('coupon_code', null, ['class' => 'form-control', 'required' => 'required', 'placeholder' => 'Please enter unique coupon code' ,'pattern'=>'[A-Za-z0-9]+','title'=>'Please Do not use special characters and space.']) !!}
                 <small class="text-danger">{{ $errors->first('coupon_code') }}</small>
             </div>
             <div class="bootstrap-checkbox {{ $errors->has('percent_check') ? ' has-error' : '' }}">

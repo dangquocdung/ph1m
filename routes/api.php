@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use Illuminate\Http\Request;
 
@@ -19,15 +19,18 @@ use Illuminate\Http\Request;
 
  Route::post('login', 'Api\Auth\LoginController@login');
  Route::post('fblogin', 'Api\Auth\LoginController@fblogin');
+ Route::post('googlelogin', 'Api\Auth\LoginController@googlelogin');
  Route::get('home', 'Api\MainController@home');
+ Route::get('splash', 'Api\MainController@splashscreen');
  Route::post('register', 'Api\Auth\RegisterController@register');
-Route::post('verifyemail', 'Api\Auth\RegisterController@verifyemail');
+ Route::post('verifyemail', 'Api\Auth\RegisterController@verifyemail');
  Route::post('refresh', 'Api\Auth\LoginController@refresh');
-Route::post('forgotpassword', 'Api\Auth\LoginController@forgotApi');
-Route::post('verifycode', 'Api\Auth\LoginController@verifyApi');
-Route::post('resetpassword', 'Api\Auth\LoginController@resetApi');
-Route::get('faq', 'Api\MainController@faq');
-Route::post('addcomment', 'Api\RatingCommentController@comment_store');
+ Route::post('forgotpassword', 'Api\Auth\LoginController@forgotApi');
+ Route::post('verifycode', 'Api\Auth\LoginController@verifyApi');
+ Route::post('resetpassword', 'Api\Auth\LoginController@resetApi');
+ Route::get('faq', 'Api\MainController@faq');
+ Route::post('addcomment', 'Api\RatingCommentController@comment_store');
+  Route::get('detail/{id}', 'Api\MainController@detail');
 
 Route::group(['middleware' => ['auth:api','is_blocked']], function (){
   Route::get('menu', 'Api\MainController@menu');
@@ -43,7 +46,8 @@ Route::group(['middleware' => ['auth:api','is_blocked']], function (){
   Route::get('RecentMovies', 'Api\MainController@RecentMovies');
   Route::get('RecentTvSeries', 'Api\MainController@Recenttvseries');
   Route::get('MenuByCategory/{id}', 'Api\MainController@MovieByCategory');
-  Route::get('episodes/{id}', 'Api\MainController@episodes');   
+  Route::get('episodes/{id}', 'Api\MainController@episodes');
+
   
   Route::get('watchhistory', 'Api\MainController@watch_history');
   Route::get('addwatchhistory/{type}/{id}','Api\MainController@add_history');
@@ -68,10 +72,13 @@ Route::group(['middleware' => ['auth:api','is_blocked']], function (){
   Route::get('bttoken', 'Api\PaymentController@bttoken');
   Route::post('btpayment', 'Api\PaymentController@btpayment');
   Route::post('paystack', 'Api\PaymentController@paystack');
+  Route::post('paystore', 'Api\PaymentController@pay_store');
   
   Route::get('showscreens', 'Api\MultipleScreenController@manageprofile');
   Route::post('changescreen', 'Api\MultipleScreenController@changescreen');
   Route::post('screenprofile', 'Api\MultipleScreenController@screenprofile');
+  Route::post('updatescreen', 'Api\MultipleScreenController@newupdate');
+  Route::post('downloadcounter', 'Api\MultipleScreenController@downloadcounter');
   
   Route::get('notifications', 'Api\NotificationController@allnotification');
   Route::get('readnotification/{id}', 'Api\NotificationController@notificationread');

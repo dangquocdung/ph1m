@@ -53,7 +53,8 @@
         @if ($packages)
           <tbody>
             @foreach ($packages as $key => $package)
-            @if($package->delete_status == 1)
+           {{--  @if($package->delete_status == 1) --}}
+
               <tr>
                 <td>
                   <div class="inline">
@@ -67,12 +68,10 @@
                 <td>{{$package->interval}}</td>
                 <td>{{$package->interval_count}}</td>
                 <td>{{$package->trial_period_days}}</td>
-                
                 <td>
-                    
                     <form action="{{ route('pkgstatus',$package->id) }}" method="POST">
                       {{ csrf_field() }}
-                    @if($package->status ==1)
+                    @if($package->status == 1)
                     <input type="hidden" value="0" name="status">
                     <button type="submit" class="btn btn-sm btn-danger">Deactive</button>
                     @else
@@ -80,21 +79,20 @@
                     <button type="submit" class="btn btn-sm btn-success">Active</button>
                     @endif
                     </form>
-                    
-                 
-                  
-
                 </td>
-
                 <td>
                   <div class="admin-table-action-block">
-                     <a href="{{route('packages.edit', $package->id)}}" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a>
-                    <button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#{{$package->id}}deleteModal"><i class="material-icons">delete</i> </button>
-
+                    @if($package->delete_status == 1)
+                      <a href="{{route('packages.edit', $package->id)}}" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a>
+                      <button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#{{$package->id}}deleteModal"><i class="material-icons">delete</i> </button>
+                    @else
+                      <a  data-toggle="tooltip" data-original-title="This package is in your trash, Restore it by click on Active button" style="cursor: not-allowed" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a>
+                      {{-- <button type="button" class="btn-danger btn-floating" style="cursor: not-allowed" data-toggle="modal" ><i class="material-icons">delete</i> </button> --}}
+                    @endif
                   </div>
                 </td>
               </tr>
-              @endif
+              {{-- @endif --}}
               <!-- Delete Modal -->
               <div id="{{$package->id}}deleteModal" class="delete-modal modal fade" role="dialog">
                 <div class="modal-dialog modal-sm">

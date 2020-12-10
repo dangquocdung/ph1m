@@ -33,6 +33,7 @@ class Config extends Model
       'wel_eml',
       'title',
       'favicon',
+      'livetvicon',
       'w_email',
       'verify_email',
       'stripe_pub_key',
@@ -52,7 +53,6 @@ class Config extends Model
       'prime_movie_single',
       'copyright',
       'blog',
-      'aws',
       'stripe_payment',
       'paypal_payment',
       'payu_payment',
@@ -86,7 +86,9 @@ class Config extends Model
       'comments',
       'braintree',
       'paystack',
-      'remove_landing_page','coinpay'
+      'remove_landing_page','coinpay',
+      'razorpay_payment',
+      'captcha'
       
     ];
 }

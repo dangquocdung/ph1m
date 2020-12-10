@@ -25,7 +25,7 @@
                 <small class="text-danger">{{ $errors->first('logo_enable') }}</small>
               </div>
             </div>
-             <div class="col-md-6 " >
+             <div class="col-md-6 " id="logobox" style="{{ $ps->logo != '' ? ""  : "display:none" }}">
                   <div class="logobox form-group{{ $errors->has('logo') ? ' has-error' : '' }} input-file-block">
                    {!! Form::label('logo', 'logo') !!} - <p class="info">Help block text</p>
                     {!! Form::file('logo', ['class' => 'input-file', 'id'=>'logo']) !!}
@@ -37,7 +37,7 @@
                     <small class="text-danger">{{ $errors->first('logo') }}</small>
                   </div>
                 </div>
-                </div>
+            </div>
             <div class="form-group{{ $errors->has('cpy_text') ? ' has-error' : '' }}">
               {!! Form::label('cpy_text', 'Copyright Text') !!}
               <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter your Copyright Text"></i>
@@ -61,7 +61,7 @@
                 <small class="text-danger">{{ $errors->first('share_opt') }}</small>
               </div>
             </div>
-             <div class="form-group{{ $errors->has('auto_play') ? ' has-error' : '' }}">
+            <div class="form-group{{ $errors->has('auto_play') ? ' has-error' : '' }}">
               <div class="row">
                 <div class="col-xs-4">
                   {!! Form::label('auto_play', 'Auto Play: ') !!}
@@ -159,7 +159,7 @@
                 <small class="text-danger">{{ $errors->first('skin') }}</small>
               </div>
             </div>
-             <div class="form-group{{ $errors->has('loop_video') ? ' has-error' : '' }}">
+            <div class="form-group{{ $errors->has('loop_video') ? ' has-error' : '' }}">
               <div class="row">
                 <div class="col-xs-4">
                   {!! Form::label('loop_video', 'Loop-Video Option: ') !!}
@@ -173,6 +173,22 @@
               </div>
               <div class="col-xs-12">
                 <small class="text-danger">{{ $errors->first('loop_video') }}</small>
+              </div>
+            </div>
+            <div class="form-group{{ $errors->has('chromecast') ? ' has-error' : '' }}">
+              <div class="row">
+                <div class="col-xs-4">
+                  {!! Form::label('chromecast', 'ChromeCast : ') !!}
+                </div>
+                <div class="col-xs-5 pad-0">
+                  <label class="switch">                
+                    {!! Form::checkbox('chromecast', 1, $ps->chromecast, ['class' => 'checkbox-switch']) !!}
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-xs-12">
+                <small class="text-danger">{{ $errors->first('chromecast') }}</small>
               </div>
             </div>
              <div class="form-group{{ $errors->has('is_resume') ? ' has-error' : '' }}">
@@ -191,6 +207,28 @@
                 <small class="text-danger">{{ $errors->first('is_resume') }}</small>
               </div>
             </div>
+            <div class="form-group{{ $errors->has('player_google_analytics_id') ? ' has-error' : '' }}">
+              {!! Form::label('player_google_analytics_id', 'Google Analytics Id') !!}
+              <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter your google analytics id"></i>
+              {!! Form::text('player_google_analytics_id', null,['class' => 'form-control']) !!}
+              <small class="text-danger">{{ $errors->first('player_google_analytics_id') }}</small>
+            </div>
+              
+            <div class="form-group{{ $errors->has('subtitle_font_size') ? ' has-error' : '' }}">
+              {!! Form::label('subtitle_font_size', 'Subtitle Font Size') !!}
+              <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter your Subtitle font size"></i>
+              {!! Form::number('subtitle_font_size', null, ['class' => 'form-control','max'=>'100','min'=>'2']) !!}
+              <small class="text-danger">{{ $errors->first('subtitle_font_size') }}</small>
+            </div>
+
+            <div class="form-group{{ $errors->has('subtitle_color') ? ' has-error' : '' }}">
+              {!! Form::label('subtitle_color', 'Subtitle Color') !!}
+              <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter your Subtitle color"></i>
+              {!! Form::color('subtitle_color', null, ['class' => 'form-control',]) !!}
+              
+              <small class="text-danger">{{ $errors->first('subtitle_color') }}</small>
+            </div>
+
             <div class="btn-group pull-right">
               <button type="submit" class="btn btn-success">Update</button>
             </div>
@@ -209,21 +247,15 @@
     });
   });
 
- $('#logo_enable').on('switchChange.bootstrapSwitch', function (event, state) {
-
-          if (state == true) {
-
-             $('#logobox').show();
-          
-
-          } else if (state == false) {
-
-            $('#logobox').hide();
-          
-
-          };
-
-      });
+$('#logo_enable').on('change',function(){
+  if($('#logo_enable').is(':checked')){
+    //show
+    $('#logobox').show();
+  }else{
+    //hide
+     $('#logobox').hide();
+  }
+});
 
   
 </script>

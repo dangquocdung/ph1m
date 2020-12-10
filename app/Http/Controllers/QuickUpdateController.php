@@ -2,37 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Movie;
 use App\TvSeries;
 
 class QuickUpdateController extends Controller
 {
-    public function change($id){
-    	
-    	$movie = Movie::findorfail($id);
+    public function change($id)
+    {
 
-    	if($movie->status == 1){
-    		$movie->status = 0;
-    	}else{
-    		$movie->status = 1;
-    	}
+        $movie = Movie::findorfail($id);
 
-    	$movie->save();
-    	return back()->with('updated','Movie Status changed !');
+        if ($movie->status == 1) {
+            $movie->status = 0;
+        } else {
+            $movie->status = 1;
+        }
+
+        $movie->save();
+        return back()->with('updated', 'Movie Status changed !');
     }
 
-    public function changetvstatus($id){
-        
+    public function changetvstatus($id)
+    {
+
         $tv = TvSeries::findorfail($id);
 
-        if($tv->status == 1){
+        if ($tv->status == 1) {
             $tv->status = 0;
-        }else{
+        } else {
             $tv->status = 1;
         }
 
         $tv->save();
-        return back()->with('updated','TvSeries Status changed !');
+        return back()->with('updated', 'TvSeries Status changed !');
     }
+
 }

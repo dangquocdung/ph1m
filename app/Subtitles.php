@@ -12,9 +12,4 @@ class Subtitles extends Model
     {
     	return $this->belongsTo('App\Movie','m_t_id','id');
     }
-
-    public function episodes()
-    {
-      return $this->hasMany('App\Subtitles','m_t_id');
-    }
 }

@@ -9,7 +9,8 @@ class MenuVideo extends Model
     protected $fillable = [
     	'menu_id',
     	'movie_id',
-    	'tv_series_id'
+    	'tv_series_id',
+        'live_event_id'
     ];
 
     public function movie()

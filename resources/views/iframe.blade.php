@@ -25,9 +25,9 @@
         $(".group3").colorbox({rel:'group3', transition:"none", width:"75%", height:"75%"});
         $(".group4").colorbox({rel:'group4', slideshow:true});
         $(".ajax").colorbox();
-        $(".youtube").colorbox({iframe:true, innerWidth:640, innerHeight:390});
+        $(".youtube").colorbox({iframe:true, innerWidth:640, innerHeight:390,});
         $(".vimeo").colorbox({iframe:true, innerWidth:500, innerHeight:409});
-        $(".iframe").colorbox({iframe:true, width:"100%", height:"100%"});
+        $(".iframe").colorbox({iframe:true, width:"100%", height:"100%",controlsList:"nodownload"});
         $(".inline").colorbox({inline:true, width:"50%"});
         $(".callbacks").colorbox({
           onOpen:function(){ alert('onOpen: colorbox is about to open'); },

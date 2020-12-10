@@ -15,45 +15,41 @@ class ActorController extends Controller
      */
     public function index(Request $request)
     {
-     
-        
-        
-         $actors = \DB::table('actors')->select('id','name','image','biography','place_of_birth')->get();
 
-        if($request->ajax()){
-             return \Datatables::of($actors)
-              ->addIndexColumn()
-              ->addColumn('checkbox',function($actor){
-                $html = '<div class="inline">
-                    <input type="checkbox" form="bulk_delete_form" class="filled-in material-checkbox-input" name="checked[]" value="'.$actor->id.'" id="checkbox'.$actor->id.'">
-                    <label for="checkbox'.$actor->id.'" class="material-checkbox"></label>
+        $actors = \DB::table('actors')->select('id', 'name', 'image', 'biography', 'place_of_birth')->get();
+
+        if ($request->ajax()) {
+            return \Datatables::of($actors)
+                ->addIndexColumn()
+                ->addColumn('checkbox', function ($actor) {
+                    $html = '<div class="inline">
+                    <input type="checkbox" form="bulk_delete_form" class="filled-in material-checkbox-input" name="checked[]" value="' . $actor->id . '" id="checkbox' . $actor->id . '">
+                    <label for="checkbox' . $actor->id . '" class="material-checkbox"></label>
                   </div>';
 
-                  return $html;
-              })
-            
-               ->addColumn('biography',function($actor){
-                    return strip_tags(html_entity_decode(str_limit($actor->biography,50)));
-                 
-              })
-                  ->addColumn('image',function($actor){
-                if ($actor->image) {
-                 $image= '<img src="'.asset('/images/actors/' . $actor->image).'" alt="Pic" width="70px" class="img-responsive">';
-                }else{
-                    $image= '<img  src="http://via.placeholder.com/70x70" alt="Pic" width="70px" class="img-responsive">';
-                }
-               
-                   return $image;
+                    return $html;
+                })
 
-              })
-              ->addColumn('action',function($actor){
-                $btn = ' <div class="admin-table-action-block">
-                  
-                    <a href="'.route('actors.edit', $actor->id).'" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a><button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#deleteModal'.$actor->id.'"><i class="material-icons">delete</i> </button></div>';
-                   
-                   
+                ->addColumn('biography', function ($actor) {
+                    return strip_tags(html_entity_decode(str_limit($actor->biography, 50)));
 
-                   $btn.='<div id="deleteModal'.$actor->id.'" class="delete-modal modal fade" role="dialog">
+                })
+                ->addColumn('image', function ($actor) {
+                    if ($actor->image) {
+                        $image = '<img src="' . asset('/images/actors/' . $actor->image) . '" alt="Pic" width="70px" class="img-responsive">';
+                    } else {
+                        $image = '<img  src="http://via.placeholder.com/70x70" alt="Pic" width="70px" class="img-responsive">';
+                    }
+
+                    return $image;
+
+                })
+                ->addColumn('action', function ($actor) {
+                    $btn = ' <div class="admin-table-action-block">
+
+                    <a href="' . route('actors.edit', $actor->id) . '" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a><button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#deleteModal' . $actor->id . '"><i class="material-icons">delete</i> </button></div>';
+
+                    $btn .= '<div id="deleteModal' . $actor->id . '" class="delete-modal modal fade" role="dialog">
                 <div class="modal-dialog modal-sm">
                   <!-- Modal content-->
                   <div class="modal-content">
@@ -66,9 +62,9 @@ class ActorController extends Controller
                       <p>Do you really want to delete these records? This process cannot be undone.</p>
                     </div>
                     <div class="modal-footer">
-                      <form method="POST" action="'.route("actors.destroy",$actor->id).'">
-                        '.method_field("DELETE").'
-                        '.csrf_field().'
+                      <form method="POST" action="' . route("actors.destroy", $actor->id) . '">
+                        ' . method_field("DELETE") . '
+                        ' . csrf_field() . '
                           <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">No</button>
                           <button type="submit" class="btn btn-danger">Yes</button>
                       </form>
@@ -76,14 +72,13 @@ class ActorController extends Controller
                   </div>
                 </div>
               </div>';
-                    
-                return $btn;
-              })
-              ->rawColumns(['checkbox','biography','image','action'])
-              ->make(true);
+
+                    return $btn;
+                })
+                ->rawColumns(['checkbox', 'biography', 'image', 'action'])
+                ->make(true);
         }
 
-    
         return view('admin.actor.index', compact('actors'));
     }
 
@@ -106,20 +101,58 @@ class ActorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-          'name' => 'required',
-          'image' => 'nullable|image|mimes:jpeg,png,jpg'
+            'name' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg',
         ]);
 
         $input = $request->all();
 
         if ($file = $request->file('image')) {
-          $name = "actor_".time().$file->getClientOriginalName();
-          $file->move('images/actors', $name);
-          $input['image'] = $name;
+            $name = "actor_" . time() . $file->getClientOriginalName();
+            $file->move('images/actors', $name);
+            $input['image'] = $name;
         }
 
         Actor::create($input);
         return back()->with('added', 'Actor has been created');
+    }
+
+    public function ajaxstore(Request $request)
+    {
+        $input = $request->all();
+
+        if ($file = $request->file('image')) {
+            $name = "actor_" . time() . $file->getClientOriginalName();
+            $file->move('images/actors', $name);
+            $input['image'] = $name;
+        }
+
+        $result = Actor::create($input);
+
+        if ($result) {
+            return response()->json(['msg' => 'Actor created succesfully !']);
+        } else {
+            return response()->json(['msg' => 'Please try again !']);
+        }
+    }
+
+    public function listofactor(Request $request)
+    {
+
+        if (!isset($request->searchTerm)) {
+            $fetchData = Actor::select('id', 'name')->get();
+        } else {
+            $search = $request->searchTerm;
+            $fetchData = Actor::where('name', 'LIKE', '%' . $search . '%')->select('id', 'name')->get();
+        }
+
+        $data = array();
+
+        foreach ($fetchData as $row) {
+            $data[] = array("id" => $row['id'], "text" => $row['name']);
+        }
+
+        return response()->json($data);
     }
 
     /**
@@ -157,22 +190,22 @@ class ActorController extends Controller
         $actor = Actor::findOrFail($id);
 
         $request->validate([
-          'name' => 'required',
-          'image' => 'nullable|image|mimes:jpeg,png,jpg'
+            'name' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg',
         ]);
-        
+
         $input = $request->all();
 
         if ($file = $request->file('image')) {
-          $name = "actor_".time().$file->getClientOriginalName();
-          if ($actor->image != null) {
-              $content = @file_get_contents(public_path().'/images/actors/'.$actor->image);
-              if ($content) { 
-                unlink(public_path()."/images/actors/".$actor->image);
-              }
-          }
-          $file->move('images/actors', $name);
-          $input['image'] = $name;
+            $name = "actor_" . time() . $file->getClientOriginalName();
+            if ($actor->image != null) {
+                $content = @file_get_contents(public_path() . '/images/actors/' . $actor->image);
+                if ($content) {
+                    unlink(public_path() . "/images/actors/" . $actor->image);
+                }
+            }
+            $file->move('images/actors', $name);
+            $input['image'] = $name;
         }
 
         $actor->update($input);
@@ -190,10 +223,10 @@ class ActorController extends Controller
         $actor = Actor::findOrFail($id);
 
         if ($actor->image != null) {
-          $content = @file_get_contents(public_path().'/images/actors/'.$actor->image);
-          if ($content) { 
-            unlink(public_path()."/images/actors/".$actor->image);
-          }
+            $content = @file_get_contents(public_path() . '/images/actors/' . $actor->image);
+            if ($content) {
+                unlink(public_path() . "/images/actors/" . $actor->image);
+            }
         }
 
         $actor->delete();
@@ -214,17 +247,17 @@ class ActorController extends Controller
         foreach ($request->checked as $checked) {
 
             $actor = Actor::findOrFail($checked);
-            
+
             if ($actor->image != null) {
-              $content = @file_get_contents(public_path().'/images/actors/'.$actor->image);
-              if ($content) { 
-                unlink(public_path()."/images/actors/".$actor->image);
-              }
+                $content = @file_get_contents(public_path() . '/images/actors/' . $actor->image);
+                if ($content) {
+                    unlink(public_path() . "/images/actors/" . $actor->image);
+                }
             }
 
             Actor::destroy($checked);
         }
 
-        return back()->with('deleted', 'Actors has been deleted');   
+        return back()->with('deleted', 'Actors has been deleted');
     }
 }

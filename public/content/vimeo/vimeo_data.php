@@ -19,8 +19,8 @@ $album_id = isset($_REQUEST['album_id']) && !empty($_REQUEST['album_id']) ? $_RE
 $path = isset($_REQUEST['path']) && !empty($_REQUEST['path']) ? $_REQUEST['path'] : null;
 $user = isset($_REQUEST['user']) && !empty($_REQUEST['user']) ? $_REQUEST['user'] : null;
 $query = isset($_REQUEST['query']) && !empty($_REQUEST['query']) ? $_REQUEST['query'] : null;
-$sort = isset($_REQUEST['sort']) && !empty($_REQUEST['sort']) ? $_REQUEST['sort'] : 'date';
-$sortDirection = isset($_REQUEST['sortDirection']) && !empty($_REQUEST['sortDirection']) ? $_REQUEST['sortDirection'] : 'asc';
+$sort = isset($_REQUEST['sort']) && !empty($_REQUEST['sort']) ? $_REQUEST['sort'] : 'default';
+//$sortDirection = isset($_REQUEST['sortDirection']) && !empty($_REQUEST['sortDirection']) ? $_REQUEST['sortDirection'] : 'asc';
 
 require("autoload.php");
 use Vimeo\Vimeo;
@@ -33,7 +33,7 @@ if($type == 'vimeo_channel'){
 													'per_page' => $per_page,
 													'fields' => 'uri,name,description,duration,width,height,privacy,pictures.sizes',
 													'sort' => $sort,
-													'direction' => $sortDirection,								
+													//'direction' => $sortDirection,								
 													'query' => $query,
 													'filter' => 'embeddable',
 													'filter_embeddable' => 'true'
@@ -45,7 +45,7 @@ if($type == 'vimeo_channel'){
 													'per_page' => $per_page,
 													'fields' => 'uri,name,description,duration,width,height,privacy,pictures.sizes',
 													'sort' => $sort,
-													'direction' => $sortDirection,							
+													//'direction' => $sortDirection,							
 													'query' => $query,
 													'filter' => 'embeddable',
 													'filter_embeddable' => 'true'

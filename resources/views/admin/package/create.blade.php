@@ -26,7 +26,7 @@
                 <p class="inline info"> - Please enter your plan amount (Min. Amount should be 1)</p>
                 <div class="input-group">
                   <span class="input-group-addon simple-input"><i class="{{$currency_symbol}}"></i></span>
-                  {!! Form::number('amount', null, ['min' => 1, 'class' => 'form-control', 'required' => 'required']) !!}  
+                  {!! Form::number('amount', null, ['min' => 1, 'step'=>'0.01', 'class' => 'form-control', 'required' => 'required']) !!}  
                 </div>
                 <input type="text" name="currency_symbol" id="currency_symbol" value="{{$currency_symbol}}" hidden="true">
                 <small class="text-danger">{{ $errors->first('amount') }}</small>
@@ -58,7 +58,7 @@
                 <ul>
                      <li>
                       <div class="inline">
-                        <input type="checkbox" class="filled-in material-checkbox-input" name="menu[]" value="100" id="checkbox{{100}}" checked>
+                        <input type="checkbox" class="filled-in material-checkbox-input all" name="menu[]" value="100" id="checkbox{{100}}" >
                         <label for="checkbox{{100}}" class="material-checkbox"></label>
                       </div>
                       All Menus
@@ -66,7 +66,7 @@
                   @foreach ($menus as $menu)
                     <li>
                       <div class="inline">
-                        <input type="checkbox" class="filled-in material-checkbox-input" name="menu[]" value="{{$menu->id}}" id="checkbox{{$menu->id}}">
+                        <input type="checkbox" class="filled-in material-checkbox-input one" name="menu[]" value="{{$menu->id}}" id="checkbox{{$menu->id}}">
                         <label for="checkbox{{$menu->id}}" class="material-checkbox"></label>
                       </div>
                       {{$menu->name}}
@@ -89,6 +89,35 @@
                 <small class="text-danger">{{ $errors->first('screen') }}</small>
             </div>
 
+            <!-----------  for download limit ------------------>
+
+            <div class="form-group{{ $errors->has('download') ? ' has-error' : '' }}">
+              <div class="row">
+                <div class="col-xs-6">
+                  {!! Form::label('download', 'Do you want download limit?') !!}
+                </div>
+                <div class="col-xs-5 pad-0">
+                  <label class="switch">
+                    {!! Form::checkbox('download', 1, 0, ['class' => 'checkbox-switch seriescheck','id'=>'download_enable']) !!}
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-xs-12">
+                <small class="text-danger">{{ $errors->first('download') }}</small>
+              </div>
+            </div>
+            <small class="text-danger">{{ $errors->first('downloadlimit') }}</small>
+            <div id="downloadlimit" class="form-group{{ $errors->has('downloadlimit') ? ' has-error' : '' }}" style="display:none">
+                {!! Form::label('downloadlimit', 'Download Limit') !!}
+                <p class="inline info"> - Please enter download limit for users</p>
+                {!! Form::number('downloadlimit', null, ['class' => 'form-control']) !!}
+                <small class="text-danger">Note :- The download limit you entered will be multiply with given screens.</small>
+                
+            </div>
+
+            <!--------------- end download limit ------------------->
+
             <div class="form-group{{ $errors->has('status') ? ' has-error' : '' }}">
                 {!! Form::label('status', 'Status') !!}
                 <p class="inline info"> - Please select status</p>
@@ -105,4 +134,30 @@
       </div>
     </div>
   </div>
+@endsection
+@section('custom-script')
+<script type="text/javascript">
+    // when click all menu  option all checkbox are checked
+
+    $(".all").click(function(){
+      if($(this).is(':checked')){
+        $('.one').prop('checked',true);
+      }
+      else{
+        $('.one').prop('checked',false);
+      }
+    })
+
+</script>
+<script>
+$('#download_enable').on('change',function(){
+  if($('#download_enable').is(':checked')){
+    //show
+    $('#downloadlimit').show();
+  }else{
+    //hide
+     $('#downloadlimit').hide();
+  }
+});
+</script>
 @endsection

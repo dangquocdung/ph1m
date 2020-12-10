@@ -8,7 +8,7 @@
   <a href="{{url('admin/seo')}}" style="color: #7f8c8d;" ><button class="tablinks">SEO Setting</button></a>
   <a href="#" style="color: #7f8c8d;"><button class="tablinks active">API Setting</button></a>
   <a href="{{route('mail.getset')}}" style="color: #7f8c8d;"><button class="tablinks">Mail Setting</button></a>
-  <a href="{{url('/admin/page-settings')}}" style="color: #7f8c8d;"><button class="tablinks">Page Setting</button></a>
+
 </div>
   
       {!! Form::model($env_files, ['method' => 'POST', 'action' => 'ConfigController@changeEnvKeys']) !!}
@@ -26,6 +26,7 @@
                   </div>
              
           </div>
+
           <div class="row admin-form-block z-depth-1">
         
             <h6 class="form-block-heading apipadding">Vimeo Api</h6>
@@ -41,6 +42,46 @@
            
           
           </div>
+        <div class="row admin-form-block z-depth-1">
+          <h6 class="form-block-heading apipadding">Captcha Credentials </h6>
+          <br>
+              
+          <div class="payment-gateway-block">
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-xs-6">
+                    {!! Form::label('captcha', 'GOOGLE CAPTCHA') !!}
+                  </div>
+                  <div class="col-xs-5 text-right">
+                    <label class="switch">
+                      {!! Form::checkbox('captcha', 1, $config->captcha, ['class' => 'checkbox-switch']) !!}
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div style="{{ $config->captcha==1 ? "" : "display: none" }}" id="captcha_box" class="row">
+                <div class="col-md-6">
+                  <div class="form-group{{ $errors->has('NOCAPTCHA_SITEKEY') ? ' has-error' : '' }}">
+                    {!! Form::label('NOCAPTCHA_SITEKEY', 'CAPTCHA SITE KEY') !!}
+                    <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter captcha site key"></i>
+                    {!! Form::text('NOCAPTCHA_SITEKEY', null, ['class' => 'form-control']) !!}
+                    <small class="text-danger">{{ $errors->first('NOCAPTCHA_SITEKEY') }}</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="search form-group{{ $errors->has('NOCAPTCHA_SECRET') ? ' has-error' : '' }}">
+                    {!! Form::label('NOCAPTCHA_SECRET', 'CAPTCHA SECRET KEY') !!}
+                      <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter captcha secret key"></i>
+                      <input type="password" id="captcha-password-field" name="NOCAPTCHA_SECRET" @if(isset( $env_files['NOCAPTCHA_SECRET'])) value="{{ $env_files['NOCAPTCHA_SECRET'] }}" @endif>
+                      <span toggle="#captcha-password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                      <small class="text-danger">{{ $errors->first('NOCAPTCHA_SECRET') }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+             
+        </div>
         <div class="row admin-form-block z-depth-1">
           <div class="api-main-block">
             <h5 class="form-block-heading apipadding">Payment Gateways</h5>
@@ -146,6 +187,52 @@
             </div>
             
           </div>
+          
+
+            <div class="payment-gateway-block">
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-xs-6">
+                    {!! Form::label('razorpay_payment', 'Razorpay PAYMENT') !!}
+                  </div>
+                  <div class="col-xs-5 text-right">
+                    <label class="switch">
+                      {!! Form::checkbox('razorpay_payment', 1, $config->razorpay_payment, ['class' => 'checkbox-switch']) !!}
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div style="{{ $config->razorpay_payment==1 ? "" : "display: none" }}" id="razorpay_box" class="row">
+                <div class="col-md-6">
+                  <div class="form-group{{ $errors->has('RAZOR_PAY_KEY') ? ' has-error' : '' }}">
+                      {!! Form::label('RAZOR_PAY_KEY', 'RAZOR PAY KEY') !!}
+                      <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter Razorpay key"></i>
+                      {!! Form::text('RAZOR_PAY_KEY', null , ['class' => 'form-control']) !!}
+
+                      <small class="text-danger">{{ $errors->first('RAZOR_PAY_KEY') }}</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="search form-group{{ $errors->has('RAZOR_PAY_SECRET') ? ' has-error' : '' }}">
+                      
+                          {!! Form::label('RAZOR_PAY_SECRET', 'RAZOR PAY SECRET KEY') !!}
+                          <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter Razorpay secret key"></i>
+                          
+
+                          <input type="password" id="razorpay_secret" name="RAZOR_PAY_SECRET" value="{{ $env_files['RAZOR_PAY_SECRET'] }}" >
+                        
+
+                          <span toggle="#razorpay_secret" class="fa fa-fw fa-eye field-icon toggle-password2"></span>
+                        
+
+                     
+
+                      <small class="text-danger">{{ $errors->first('RAZOR_PAY_SECRET') }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
 
           <div class="payment-gateway-block">
               <div class="form-group">
@@ -385,21 +472,21 @@
                           <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter merchant key"></i>
                           <input type="text" name="PAYTM_MERCHANT_KEY" value="{{ $env_files['PAYTM_MERCHANT_KEY'] }}" class="form-control">
                       </div>
-            <div class="bootstrap-checkbox form-group{{ $errors->has('paytm_test') ? ' has-error' : '' }}">
-              <div class="row">
-                <div class="col-md-7">
-                  <h5 class="bootstrap-switch-label">Paytm Testing/Live</h5>
-                </div>
-                <div class="col-md-5 pad-0">
-                  <div class="make-switch">
-                    {!! Form::checkbox('paytm_test', 1, ($config->paytm_test == 1 ? 1 : 0), ['class' => 'bootswitch', "data-on-text"=>"Live", "data-off-text"=>"Test", "data-size"=>"small"]) !!}
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-12">
-                <small class="text-danger">{{ $errors->first('paytm_test') }}</small>
-              </div>
-            </div>
+                      <div class="bootstrap-checkbox form-group{{ $errors->has('paytm_test') ? ' has-error' : '' }}">
+                        <div class="row">
+                          <div class="col-md-7">
+                            <h5 class="bootstrap-switch-label">Paytm Testing/Live</h5>
+                          </div>
+                          <div class="col-md-5 pad-0">
+                            <div class="make-switch">
+                              {!! Form::checkbox('paytm_test', 1, ($config->paytm_test == 1 ? 1 : 0), ['class' => 'bootswitch', "data-on-text"=>"Live", "data-off-text"=>"Test", "data-size"=>"small"]) !!}
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-12">
+                          <small class="text-danger">{{ $errors->first('paytm_test') }}</small>
+                        </div>
+                      </div>
                 </div>
                
 
@@ -462,63 +549,7 @@
             </div>
 
           </div>
-           <div class="payment-gateway-block">
-              <div class="form-group">
-                <div class="row">
-                  <div class="col-xs-6">
-                    {!! Form::label('aws', 'AWS Storage Details') !!}
-                  </div>
-                  <div class="col-xs-5 text-right">
-                    <label class="switch">
-                      {!! Form::checkbox('aws', 1, $config->aws, ['class' => 'checkbox-switch']) !!}
-                      <span class="slider round"></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div id="aws_box" style="{{ $config->aws==1 ? "" : "display: none" }}" class="row">
-                <div class="col-md-6">
-                  <div class="form-group{{ $errors->has('key') ? ' has-error' : '' }}">
-                      {!! Form::label('key', 'AWS AccessKey') !!}
-                      <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter your Bank Account Number"></i>
-                      <input id="payum" type="text" class="form-control" value="{{$env_files['key'] }}" name="key">
-                     
-                      <small class="text-danger">{{ $errors->first('key') }}</small>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="form-group{{ $errors->has('secret') ? ' has-error' : '' }}">
-                      {!! Form::label('secret', 'AWS Secret Key') !!}
-                      <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter your Account Holder Names"></i>
-                      <input id="payum" type="text" class="form-control" value="{{$env_files['secret'] }}" name="secret">
-                     
-                      <small class="text-danger">{{ $errors->first('secret') }}</small>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="search form-group{{ $errors->has('region') ? ' has-error' : '' }}">
-                   
-                        {!! Form::label('region', 'AWS Bucket Region') !!}
-                  <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter payu merchant key"></i>
-                  <input id="payum" type="text" class="form-control" value="{{$env_files['region'] }}" name="region">
-                  
-                     <small class="text-danger">{{ $errors->first('region') }}</small>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="search form-group{{ $errors->has('bucket') ? ' has-error' : '' }}">
-                    
-                        {!! Form::label('bucket', 'AWS Bucket Name') !!}
-                        <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter payu merchant salt"></i>
-                        <input type="text" name="bucket" value="{{$env_files['bucket'] }}" id="payusalt" class="form-control">
-                     
-                      <small class="text-danger">{{ $errors->first('bucket') }}</small>
-                  
-                </div>
-              </div>
-            </div>
-
-          </div>
+          
 
           <div class="payment-gateway-block">
 
@@ -553,17 +584,11 @@
               </div>
               <div class="col-md-6">
                 <div class="search form-group{{ $errors->has('TMDB_API_KEY') ? ' has-error' : '' }}">
-                  
-                   
                       {!! Form::label('TMDB_API_KEY', 'TMDB API KEY') !!}
                       <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter tmdb api key"></i>
                       <input type="password" id="tmdb_secret" name="TMDB_API_KEY" value="{{ $env_files['TMDB_API_KEY'] }}" id="tmdb_secret" class="form-control">
-                   
                   
                       <span toggle="#tmdb_secret" class="fa fa-fw fa-eye field-icon toggle-password2"></span>
-                    
-                 
-
                     <small class="text-danger">{{ $errors->first('TMDB_API_KEY') }}</small>
                 </div>
                </div>
@@ -615,6 +640,13 @@ if (input.attr("type") == "password") {
            $('#stripe_box').show('fast');
         }else{
           $('#stripe_box').hide('fast');
+        }
+    });   
+     $('#razorpay_payment').on('change',function(){
+      if ($('#razorpay_payment').is(':checked')){
+           $('#razorpay_box').show('fast');
+        }else{
+          $('#razorpay_box').hide('fast');
         }
     });   
 
@@ -677,7 +709,14 @@ if (input.attr("type") == "password") {
         }else{
           $('#aws_box').hide('fast');
         }
-    });    
+    });  
+     $('#captcha').on('change',function(){
+      if ($('#captcha').is(':checked')){
+           $('#captcha_box').show('fast');
+        }else{
+          $('#captcha_box').hide('fast');
+        }
+    });   
   </script>
 
 

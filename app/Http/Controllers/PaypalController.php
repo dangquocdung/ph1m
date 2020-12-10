@@ -6,10 +6,11 @@ use App\Config;
 use App\Http\Requests;
 use App\Menu;
 use App\Package;
+use Auth;
+use App\Multiplescreen;
 use App\PaypalSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\URL;
 use PayPal\Api\Amount;
@@ -122,7 +123,7 @@ class PaypalController extends Controller
     	return back()->with('deleted', 'Unknown error occurred');
     }
 
-    public function getPaymentStatus()
+    public function getPaymentStatus(Request $request)
     {
         $menus = Menu::all();
         $user_email = Auth::user()->email;
@@ -137,7 +138,7 @@ class PaypalController extends Controller
         /** clear the session payment ID **/
         Session::forget('paypal_payment_id');
         Session::forget('plan');
-        if (empty(Input::get('PayerID')) || empty(Input::get('token'))) {
+        if (empty($request->get('PayerID')) || empty($request->get('token'))) {
             return back()->with('deleted', 'Payment failed');
         }
 
@@ -147,7 +148,7 @@ class PaypalController extends Controller
         /** The payer_id is added to the request query parameters **/
         /** when the user is redirected from paypal back to your site **/
         $execution = new PaymentExecution();
-        $execution->setPayerId(Input::get('PayerID'));
+        $execution->setPayerId($request->get('PayerID'));
         /**Execute the payment **/
         $result = $payment->execute($execution, $this->_api_context);
         /** dd($result);exit; /** DEBUG RESULT, remove it later **/
@@ -159,14 +160,13 @@ class PaypalController extends Controller
 
             if ($plan->interval == 'month') {
                 $end_date = Carbon::now()->addMonths($plan->interval_count);
-            } else if ($plan->interval == 'year') {
+            } else if($plan->interval == 'year') {
                 $end_date = Carbon::now()->addYears($plan->interval_count);
-            } else if ($plan->interval == 'week') {
+            } else if($plan->interval == 'week') {
                 $end_date = Carbon::now()->addWeeks($plan->interval_count);
-            } else if ($plan->interval == 'day') {
+            } else if($plan->interval == 'day') {
                 $end_date = Carbon::now()->addDays($plan->interval_count);
             }
-
             $auth = Auth::user();
 
             $created_subscription = PaypalSubscription::create([
@@ -182,7 +182,33 @@ class PaypalController extends Controller
             ]);
 
             if ($created_subscription) {
-
+                $auth = Auth::user();
+                $screen = $plan->screens;
+              if($screen > 0){
+                $multiplescreen = Multiplescreen::where('user_id',$auth->id)->first();
+                 if(isset($multiplescreen)){
+                    $multiplescreen->update([
+                      'pkg_id' => $plan->id,
+                      'user_id' => $auth->id,
+                      'screen1' => $screen >= 1 ? $auth->name :  null,
+                      'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                      'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                      'screen4' => $screen >= 4 ? 'Screen4' :  null
+                    ]);
+                }
+                else{
+                    $multiplescreen = Multiplescreen::create([
+                      'pkg_id' => $plan->id,
+                      'user_id' => $auth->id,
+                      'screen1' => $screen >= 1 ? $auth->name :  null,
+                      'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                      'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                      'screen4' => $screen >= 4 ? 'Screen4' :  null
+                    ]);
+                 }
+              }
+              if(env('MAIL_DRIVER') != NULL && env('MAIL_HOST') != NULL && env('MAIL_PORT') != NULL)
+              {
                 try{
                     Mail::send('user.invoice', ['paypal_sub' => $created_subscription, 'invoice' => null], function($message) {
                         $message->from(Session::get('com_email'))->to(Session::get('user_email'))->subject('Invoice');
@@ -190,10 +216,12 @@ class PaypalController extends Controller
                     Session::forget('user_email');
                     Session::forget('com_email');
                 }
-                       catch(\Swift_TransportException $e){
-                           header( "refresh:5;url=./" );
-                           dd("Payment Successfully ! but Invoice will not sent because admin not updated the mail setting in admin dashboard ! Redirecting you to homepage... !");
-                       }
+               catch(\Swift_TransportException $e){
+                   header( "refresh:5;url=./" );
+                   dd("Payment Successfully ! but Invoice will not sent because admin not updated the mail setting in admin dashboard ! Redirecting you to homepage... !");
+               }
+              }
+                
                
             }
 

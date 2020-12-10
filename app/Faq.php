@@ -11,7 +11,7 @@ class Faq extends Model
 
 	public $translatable = ['question', 'answer'];
 
-    /**
+    /*
      * Convert the model instance to an array.
      *
      * @return array

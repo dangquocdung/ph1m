@@ -35,6 +35,31 @@
                 {!! Form::textarea('detail', null, ['id' => '','autocomplete'=>'off', 'class' => 'form-control ckeditor', 'required']) !!}
                 <small class="text-danger">{{ $errors->first('detail') }}</small>
             </div>
+
+             <div class="menu-block">
+              <h6 class="menu-block-heading">Please Select Menu</h6>
+               <small class="text-danger">{{ $errors->first('menu') }}</small>
+              @if (isset($menus) && count($menus) > 0)
+                <ul>
+                     <li>
+                      <div class="inline">
+                        <input type="checkbox" class="filled-in material-checkbox-input all" name="menu[]" value="100" id="checkbox{{100}}" >
+                        <label for="checkbox{{100}}" class="material-checkbox"></label>
+                      </div>
+                      All Menus
+                    </li>
+                  @foreach ($menus as $menu)
+                    <li>
+                      <div class="inline">
+                        <input type="checkbox" class="filled-in material-checkbox-input one" name="menu[]" value="{{$menu->id}}" id="checkbox{{$menu->id}}" >
+                        <label for="checkbox{{$menu->id}}" class="material-checkbox"></label>
+                      </div>
+                      {{$menu->name}}
+                    </li>
+                  @endforeach
+                </ul>
+              @endif
+            </div>
              <div class="form-group{{ $errors->has('is_active') ? ' has-error' : '' }} switch-main-block">
             <div class="row">
               <div class="col-xs-4">
@@ -65,8 +90,9 @@
 @endsection
 
 @section('custom-script')
-	<script>
-		$(document).ready(function(){
+  <script>
+    $(document).ready(function(){
+
       $('.upload-image-main-block').hide();
       $('.for-custom-image input').click(function(){
         if($(this).prop("checked") == true){
@@ -77,6 +103,18 @@
         }
       });
     });
-	</script>
+  </script>
+  <script type="text/javascript">
+    // when click all menu  option all checkbox are checked
+
+    $(".all").click(function(){
+      if($(this).is(':checked')){
+        $('.one').prop('checked',true);
+      }
+      else{
+        $('.one').prop('checked',false);
+      }
+    })
+  </script>
   
 @endsection

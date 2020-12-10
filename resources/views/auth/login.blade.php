@@ -29,16 +29,13 @@
           </div>
           <div class="thumbnail__content text-center">
             {!! $auth_customize->detail !!}
-          </div>
-          <!-- <div class="thumbnail__links">
-            <ul class="list-inline m-b-0 text-center">
-              <li><a href="#" target="_blank"><i class="fa fa-globe"></i></a></li>
-              <li><a href="https://www.behance.net/" target="_blank"><fa class="fa fa-behance"></fa></a></li>
-              <li><a href="https://github.com/" target="_blank"><i class="fa fa-github"></i></a></li>
-              <li><a href="https://twitter.com/" target="_blank"><i class="fa fa-twitter"></i></a></li>
-            </ul>
-          </div> -->
+          </div>          
           <div class="signup__overlay"></div>
+        </div>
+         <div class="signup-thumbnail">
+          @if($logo != null)
+              <a href="{{url('/')}}" title="{{$w_title}}"><img src="{{asset('images/logo/'.$logo)}}" class="img-responsive" alt="{{$w_title}}"></a>
+            @endif  
         </div>
       </div>
       <div class="col-sm-6 col-md-4 pad-0">
@@ -60,8 +57,8 @@
           <form method="POST" action="{{ route('login') }}">
             {{ csrf_field() }}
             <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-              <label for="email">Email</label>
-              <input id="email" type="text" class="form-control" name="email" placeholder="Please Enter Your Email" value="{{ old('email') }}" required autofocus>
+              <label for="email">{{__('staticwords.email')}}</label>
+              <input id="email" type="text" class="form-control" name="email" placeholder="{{__('staticwords.enteryouremail')}}" value="{{ old('email') }}" required autofocus>
               @if ($errors->has('email'))
                 <span class="help-block">
                   <strong>{{ $errors->first('email') }}</strong>
@@ -69,8 +66,8 @@
               @endif
             </div>
             <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-              <label for="password">Password</label>
-              <input id="password" type="password" class="form-control" name="password" placeholder="Please Enter Your Password" value="{{ old('password') }}">
+              <label for="password">{{__('staticwords.password')}}</label>
+              <input id="password" type="password" class="form-control" name="password" placeholder="{{__('staticwords.enteryourpassword')}}" value="{{ old('password') }}">
               @if ($errors->has('password'))
                 <span class="help-block">
                   <strong>{{ $errors->first('password') }}</strong>
@@ -78,26 +75,29 @@
               @endif
             </div>
             <div class="remember form-group{{ $errors->has('remember') ? ' has-error' : '' }}">
-             <label><input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}> Remember Me</label>
+             <label><input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>{{__('staticwords.rememberme')}}</label>
             </div>
             <div class="m-t-lg">
-              <input class="btn btn--form btn--form-login" type="submit" value="Login" />
+              <input class="btn btn--form btn--form-login" type="submit" value={{__('staticwords.login')}} />
               @php
               $config=App\Config::first();
               @endphp
               <div class="social-login">
                 @if($config->fb_login==1)
-                <a href="{{ url('/auth/facebook') }}" class="btn btn--form btn--form-login fb-btn" title="Login With Facebook"><i class="fa fa-facebook-f"></i> Login With Facebook</a>
+                <a href="{{ url('/auth/facebook') }}" class="btn btn--form btn--form-login fb-btn" title="{{__('staticwords.loginwithfacebook')}}"><i class="fa fa-facebook-f"></i>{{__('staticwords.loginwithfacebook')}}</a>
                 @endif
                   @if($config->google_login==1)
-                <a href="{{ url('/auth/google') }}" class="btn btn--form btn--form-login gplus-btn" title="Login With Google"><i class="fa fa-google"></i> Login With Google</a>
+                <a href="{{ url('/auth/google') }}" class="btn btn--form btn--form-login gplus-btn" title="{{__('staticwords.loginwithgoogle')}}"><i class="fa fa-google"></i> {{__('staticwords.loginwithgoogle')}}</a>
+                @endif
+                 @if($config->amazon_login==1)
+                <a href="{{ url('/auth/amazon') }}" class="btn btn--form btn--form-login amazon-btn" title="{{__('staticwords.loginwithamazon')}}"><i class="fa fa-amazon"></i> {{__('staticwords.loginwithamazon')}}</a>
                 @endif
                   @if($config->gitlab_login==1)
-                 <a style="background: linear-gradient(270deg, #48367d 0%, #241842 100%);" href="{{ url('/auth/gitlab') }}" class="btn btn--form btn--form-login" title="Login With Gitlab"><i class="fa fa-gitlab"></i> Login With GitLab</a>
+                 <a style="background: linear-gradient(270deg, #48367d 0%, #241842 100%);" href="{{ url('/auth/gitlab') }}" class="btn btn--form btn--form-login" title="{{__('staticwords.loginwithgitlab')}}"><i class="fa fa-gitlab"></i> {{__('staticwords.loginwithgitlab')}}</a>
                  @endif
               </div>
-              <a class="signup__link pull-left" href="{{ route('password.request') }}">Forgot Your Password?</a>
-              <a class="signup__link pull-right" href="{{url('register')}}">Not a Member ? Register Here</a>
+              <a class="signup__link pull-left" href="{{ route('password.request') }}">{{__('staticwords.forgotyourpassword')}}</a>
+              <a class="signup__link pull-right" href="{{url('register')}}">{{__('staticwords.registerhere')}}</a>
             </div>
           </form>
         </div>

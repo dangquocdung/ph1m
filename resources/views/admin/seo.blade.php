@@ -8,7 +8,7 @@
   <a href="#" style="color: #7f8c8d;" ><button class="tablinks active">SEO Setting</button></a>
   <a href="{{url('admin/api-settings')}}" style="color: #7f8c8d;"><button class="tablinks">API Setting</button></a>
   <a href="{{route('mail.getset')}}" style="color: #7f8c8d;"><button class="tablinks">Mail Setting</button></a>
-  <a href="{{url('/admin/page-settings')}}" style="color: #7f8c8d;"><button class="tablinks">Page Setting</button></a>
+  
 </div>
     <div class="row admin-form-block z-depth-1">
       @if ($seo)

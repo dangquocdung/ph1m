@@ -28,7 +28,8 @@
                 {!! Form::label('movie_id', 'Select Movies') !!}
                 <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please Select Movie Latest 15 Movies You added are visible"></i>
                 
-                <select class="form-control select2" name="movie_id">
+                <select class="form-control select2" name="movie_id" >
+                  <option value="">Please Select</option>
                   @foreach($movie as $movies)
                    
                   <option value="{{$movies->id}}" name="{{$movies->id}}">{{$movies->title}}</option>
@@ -42,19 +43,19 @@
              
                ->get();;
             @endphp
-            <div class="form-group{{ $errors->has('movie_id') ? ' has-error' : '' }}">
-                {!! Form::label('movie_id', 'Select Live Tv') !!}
+            <div class="form-group{{ $errors->has('livetv') ? ' has-error' : '' }}">
+                {!! Form::label('livetv', 'Select Live Tv') !!}
                 <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please Select Movie Latest 15 Movies You added are visible"></i>
                 
-                <select class="form-control select2" name="movie_id">
-                   <!--<option value="0">None</option>-->
+                <select class="form-control select2" name="livetv">
+                   <option value="">Please Select</option>
                   @foreach($livetv as $movies)
                    
                   <option value="{{$movies->id}}" name="{{$movies->id}}">{{$movies->title}}</option>
                   @endforeach
                 </select>
               
-                <small class="text-danger">{{ $errors->first('movie_id') }}</small>
+                <small class="text-danger">{{ $errors->first('livetv') }}</small>
             </div>
 
             @php
@@ -69,7 +70,7 @@
                 <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please Select Tv Series; Latest 15 TvSeries You added are visible"></i>
                
                 <select class="form-control select2" name="tv_id">
-                   <option value="0">None</option>
+                   <option value="">Please Select</option>
 
                      @foreach($tv as $tvs)
                      @php
@@ -100,7 +101,7 @@
             
             <div class="btn-group pull-right">
               <button type="reset" class="btn btn-info"><i class="material-icons left">toys</i> Reset</button>
-              <button type="submit" class="btn btn-success"><i class="material-icons left">add_to_photos</i> Create</button>
+              <button type="submit" class="btn btn-success"><i class="material-icons left">near_me</i> Send</button>
             </div>
             <div class="clear-both"></div>
           {!! Form::close() !!}

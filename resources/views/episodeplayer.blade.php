@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>Watch Episode - {{ $episode->title }}</title>
+		<title>{{__('staticwords.watchepisode')}} - {{ $episode->title }}</title>
 		
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="initial-scale=1, maximum-scale=1 user-scalable=no" />
@@ -13,7 +13,24 @@
 	    	$text = $cpy->cpy_text;
 	    	$app_url = config('app.url');
 		?>
+		<style>
 		
+		.UVPSubtitle
+		{
+			font-family:Arial !important;
+			text-align:center !important;
+			color:{{$cpy->subtitle_color}}!important;
+			text-shadow: 0px 0px 1px #000000 !important;
+			font-size:{{$cpy->subtitle_font_size}}px!important;
+			line-height:{{$cpy->subtitle_font_size}}px!important;
+		    font-weight:600 !important;
+			margin:0px !important;
+			padding:0px !important;
+			margin-left:20px !important;
+			margin-right:20px !important;
+			margin-bottom:12px !important;
+		}
+	</style>
 		<script type="text/javascript">
 			var cpy = "<?= $text ?>";
 			var app_url = "<?= $app_url ?>";
@@ -79,8 +96,16 @@
 					useHEXColorsForSkin:"no",
 					normalHEXButtonsColor:"#FF0000",
 					selectedHEXButtonsColor:"#000000",
+					@if($cpy->chromecast ==1)
 					showChromecastButton:"yes",
+					@else
+					showChromecastButton:"no",
+					@endif
+					@if(isset($cpy->player_google_analytics_id))
+					googleAnalyticsTrackingCode:"{{$cpy->player_google_analytics_id}}",
+					@else
 					googleAnalyticsTrackingCode:"",
+					@endif
 					useDeepLinking:"no",
 					showPreloader:"yes",
 					preloaderBackgroundColor:"#000000",
@@ -126,7 +151,7 @@
 					showPlaylistsByDefault:"no",
 					thumbnailSelectedType:"opacity",
 					startAtPlaylist:0,
-					buttonsMargins:0,
+					buttonsMargins:15,
 					thumbnailMaxWidth:350, 
 					thumbnailMaxHeight:350,
 					horizontalSpaceBetweenThumbnails:40,
@@ -286,7 +311,25 @@
 					atbButtonTextNormalColor:"#888888",
 					atbButtonTextSelectedColor:"#FFFFFF",
 					atbButtonBackgroundNormalColor:"#FFFFFF",
-					atbButtonBackgroundSelectedColor:"#000000"
+					atbButtonBackgroundSelectedColor:"#000000",
+					// context menu
+                    showContextmenu:'yes',
+                    showScriptDeveloper:"no",
+                    contextMenuBackgroundColor:"#1F1F1F",
+                    contextMenuBorderColor:"#1F1F1F",
+                    contextMenuSpacerColor:"#333",
+                    contextMenuItemNormalColor:"#888888",
+                    contextMenuItemSelectedColor:"#FFFFFF",
+                    contextMenuItemDisabledColor:"#333",
+//thumbnails preview
+                    thumbnailsPreviewWidth:196,
+                    thumbnailsPreviewHeight:110,
+                    thumbnailsPreviewBackgroundColor:"#000000",
+                    thumbnailsPreviewBorderColor:"#666",
+                    thumbnailsPreviewLabelBackgroundColor:"#666",
+                    thumbnailsPreviewLabelFontColor:"#FFF",
+                    rewindTime:10
+
 				});
 					registerAPI();
 					// registerAPI1();
@@ -437,8 +480,8 @@
 		<ul id="playlists" style="display:none;">
 		
 		  <li data-source="episode" data-playlist-name="{{ $episode->seasons->tvseries->title }}" data-thumbnail-path="{{asset('images/tvseries/thumbnails/'.$episode->seasons->thumbnail)}}">
-        <p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">Title: {{ $episode->seasons->title }}</span></p>
-        <p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">Description: </span>{{ $episode->seasons->detail }}</p>
+        <p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">{{__('staticwords.title')}}: {{ $episode->seasons->title }}</span></p>
+        <p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">{{__('staticwords.description')}}: </span>{{ $episode->seasons->detail }}</p>
       	</li>
 
 

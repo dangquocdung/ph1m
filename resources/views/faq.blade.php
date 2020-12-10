@@ -4,11 +4,11 @@
   <!-- main wrapper -->
   <section id="main-wrapper" class="main-wrapper home-page user-account-section">
     <div class="container-fluid faq-main-block">
-      <h4 class="heading">{{$home_translations->where('key', 'frequently asked questions')->first->value->value}}</h4>
+      <h4 class="heading">{{__('staticwords.frequentlyaskedquestions')}}</h4>
       <ul class="bradcump">
-        <li><a href="{{url('account')}}">Dashboard</a></li>
+        <li><a href="{{url('account')}}">{{__('staticwords.dashboard')}}</a></li>
         <li>/</li>
-        <li>FAQ's</li>
+        <li>{{__('staticwords.faq')}}</li>
       </ul>
       <div class="panel-setting-main-block">
         @if(isset($faqs))

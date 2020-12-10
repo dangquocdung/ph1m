@@ -47,9 +47,10 @@
 	
 		<div id="forpopup1">
 		<label for="">Enter Start Time :</label>
-		<input type="text" class="form-control" name="time" placeholder="ex. 00:00:10" name="time" required="required">
+		<input type="text" class="form-control" name="time" placeholder="ex. 00:00:10" >
+		<small class="text-danger">{{ $errors->first('time') }}</small>
 		</div>
-
+	
 		<div style="display: none;" id="ad_hold_time">
 			<label for="ad_hold">Ad Hold Time:</label>
 			<input type="text" class="form-control" placeholder="eg. 5" name="ad_hold">
@@ -57,7 +58,8 @@
 
 		<div id="forpopup">
 		<label for="">Enter End Time :</label>
-		<input type="text" class="form-control" name="endtime" placeholder="ex. 00:00:20" name="end_time" required="required">
+		<input type="text" class="form-control" name="endtime" placeholder="ex. 00:00:20" >
+		<small class="text-danger">{{ $errors->first('endtime') }}</small>
 		</div>
 		
 

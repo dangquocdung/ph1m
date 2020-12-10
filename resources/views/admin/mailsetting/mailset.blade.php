@@ -8,7 +8,7 @@
   <a href="{{url('admin/seo')}}" style="color: #7f8c8d;" ><button class="tablinks">SEO Setting</button></a>
   <a href="{{url('admin/api-settings')}}" style="color: #7f8c8d;"><button class="tablinks">API Setting</button></a>
   <a href="#" style="color: #7f8c8d;"><button class="tablinks active">Mail Setting</button></a>
-  <a href="{{url('/admin/page-settings')}}" style="color: #7f8c8d;"><button class="tablinks">Page Setting</button></a>
+ 
 </div>
       {!! Form::model($env_files, ['method' => 'POST', 'action' => 'ConfigController@changeMailEnvKeys']) !!}
         <div class="row admin-form-block z-depth-1">

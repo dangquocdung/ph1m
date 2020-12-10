@@ -29,16 +29,13 @@
           </div>
           <div class="thumbnail__content text-center">
             {!! $auth_customize->detail !!}
-          </div>
-          <!-- <div class="thumbnail__links">
-            <ul class="list-inline m-b-0 text-center">
-              <li><a href="#" target="_blank"><i class="fa fa-globe"></i></a></li>
-              <li><a href="https://www.behance.net/" target="_blank"><fa class="fa fa-behance"></fa></a></li>
-              <li><a href="https://github.com/" target="_blank"><i class="fa fa-github"></i></a></li>
-              <li><a href="https://twitter.com/" target="_blank"><i class="fa fa-twitter"></i></a></li>
-            </ul>
-          </div> -->
+          </div>          
           <div class="signup__overlay"></div>
+        </div>
+         <div class="signup-thumbnail">
+          @if($logo != null)
+              <a href="{{url('/')}}" title="{{$w_title}}"><img src="{{asset('images/logo/'.$logo)}}" class="img-responsive" alt="{{$w_title}}"></a>
+            @endif  
         </div>
       </div>
       <div class="col-sm-6 col-md-4 pad-0">
@@ -52,8 +49,8 @@
             {{ csrf_field() }}
             <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
               <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                <label for="email">Email</label>
-                <input id="email" type="text" class="form-control" name="email" placeholder="Please Enter Your Email" value="{{ old('email') }}" required autofocus>
+                <label for="email">{{__('staticwords.email')}}</label>
+                <input id="email" type="text" class="form-control" name="email" placeholder="{{__('staticwords.enteryouremail')}}" value="{{ old('email') }}" required autofocus>
                 @if ($errors->has('email'))
                   <span class="help-block">
                     <strong>{{ $errors->first('email') }}</strong>
@@ -62,7 +59,7 @@
               </div>
             </div>
             <div class="m-t-lg">
-              <input class="btn btn--form btn--form-login" type="submit" value="Send Password Reset Link" />
+              <input class="btn btn--form btn--form-login" type="submit" value="{{__('staticwords.sendpasswordresetlink')}}" />
             </div>
           </form>
         </div>
@@ -83,7 +80,7 @@
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
-                <div class="panel-heading">Reset Password</div>
+                <div class="panel-heading">{{__('staticwords.resetpassword')}}</div>
 
                 <div class="panel-body">
                     @if (session('status'))
@@ -96,7 +93,7 @@
                         {{ csrf_field() }}
 
                         <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email" class="col-md-4 control-label">E-Mail Address</label>
+                            <label for="email" class="col-md-4 control-label">{{__('staticwords.emailaddress')}}</label>
 
                             <div class="col-md-6">
                                 <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
@@ -112,7 +109,7 @@
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
                                 <button type="submit" class="btn btn-primary">
-                                    Send Password Reset Link
+                                    {{__('staticwords.sendpasswordresetlink')}}
                                 </button>
                             </div>
                         </div>

@@ -19,7 +19,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
-        \Barryvdh\Cors\HandleCors::class,
+        \Fruitcake\Cors\HandleCors::class,
     ];
 
     /**
@@ -45,7 +45,7 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:60,1',
             'bindings',
-            \Barryvdh\Cors\HandleCors::class,
+            
         ],
     ];
 
@@ -68,5 +68,10 @@ class Kernel extends HttpKernel
         'is_subscriber' => \App\Http\Middleware\IsSubscription::class,
         'optimizeImages' => \Spatie\LaravelImageOptimizer\Middlewares\OptimizeImages::class,
         'switch_languages' => \App\Http\Middleware\SwitchLanguage::class,
+        'login_limit' => \App\Http\Middleware\LoginLimit::class,
+        'ip_block' => \App\Http\Middleware\IpBlock::class,
+        'comming_soon' => \App\Http\Middleware\CommingSoon::class,
+        'IsInstalled' => \App\Http\Middleware\IsInstalled::class,
+        'isActive' => \App\Http\Middleware\IsActive::class,
     ];
 }

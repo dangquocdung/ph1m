@@ -38,8 +38,8 @@ class FaqController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-          'question' => 'required',
-          'answer' => 'required'
+            'question' => 'required',
+            'answer' => 'required',
         ]);
 
         $input = $request->all();
@@ -83,7 +83,7 @@ class FaqController extends Controller
         $faq = Faq::findOrFail($id);
 
         $request->validate([
-          'question' => 'required',
+            'question' => 'required',
         ]);
 
         $input = $request->all();
@@ -122,6 +122,6 @@ class FaqController extends Controller
             Faq::destroy($checked);
         }
 
-        return back()->with('deleted', 'Faqs has been deleted');   
+        return back()->with('deleted', 'Faqs has been deleted');
     }
 }

@@ -179,7 +179,12 @@
         <small class="text-danger">{{ $errors->first('title') }}</small>
       </div>
 
-
+      <div id="movie_slug" class="form-group{{ $errors->has('slug') ? ' has-error' : '' }}">
+        {!! Form::label('slug', 'Movie Slug') !!}
+        <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Enter movie slug Eg:Avatar"></i>
+        {!! Form::text('slug', null, ['class' => 'form-control', 'placeholder' => 'Please enter movie slug']) !!}
+        <small class="text-danger">{{ $errors->first('slug') }}</small>
+      </div>
 
       <div class="form-group">
         <label for="">Meta Keyword: </label>
@@ -200,7 +205,7 @@
         {!! Form::label('selecturls', 'Add Video') !!}
         <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please select one of the options to add Video/Movie"></i>
         <select class="form-control select2" id="selecturl" name="selecturl">
-          <option></option>
+         
           @if($video_link['iframeurl']!='')
           <option value="iframeurl" selected="">IFrame URL</option>
           @else
@@ -213,15 +218,12 @@
             @else
              <option value="customurl">Custom URL/ Youtube URL/ Vimeo URL </option>
           @endif
-          {{--  @if($video_link['upload_video']!='')
-            <option value="uploadvideo" selected="">Upload Video</option>
-            @else
-               <option value="uploadvideo">Upload Video</option>
-          @endif --}}
-
-          <option {{ $video_link['ready_url'] =='' ? "selected" : "" }} value="multiqcustom">Multi Quality Custom URL</option>
-
-          
+        
+          @if($video_link['url_360'] || $video_link['url_480'] || $video_link['url_720'] || $video_link['url_1080'] !='')
+          <option selected=""  value="multiqcustom">Multi Quality Custom URL</option>
+          @else
+           <option value="multiqcustom">Multi Quality Custom URL</option>
+          @endif
            
         </select>
        
@@ -232,9 +234,9 @@
         <input  type="text" value="{{$video_link['iframeurl']}}" class="form-control" name="iframeurl" placeholder="Iframe URL">
       </div>
 
-        <div style="{{ $video_link['ready_url'] == '' ? "" : "display:none" }}" id="custom_url">
+        <div style="{{ $video_link['url_360'] || $video_link['url_480']|| $video_link['url_720'] || $video_link['url_1080'] != '' ? "" : "display:none" }}" id="custom_url">
               
-               <p style="color: red" class="inline info">Upload video not support wmv and mkv video format !</p>
+               <p style="color: red" class="inline info">Upload video not support wmv, Avi and mkv video format !</p>
                 <br>
                 <p class="inline info">Openload, Google drive and other url add here!</p>
                 <br><br>
@@ -313,15 +315,15 @@
                         <small class="text-danger">{{ $errors->first('url_1080') }}</small>
                      </div>
 
-                     <div class="col-md-4">
-                      {!! Form::label('upload_video', 'Upload Video in 1080p') !!} - <p class="inline info">Choose A Video</p>
-                          {!! Form::file('upload_video_1080', ['class' => 'input-file', 'id'=>'upload_video_1080']) !!}
-                          <label for="upload_video_1080" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 1080p Quality">
-                            <i class="icon fa fa-check"></i>
-                            <span class="js-fileName">Choose a File</span>
-                          </label>
-                          <small class="text-danger">{{ $errors->first('upload_video') }}</small>
-                    </div>
+                      <div class="col-md-4">
+                        {!! Form::label('upload_video', 'Upload Video in 1080p') !!} - <p class="inline info">Choose A Video</p>
+                            {!! Form::file('upload_video_1080', ['class' => 'input-file', 'id'=>'upload_video_1080']) !!}
+                            <label for="upload_video_1080" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 1080p Quality">
+                              <i class="icon fa fa-check"></i>
+                              <span class="js-fileName">Choose a File</span>
+                            </label>
+                            <small class="text-danger">{{ $errors->first('upload_video') }}</small>
+                      </div>
 
                    </div>
     
@@ -357,26 +359,7 @@
      </div>
     
 
-     {{-- upload video --}}
-     <div id="uploadvideo" style="{{$video_link['upload_video']!='' ? '' : "display: none" }}" class="form-group{{ $errors->has('upload_video') ? ' has-error' : '' }} input-file-block">
-      <label>File Name: <span>{{$video_link['upload_video']}}</span></label>
-      <br>
-      {!! Form::label('upload_video', 'Upload Video') !!} - <p class="inline info">Choose A Video</p>
-      {!! Form::file('upload_video', ['class' => 'input-file', 'id'=>'upload_video']) !!}
-      <label for="upload_video" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video">
-        <i class="icon fa fa-check"></i>
-        <span class="js-fileName">Choose a File</span>
-      </label>
-      <p class="info">Choose Video</p>
-      <small class="text-danger">{{ $errors->first('upload_video') }}</small>
-      <label for="">Upload To AWS </label>
-      <br>
-      <label class="switch">
-       <input type="checkbox" name="upload_aws" class="checkbox-switch" id="upload_aws">
-       <span class="slider round"></span>
-
-     </label>
-   </div>
+   
    {{-- select to upload or add links code ends here --}}
 
    <div class="form-group{{ $errors->has('a_language') ? ' has-error' : '' }}">
@@ -446,7 +429,7 @@
       </div>
     </div>
   </div>
-  <div class="pad_plus_border" style=" {{$video_link['upload_video']!='' || $video_link['ready_url']!='' ? "" : "display: none"}})" id="subtitle_section">
+  <div class="pad_plus_border" style=" {{$video_link['ready_url']!='' ? "" : "display: none"}})" id="subtitle_section">
     <div class="form-group{{ $errors->has('subtitle') ? ' has-error' : '' }}">
       <div class="row">
         <div class="col-xs-6">
@@ -454,7 +437,7 @@
         </div>
         <div class="col-xs-5 pad-0">
           <label class="switch">
-            {!! Form::checkbox('subtitle', 1, $movie->subtitle, ['class' => 'checkbox-switch']) !!}
+            <input type="checkbox" {{ $movie->subtitle == 1 ? "checked" : "" }} class="checkbox-switch" id="subtitle_check" name="subtitle">
             <span class="slider round"></span>
           </label>
         </div>
@@ -463,45 +446,29 @@
         <small class="text-danger">{{ $errors->first('subtitle') }}</small>
       </div>
     </div>
-    <div class="form-group{{ $errors->has('subtitle_list') ? ' has-error' : '' }} subtitle_list">
-      {!! Form::label('subtitle_list', 'Subtitles List') !!}
-      <div class="input-group">
-        <select name="subtitle_list[]" id="subtitle_list" class="form-control select2" multiple="multiple">
-          @if(isset($old_subtitles) && count($old_subtitles) > 0)
-          @foreach($old_subtitles as $old)
-          <option value="{{$old->id}}" selected="selected">{{$old->language}}</option> 
-          @endforeach
-          @endif
-          @if(isset($a_subs))
-          @foreach($a_subs as $rest)
-          <option value="{{$rest->id}}">{{$rest->language}}</option> 
-          @endforeach
-          @endif
-        </select>  
-        <a href="#" data-toggle="modal" data-target="#AddLangModal" class="input-group-addon"><i class="material-icons left">add</i></a>
-      </div>
-      <small class="text-danger">{{ $errors->first('subtitle_list') }}</small>
-    </div>
-             <label>Subtitle:</label>
-     <table class="table table-bordered" id="dynamic_field">  
-      <tr> 
-        <td>
-         <div class="form-group{{ $errors->has('sub_t') ? ' has-error' : '' }} input-file-block">
-          <input type="file" name="sub_t[]"/>
-          <p class="info">Choose subtitle file ex. subtitle.srt, or. txt</p>
-          <small class="text-danger">{{ $errors->first('sub_t') }}</small>
-        </div>
-      </td>
-
-      <td>
-        <input type="text" name="sub_lang[]" placeholder="Subtitle Language" class="form-control name_list" />
-      </td>  
-      <td><button type="button" name="add" id="add" class="btn btn-xs btn-success">
-        <i class="fa fa-plus"></i>
-      </button></td>  
-    </tr>  
-  </table>
+    
+    <div style="{{ $movie->subtitle == 1 ? "" : "display: none" }}" class="form-group subtitle-box">
+      <label>Subtitle:</label>
+      <table class="table table-bordered" id="dynamic_field">  
+        <tr> 
+          <td>
+            <div class="form-group{{ $errors->has('sub_t') ? ' has-error' : '' }} input-file-block">
+              <input type="file" name="sub_t[]"/>
+              <p class="info">Choose subtitle file ex. subtitle.srt, or. txt</p>
+              <small class="text-danger">{{ $errors->first('sub_t') }}</small>
             </div>
+          </td>
+
+          <td>
+            <input type="text" name="sub_lang[]" placeholder="Subtitle Language" class="form-control name_list" />
+          </td>  
+          <td><button type="button" name="add" id="add" class="btn btn-xs btn-success">
+            <i class="fa fa-plus"></i>
+          </button></td>  
+       </tr>  
+     </table>
+    </div>
+  </div>
             <div class="form-group{{ $errors->has('series') ? ' has-error' : '' }}">
               <div class="row">
                 <div class="col-xs-6">
@@ -540,6 +507,31 @@
                 <small class="text-danger">{{ $errors->first('featured') }}</small>
               </div>
             </div>
+              
+            <div class="form-group{{ $errors->has('is_protect') ? ' has-error' : '' }}">
+              <div class="row">
+                <div class="col-xs-6">
+                  {!! Form::label('is_protect', 'Protected Video ?') !!}
+                </div>
+                <div class="col-xs-5 pad-0">
+                  <label class="switch">
+                    <input type="checkbox" name="is_protect" {{ $movie->is_protect == 1 ? 'checked' : '' }} class="checkbox-switch" id="is_protect">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-xs-12">
+                <small class="text-danger">{{ $errors->first('is_protect') }}</small>
+              </div>
+            </div>
+            <div class="search form-group{{ $errors->has('password') ? ' has-error' : '' }} is_protect" style="{{ $movie->is_protect == 1 ? '' : 'display:none' }}" >
+              {!! Form::label('password', 'Protected Password For Video') !!}
+              <input type="password" id="password" name="password" value="{{ $movie->password }}" class="form-control">
+              <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+              
+            </div>
+            <small class="text-danger">{{ $errors->first('password') }}</small>
+
             <div class="menu-block">
               <h6 class="menu-block-heading">Please Select Menu</h6>
               @if (isset($menus) && count($menus) > 0)
@@ -587,7 +579,7 @@
               {!! Form::label('director_id', 'Directors') !!}
               <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please select your directors"></i>
               <div class="input-group">
-                <select name="director_id[]" id="director_id" class="form-control select2" multiple="multiple">
+                <select name="director_id[]" id="director_id" class="form-control select2 directorList" multiple="multiple">
                   @if(isset($old_director) && count($old_director) > 0)
                   @foreach($old_director as $old)
                   <option value="{{$old->id}}" selected="selected">{{$old->name}}</option> 
@@ -814,37 +806,40 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h5 class="modal-title">Add Director</h5>
       </div>
-      {!! Form::open(['method' => 'POST', 'action' => 'DirectorController@store', 'files' => true]) !!}
-      <div class="modal-body admin-form-block">          
-        <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
-          {!! Form::label('name', 'Name') !!}
-          {!! Form::text('name', null, ['class' => 'form-control', 'required' => 'required']) !!}
-          <small class="text-danger">{{ $errors->first('name') }}</small>
-        </div>
-        <div class="form-group{{ $errors->has('image') ? ' has-error' : '' }} input-file-block">
-          {!! Form::label('image', 'Director Image') !!} - <p class="inline info">Help block text</p>
-          {!! Form::file('image', ['class' => 'input-file', 'id'=>'image']) !!}
-          <label for="image" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Director pic">
-            <i class="icon fa fa-check"></i>
-            <span class="js-fileName">Choose a File</span>
-          </label>
-          <p class="info">Choose custom image</p>
-          <small class="text-danger">{{ $errors->first('image') }}</small>
-        </div>
-      </div>  
-      <div class="modal-footer">            
-        <div class="btn-group pull-right">
-          <button type="reset" class="btn btn-info"><i class="material-icons left">toys</i> Reset</button>
-          <button type="submit" class="btn btn-success"><i class="material-icons left">add_to_photos</i> Create</button>
-        </div>
-        <div class="clear-both"></div>
-      </div>  
-      {!! Form::close() !!}
+      <div style="display:none;" class="alert alert-success" id="msg_div">
+              <center><span id="res_message"></span></center>
+      </div>
+      <form method="POST" enctype="multipart/form-data" id="editdirector">
+        <div class="modal-body admin-form-block">          
+          <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+            {!! Form::label('name', 'Name') !!}
+            {!! Form::text('name', null, ['class' => 'form-control', 'required' => 'required']) !!}
+            <small class="text-danger">{{ $errors->first('name') }}</small>
+          </div>
+          <div class="form-group{{ $errors->has('image') ? ' has-error' : '' }} input-file-block">
+            {!! Form::label('image', 'Director Image') !!} - <p class="inline info">Help block text</p>
+            {!! Form::file('image', ['class' => 'input-file', 'id'=>'image']) !!}
+            <label for="image" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Director pic">
+              <i class="icon fa fa-check"></i>
+              <span class="js-fileName">Choose a File</span>
+            </label>
+            <p class="info">Choose custom image</p>
+            <small class="text-danger">{{ $errors->first('image') }}</small>
+          </div>
+        </div>  
+        <div class="modal-footer">            
+          <div class="btn-group pull-right">
+            <button type="reset" class="btn btn-info"><i class="material-icons left">toys</i> Reset</button>
+            <button type="submit" class="btn btn-success" id="send_form"><i class="material-icons left">add_to_photos</i> Create</button>
+          </div>
+          <div class="clear-both"></div>
+        </div>  
+      </form>
     </div>
   </div>
 </div>
 <!-- Add Actor Modal -->
-<div id="AddActorModal" class="modal fade" role="dialog">
+{{-- <div id="AddActorModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
     <!-- Modal content-->
     <div class="modal-content">
@@ -880,6 +875,48 @@
       {!! Form::close() !!}
     </div>
   </div>
+</div> --}}
+
+
+<div id="AddActorModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h5 class="modal-title">Add Actor</h5>
+      </div>
+      <div style="display:none;" class="alert alert-success" id="msg_div">
+              <center><span id="res_message"></span></center>
+      </div>
+      <form method="POST" enctype="multipart/form-data" id="editator">
+        <div class="modal-body admin-form-block">          
+          <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
+            {!! Form::label('name', 'Name') !!}
+            {!! Form::text('name', null, ['class' => 'form-control', 'required' => 'required']) !!}
+            <small class="text-danger">{{ $errors->first('name') }}</small>
+          </div>
+          <div class="form-group{{ $errors->has('image') ? ' has-error' : '' }} input-file-block">
+            {!! Form::label('image', 'Actor Image') !!} - <p class="inline info">Help block text</p>
+            {!! Form::file('image', ['class' => 'input-file', 'id'=>'image']) !!}
+            <label for="image" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Actor pic">
+              <i class="icon fa fa-check"></i>
+              <span class="js-fileName">Choose a File</span>
+            </label>
+            <p class="info">Choose custom image</p>
+            <small class="text-danger">{{ $errors->first('image') }}</small>
+          </div>
+        </div>  
+        <div class="modal-footer">            
+          <div class="btn-group pull-right">
+            <button type="reset" class="btn btn-info"><i class="material-icons left">toys</i> Reset</button>
+            <button type="submit" class="btn btn-success" id="send_form_actor"><i class="material-icons left">add_to_photos</i> Create</button>
+          </div>
+          <div class="clear-both"></div>
+        </div>  
+      </form>
+    </div>
+  </div>
 </div>
 <!-- Add Genre Modal -->
 <div id="AddGenreModal" class="modal fade" role="dialog">
@@ -912,38 +949,157 @@
 @endsection
 
 @section('custom-script')
+<!------------------------- ajax directors ------------------>
+<script type="text/javascript">
+  $(document).ready(function(){
+
+     $(".directorList").select2({
+      ajax: { 
+       url: "{{ route('listofd') }}",
+       type: "GET",
+       dataType: 'json',
+       delay: 250,
+       data: function (params) {
+        return {
+          searchTerm: params.term // search term
+        };
+       },
+       processResults: function (response) {
+         return {
+            results: response
+         };
+       },
+       cache: true
+      }
+     });
+});
+
+$(document).ready(function(){
+$('#send_form').click(function(e){
+   e.preventDefault();
+   /*Ajax Request Header setup*/
+   $.ajaxSetup({
+      headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+  });
+
+   $('#send_form').html('Creating..');
+   
+   /* Submit form data using ajax*/
+   $.ajax({
+      url: "{{ route('ajax.director')}}",
+      method: 'GET',
+      data: $('#editdirector').serialize(),
+      datatype : 'html',
+      success: function(response){
+        
+         //------------------------
+            $('#send_form').html('Create');
+            $('#msg_div').show();
+            $('#res_message').html(response.msg);
+
+            document.getElementById("editdirector").reset(); 
+            setTimeout(function(){
+            $('#res_message').hide();
+            $('#msg_div').hide();
+            $('#AddDirectorModal').modal('hide');
+
+            },1000);
+         //--------------------------
+      }});
+   });
+});
+</script>
+<!-------------- end ajax director---------------->
+
+
+<!------------------------- ajax actor ------------------>
+<script type="text/javascript">
+  $(document).ready(function(){
+
+     $(".actorList").select2({
+      ajax: { 
+       url: "{{ route('listofactor') }}",
+       type: "GET",
+       dataType: 'json',
+       delay: 250,
+       data: function (params) {
+        return {
+          searchTerm: params.term // search term
+        };
+       },
+       processResults: function (response) {
+         return {
+            results: response
+         };
+       },
+       cache: true
+      }
+     });
+});
+
+$(document).ready(function(){
+$('#send_form_actor').click(function(e){
+   e.preventDefault();
+   /*Ajax Request Header setup*/
+   $.ajaxSetup({
+      headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+  });
+
+   $('#send_form_actor').html('Creating..');
+   
+   /* Submit form data using ajax*/
+   $.ajax({
+      url: "{{ route('ajax.actor')}}",
+      method: 'GET',
+      data: $('#editactor').serialize(),
+      datatype : 'html',
+      success: function(response){
+        
+         //------------------------
+            $('#send_form_actor').html('Create');
+            $('#msg_div').show();
+            $('#res_message').html(response.msg);
+
+            document.getElementById("editactor").reset(); 
+            setTimeout(function(){
+            $('#res_message').hide();
+            $('#msg_div').hide();
+            $('#AddActorModal').modal('hide');
+
+            },1000);
+         //--------------------------
+      }});
+   });
+});
+</script>
+<!-------------- end ajax actor---------------->
+
 <script>
   $(document).ready(function(){
-    $("#selecturl").select2({
-      placeholder: "Add Video Through...",
+    // $("#selecturl").select2({
+    //   placeholder: "Add Video Through...",
 
-    });
+    // });
     $('#selecturl').change(function(){  
      selecturl = document.getElementById("selecturl").value;
    if (selecturl == 'iframeurl') {
     $('#ifbox').show();
     $('#subtitle_section').hide();
-    $('#uploadvideo').hide();
     $('#ready_url').hide();
     $('#custom_url').hide();
 
-  }else if (selecturl == 'uploadvideo') {
-   $('#uploadvideo').show();
-   $('#subtitle_section').show();
-   $('#ready_url').hide();
-   $('#ifbox').hide();
-   $('#custom_url').hide();
-
- }else if(selecturl=='customurl'){
+  }else if(selecturl=='customurl'){
        $('#ifbox').hide();
-       $('#uploadvideo').hide();
        $('#ready_url').show();
        $('#subtitle_section').show();
        $('#ready_url_text').text('Enter Custom URL or Vimeo or Youtube URL');
        $('#custom_url').hide();
    }
     else if (selecturl == 'youtubeapi') {
-   $('#uploadvideo').hide();
    $('#ready_url').show();
    $('#subtitle_section').show();
    $('#custom_url').hide();
@@ -952,14 +1108,13 @@
 
  }else if(selecturl=='vimeoapi'){
    $('#ifbox').hide();
-   $('#uploadvideo').hide();
    $('#ready_url').show();
    $('#subtitle_section').show();
    $('#custom_url').hide();
    $('#ready_url_text').text('Import From Vimeo API');
- }else if(selecturl=='multiqcustom'){
+ }
+ else if(selecturl=='multiqcustom'){
    $('#ifbox').hide();
-   $('#uploadvideo').hide();
    $('#ready_url').hide();
    $('#subtitle_section').show();
    $('#custom_url').show();
@@ -1015,6 +1170,15 @@
      }
      else if($(this).prop("checked") == false){
       $('.movie_id').fadeOut();
+    }
+  });
+
+  $('input[name="is_protect"]').click(function(){
+    if($(this).prop("checked") == true){
+      $('.is_protect').fadeIn();
+    }
+    else if($(this).prop("checked") == false){
+      $('.is_protect').fadeOut();
     }
   });
   });
@@ -1252,5 +1416,28 @@ function youtubeApiCall(){
         $('.mseries').removeAttr('required');
       }
   });
+</script>
+<script>
+  $('#subtitle_check').on('change',function(){
+
+    if($('#subtitle_check').is(':checked')){
+      $('.subtitle-box').show('fast');
+    }else{
+       $('.subtitle-box').hide('fast');
+    }
+
+  });
+</script>
+<script type="text/javascript">
+    $(".toggle-password").click(function() {
+
+  $(this).toggleClass("fa-eye fa-eye-slash");
+  var input = $($(this).attr("toggle"));
+  if (input.attr("type") == "password") {
+    input.attr("type", "text");
+  } else {
+    input.attr("type", "password");
+  }
+});
 </script>
 @endsection

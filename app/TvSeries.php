@@ -86,4 +86,7 @@ class TvSeries extends Model
     public function getUserRatingAttribute(){
       return round($this->ratings()->avg('rating'),2);
     }
+    public function user(){
+      return $this->belongsTo('App\User','created_by','id');
+    }
 }

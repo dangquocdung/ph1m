@@ -36,21 +36,27 @@ return [
     ],
     
     'facebook' => [
-        'client_id'     => env('FACEBOOK_ID'),
-        'client_secret' => env('FACEBOOK_SECRET'),
-        'redirect'      => env('FACEBOOK_URL'),
+        'client_id'     => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect'      => env('FACEBOOK_CALLBACK'),
     ],
 
     'google' => [
-        'client_id'     => env('GOOGLE_ID'),
-        'client_secret' => env('GOOGLE_SECRET'),
-        'redirect'      => env('GOOGLE_URL'),
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_CALLBACK'),
     ],
 
     'gitlab' => [
     'client_id' => env('GITLAB_CLIENT_ID'),
     'client_secret' => env('GITLAB_CLIENT_SECRET'),
     'redirect' => env('GITLAB_CALLBACK_URL'),
+    ],
+
+   'amazon' => [
+        'client_id'     => env('AMAZON_LOGIN_ID'),
+        'client_secret' => env('AMAZON_LOGIN_SECRET'),
+        'redirect'      => env('AMAZON_LOGIN_REDIRECT'),
     ],
 
 ];

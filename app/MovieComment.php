@@ -8,6 +8,7 @@ class MovieComment extends Model
 {
 
     protected $fillable = [
+      'user_id',
       'name',
       'email',
       'comment',

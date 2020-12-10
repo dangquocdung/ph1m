@@ -14,6 +14,6 @@ class SalesChart extends Chart
     public function __construct()
     {
         parent::__construct();
-        $this->options(['legend' => [ 'display' => false ], 'scales' => ['xAxes' => ['display' => false], 'yAxes' => ['scaleLabel' => ['display' => false], 'display' => false]]]);
+       
     }
 }

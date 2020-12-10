@@ -1,66 +1,65 @@
 @extends('layouts.theme')
-@section('title',"Watch History")
+@section('title',__('staticwords.watchhistory'))
 @section('main-wrapper')
 <br>
 @php
- $withlogin= App\Config::findOrFail(1)->withlogin;
-           $auth=Auth::user();
-             $subscribed = null;
-           if(isset($auth)){
-          
-            if (isset($auth)) {
+  $withlogin= App\Config::findOrFail(1)->withlogin;
+  $catlog= App\Config::findOrFail(1)->catlog;
+  $auth=Auth::user();
+  $subscribed = null;
+ 
 
-              $current_date = date("d/m/y");
-                  
-              $auth = Illuminate\Support\Facades\Auth::user();
-              if ($auth->is_admin == 1) {
-                $subscribed = 1;
-              } else if ($auth->stripe_id != null) {
-                Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-                if(isset($invoices) && $invoices != null && count($invoices->data) > 0)
-                
-                {
-                $user_plan_end_date = date("d/m/y", $invoice->lines->data[0]->period->end);
-                $plans = App\Package::all();
-                foreach ($plans as $key => $plan) {
-                  if ($auth->subscriptions($plan->plan_id)) {
-                   
-                  if($current_date <= $user_plan_end_date)
-                  {
-                  
-                      $subscribed = 1;
-                  }
-                      
-                  }
-                } 
-                }
-                
-                
-              } else if (isset($auth->paypal_subscriptions)) {  
-                //Check Paypal Subscription of user
-                $last_payment = $auth->paypal_subscriptions->last();
-                if (isset($last_payment) && $last_payment->status == 1) {
-                  //check last date to current date
-                  $current_date = Illuminate\Support\Carbon::now();
-                  if (date($current_date) <= date($last_payment->subscription_to)) {
-                    $subscribed = 1;
-                  }
-                }
-              }
-            }
-         }
+  if (isset($auth)) {
+
+    $current_date = date("d/m/y");
+        
+    $auth = Illuminate\Support\Facades\Auth::user();
+    if ($auth->is_admin == 1) {
+      $subscribed = 1;
+    } else if ($auth->stripe_id != null) {
+      Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+      if(isset($invoices) && $invoices != null && count($invoices->data) > 0)
+      
+      {
+      $user_plan_end_date = date("d/m/y", $invoice->lines->data[0]->period->end);
+      $plans = App\Package::all();
+      foreach ($plans as $key => $plan) {
+        if ($auth->subscriptions($plan->plan_id)) {
+         
+        if($current_date <= $user_plan_end_date)
+        {
+        
+            $subscribed = 1;
+        }
+            
+        }
+      } 
+      }
+      
+      
+    } else if (isset($auth->paypal_subscriptions)) {  
+      //Check Paypal Subscription of user
+      $last_payment = $auth->paypal_subscriptions->last();
+      if (isset($last_payment) && $last_payment->status == 1) {
+        //check last date to current date
+        $current_date = Illuminate\Support\Carbon::now();
+        if (date($current_date) <= date($last_payment->subscription_to)) {
+          $subscribed = 1;
+        }
+      }
+    }
+  }
+         
 @endphp
   @if (isset($pusheditems) && count($pusheditems) > 0 )
-          <div class="genre-prime-block">
+          <div class="genre-prime-block view-all-block">
            
             
             <div class="container-fluid">
-              <h5 class="section-heading"> {{$header_translations->where('key', 'watch history') ? $header_translations->where('key', 'watch history')->first->value->value : ''}} </h5>
-              <a href="{{url('account/watchhistory/delete')}}"><button class=" btn btn-danger">Clear All</button></a>
+              <h5 class="section-heading">{{__('staticwords.watchhistory')}} </h5>
+              <a href="{{url('account/watchhistory/delete')}}"><button class=" btn btn-danger">{{__('staticwords.clearall')}}</button></a>
               <div class="">
                 @if(isset($pusheditems))
-
-            
 
                   @foreach($pusheditems as $item)
                   
@@ -91,69 +90,82 @@
                           
                         
                       <div class="genre-slide-image protip" data-pt-placement="outside" data-pt-interactive="false" data-pt-title="#prime-next-item-description-block{{$item->id}}">
-                        <a href="{{url('movie/detail',$item->id)}}">
+                        <a href="{{url('movie/detail',$item->slug)}}">
                           @if($item->thumbnail != null || $item->thumbnail != '')
-                            <img src="{{asset('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive" alt="genre-image">
+                            <img data-src="{{url('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive lazy" alt="genre-image">
                           @else
 
-                            <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                            <img data-src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive lazy" alt="genre-image">
                           @endif
                         </a>
                       </div>
                        {!! Form::open(['method' => 'DELETE', 'action' => ['WatchController@moviedestroy', $item->id]]) !!}
-                    {!! Form::submit("Remove", ["class" => "btn btn-danger"]) !!}
+                    {{-- {!! Form::submit(__('staticwords.remove'), ["class" => "btn btn-danger"]) !!} --}}
+                    <button type="submit" class="watchhistory_remove"><i class="fa fa-close" aria-hidden="true"></i></button><br/>
                 {!! Form::close() !!}
+                @if(isset($protip) && $protip == 1)
                       <div id="prime-next-item-description-block{{$item->id}}" class="prime-description-block">
                         <div class="prime-description-under-block">
                           <h5 class="description-heading">{{$item->title}}</h5>
-                          <div class="item-rating">Rating {{$item->rating}}</div>
+                         
                           <ul class="description-list">
-                            <li>{{$item->duration}} {{$popover_translations->where('key', 'mins')->first->value->value}}</li>
+                            <li>{{__('staticwords.rating')}} {{$item->rating}}</li>
+                            <li>{{$item->duration}} {{__('staticwords.mins')}}</li>
                             <li>{{$item->publish_year}}</li>
                             <li>{{$item->maturity_rating}}</li>
                             @if($item->subtitle == 1)
                               <li>
-                               {{$popover_translations->where('key', 'subtitles')->first->value->value}}
+                               {{__('staticwords.subtitles')}}
                               </li>
                             @endif
                           </ul>
                           <div class="main-des">
                             <p>{{$item->detail}}</p>
-                            <a href="{{url('movie/detail',$item->id)}}">Read more</a>
+                            <a href="{{url('movie/detail',$item->slug)}}">{{__('staticwords.readmore')}}</a>
                           </div>
-                          @if($subscribed==1 && $auth)
-                          <div class="des-btn-block">
-                            @if($item->video_link['iframeurl'] != null)
                           
-                            <a onclick="playoniframe('{{ $item->video_link['iframeurl'] }}','{{ $item->id }}','movie')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                            </a>
+                          <div class="des-btn-block">
+                            @if($subscribed==1 && $auth)
+                              @if($item->maturity_rating == 'all age' || $age>=str_replace('+', '', $item->maturity_rating))
+                                @if($item->video_link['iframeurl'] != null)
+                              
+                                  <a href="{{route('watchmovieiframe',$item->id)}}"class="btn btn-play iframe"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                  </a>
 
-                            @else 
-                              <a href="{{route('watchmovie',$item->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                            @endif
-                           
-                            @if($item->trailer_url != null || $item->trailer_url != '')
-                
-                            <a class="iframe btn btn-default" href="{{ route('watchTrailer',$item->id) }}">Watch Trailer</a>
-
-                            @endif
-                            @if (isset($wishlist_check->added))
-                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
+                                @else 
+                                  <a href="{{route('watchmovie',$item->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
+                                @endif
+                              @else
+                                <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                </a>
+                              @endif
+                              @if($item->trailer_url != null || $item->trailer_url != '')
+                                <a class="iframe btn btn-default" href="{{ route('watchTrailer',$item->id) }}">{{__('staticwords.watchtrailer')}}</a>
+                              @endif
                             @else
-                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}</a>
+                              @if($item->trailer_url != null || $item->trailer_url != '')
+                                <a class="iframe btn btn-default" href="{{ route('guestwatchtrailer',$item->id) }}">{{__('staticwords.watchtrailer')}}</a>
+                              @endif
                             @endif
-                          </div>
-                          @else
-                          @if($item->trailer_url != null || $item->trailer_url != '')
-                          <div class="des-btn-block"> 
-                            <a class="iframe btn btn-default" href="{{ route('guestwatchtrailer',$item->id) }}">Watch Trailer</a>
-                          </div>
                            
-
+                            @if($catlog == 0 && $subscribed ==1)
+                              @if (isset($wishlist_check->added))
+                                <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                              @else
+                                <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                              @endif
+                            @elseif($catlog ==1 && $auth)
+                              @if (isset($wishlist_check->added))
+                                <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                              @else
+                                <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                              @endif
                             @endif
-                          @endif
+                          </div>
+                         
                         </div>
                       </div>
+                      @endif
                       </div>
                        
                     </div>
@@ -165,30 +177,31 @@
                         
                       
                   <div class="genre-slide-image protip" data-pt-placement="outside" data-pt-interactive="false" data-pt-title="#prime-next-item-description-block{{$item->id}}{{ $item->type }}">
-                      <a href="{{url('show/detail',$item->id)}}">
+                      <a href="{{url('show/detail',$item->season_slug)}}">
                         @if($item->tvseries->thumbnail != null || $item->tvseries->thumbnail != '')
-                          <img src="{{asset('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive" alt="genre-image">
+                          <img data-src="{{url('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive lazy" alt="genre-image">
                         @else
 
-                          <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                          <img data-src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive lazy" alt="genre-image">
                         @endif
                       </a>
 
                     </div>
- {!! Form::open(['method' => 'DELETE', 'action' => ['WatchController@showdestroy', $item->tvseries->id]]) !!}
-                    {!! Form::submit("Remove", ["class" => "btn btn-danger"]) !!}
-                {!! Form::close() !!}
-                    
+                    {!! Form::open(['method' => 'DELETE', 'action' => ['WatchController@showdestroy', $item->tvseries->id]]) !!}
+                        {{-- {!! Form::submit(__('staticwords.remove'), ["class" => "btn btn-danger"]) !!} --}}
+                        <button type="submit" class="watchhistory_remove"><i class="fa fa-close" aria-hidden="true"></i></button><br/>
+                    {!! Form::close() !!}
+                    @if(isset($protip) && $protip == 1)
                     <div id="prime-next-item-description-block{{$item->id}}{{$item->type}}" class="prime-description-block">
                         <h5 class="description-heading">{{$item->tvseries->title}}</h5>
-                        <div class="movie-rating">{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$item->tvseries->rating}}</div>
+                        <div class="movie-rating">{{__('staticwords.tmdbrating')}} {{$item->tvseries->rating}}</div>
                         <ul class="description-list">
-                          <li>{{$popover_translations->where('key', 'season')->first->value->value}} {{$item->season_no}}</li>
+                          <li>{{__('staticwords.season')}}{{$item->season_no}}</li>
                           <li>{{$item->publish_year}}</li>
                           <li>{{$item->tvseries->age_req}}</li>
                           @if($item->subtitle == 1)
                             <li>
-                              {{$popover_translations->where('key', 'subtitles')->first->value->value}}
+                              {{__('staticwords.subtitles')}}
                             </li>
                           @endif
                         </ul>
@@ -200,30 +213,49 @@
                           @endif
                           <a href="#"></a>
                         </div>
-                        @if($subscribed==1 && $auth)
+                        
                         <div class="des-btn-block">
-                          @if (isset($item->episodes[0]))
-                            
-                            @if($item->episodes[0]->video_link['iframeurl'] !="")
+                          @if($subscribed==1 && $auth)
+                            @if (isset($item->episodes[0]))
+                              @if($item->tvseries['age_req'] == 'all age' || $age>=str_replace('+', '', $item->tvseries['age_req']))
+                                @if($item->episodes[0]->video_link['iframeurl'] !="")
+                                  <a href="#" onclick="playoniframe('{{ $item->episodes[0]->video_link['iframeurl'] }}','{{ $item->tvseries->id }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                 </a>
 
-                            <a href="#" onclick="playoniframe('{{ $item->episodes[0]->video_link['iframeurl'] }}','{{ $item->tvseries->id }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                             </a>
-
-                            @else
-                            <a href="{{ route('watchTvShow',$item->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
+                                @else
+                                  <a href="{{ route('watchTvShow',$item->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
+                                @endif
+                              @else
+                                <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                </a>
+                              @endif
                             @endif
-                           
-                          @endif
-                          @if (isset($wishlist_check->added))
-                            <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
+                             @if($item->trailer_url != null || $item->trailer_url != '')
+                              <a href="{{ route('watchtvTrailer',$item->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                            @endif
                           @else
-                            <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}
-                            </a>
+                             @if($item->trailer_url != null || $item->trailer_url != '')
+                              <a href="{{ route('guestwatchtvtrailer',$item->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                            @endif
+                          @endif
+                          @if($catlog ==0 && $subscribed ==1)
+                            @if (isset($wishlist_check->added))
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                            @else
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}
+                              </a>
+                            @endif
+                          @elseif($catlog ==1 && $auth)
+                            @if (isset($wishlist_check->added))
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                            @else
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}
+                              </a>
+                            @endif
                           @endif
                         </div>
-                        
-                        @endif
                       </div>
+                      @endif
                     </div>
                    
                      
@@ -250,36 +282,7 @@
 @endsection
 @section('custom-script')
 
-<script>
-      $(document).ready(function(){
-        
-        $(".group1").colorbox({rel:'group1'});
-        $(".group2").colorbox({rel:'group2', transition:"fade"});
-        $(".group3").colorbox({rel:'group3', transition:"none", width:"75%", height:"75%"});
-        $(".group4").colorbox({rel:'group4', slideshow:true});
-        $(".ajax").colorbox();
-        $(".youtube").colorbox({iframe:true, innerWidth:640, innerHeight:390});
-        $(".vimeo").colorbox({iframe:true, innerWidth:500, innerHeight:409});
-        $(".iframe").colorbox({iframe:true, width:"100%", height:"100%"});
-        $(".inline").colorbox({inline:true, width:"50%"});
-        $(".callbacks").colorbox({
-          onOpen:function(){ alert('onOpen: colorbox is about to open'); },
-          onLoad:function(){ alert('onLoad: colorbox has started to load the targeted content'); },
-          onComplete:function(){ alert('onComplete: colorbox has displayed the loaded content'); },
-          onCleanup:function(){ alert('onCleanup: colorbox has begun the close process'); },
-          onClosed:function(){ alert('onClosed: colorbox has completely closed'); }
-        });
 
-        $('.non-retina').colorbox({rel:'group5', transition:'none'})
-        $('.retina').colorbox({rel:'group5', transition:'none', retinaImage:true, retinaUrl:true});
-        
-        
-        $("#click").click(function(){ 
-          $('#click').css({"background-color":"#f00", "color":"#fff", "cursor":"inherit"}).text("Open this window again and this message will still be here.");
-          return false;
-        });
-      });
-    </script>
 <script>
 
   function playoniframe(url,id,type){
@@ -306,10 +309,7 @@
   }
   
 </script>
- <script>
-
-   
-
+<script>
     var app = new Vue({
       el: '.des-btn-block',
       data: {
@@ -339,10 +339,21 @@
       app.addToWishList(id, type);
       setTimeout(function() {
         $('.addwishlistbtn'+id+type).text(function(i, text){
-          return text == "{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}" ? "{{$popover_translations->where('key', 'remove from watchlist')->first->value->value}}" : "{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}";
+          return text == "{{__('staticwords.addtowatchlist')}}" ? "{{__('staticwords.removefromwatchlist')}}" : "{{__('staticwords.addtowatchlist')}}";
         });
       }, 100);
     }
 
   </script>
+  <script>
+
+      function myage(age){
+        if (age==0) {
+        $('#ageModal').modal('show'); 
+      }else{
+          $('#ageWarningModal').modal('show');
+      }
+    }
+      
+    </script>
 @endsection

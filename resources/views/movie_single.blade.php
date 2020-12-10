@@ -1,54 +1,5 @@
 @extends('layouts.theme')
- @php
  
-   $withlogin= App\Config::findOrFail(1)->withlogin;
-   $configs=App\Config::findOrFail(1);
-           $auth=Auth::user();
-             $subscribed = null;
-           if(isset($auth)){
-          
-            if (isset($auth)) {
-
-              $current_date = date("d/m/y");
-                  
-              $auth = Illuminate\Support\Facades\Auth::user();
-              if ($auth->is_admin == 1) {
-                $subscribed = 1;
-              } else if ($auth->stripe_id != null) {
-                Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-                if(isset($invoices) && $invoices != null && count($invoices->data) > 0)
-                
-                {
-                $user_plan_end_date = date("d/m/y", $invoice->lines->data[0]->period->end);
-                $plans = App\Package::all();
-                foreach ($plans as $key => $plan) {
-                  if ($auth->subscriptions($plan->plan_id)) {
-                   
-                  if($current_date <= $user_plan_end_date)
-                  {
-                  
-                      $subscribed = 1;
-                  }
-                      
-                  }
-                } 
-                }
-                
-                
-              } else if (isset($auth->paypal_subscriptions)) {  
-                //Check Paypal Subscription of user
-                $last_payment = $auth->paypal_subscriptions->last();
-                if (isset($last_payment) && $last_payment->status == 1) {
-                  //check last date to current date
-                  $current_date = Illuminate\Support\Carbon::now();
-                  if (date($current_date) <= date($last_payment->subscription_to)) {
-                    $subscribed = 1;
-                  }
-                }
-              }
-            }
-         }
- @endphp
 @if(isset($movie))
 @section('custom-meta')
 <meta name="Description" content="{{$movie->description}}" />
@@ -60,7 +11,7 @@
 @elseif($season)
  @php
    $title = $season->tvseries->title;
-   @endphp
+  @endphp
 @section('custom-meta')
 <meta name="Description" content="{{$season->tvseries->description}}" />
 <meta name="keyword" content="{{$season->tvseries->title}}, {{$season->tvseries->keyword}}">
@@ -69,89 +20,91 @@
 @section('title',"$title")
 
 @endif
+@php
+ 
+    $withlogin= App\Config::findOrFail(1)->withlogin;
+    $catlog= App\Config::findOrFail(1)->catlog;
+    $configs=App\Config::findOrFail(1);
+    $auth=Auth::user();
+    $subscribed = null;
+         
+    if (isset($auth)) {
+
+      $current_date = date("d/m/y");
+          
+      $auth = Illuminate\Support\Facades\Auth::user();
+      if ($auth->is_admin == 1) {
+        $subscribed = 1;
+      } else if ($auth->stripe_id != null) {
+        Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        //dd($invoices);
+         $customer = \Stripe\Customer::retrieve($auth->stripe_id);
+        $invoices = $customer->invoices();
+        if(isset($invoices) && $invoices != null && count($invoices->data) > 0)
+        
+        {
+        $user_plan_end_date = date("d/m/y", $invoices->lines->data[0]->period_end);
+        $plans = App\Package::all();
+        foreach ($plans as $key => $plan) {
+          if ($auth->subscriptions($plan->plan_id)) {
+           
+          if($current_date <= $user_plan_end_date)
+          {
+          
+              $subscribed = 1;
+          }
+              
+          }
+        } 
+        }
+        
+        
+      } else if (isset($auth->paypal_subscriptions)) {  
+        //Check Paypal Subscription of user
+        $last_payment = $auth->paypal_subscriptions->last();
+        if (isset($last_payment) && $last_payment->status == 1) {
+          //check last date to current date
+          $current_date = Illuminate\Support\Carbon::now();
+          if (date($current_date) <= date($last_payment->subscription_to)) {
+            $subscribed = 1;
+          }
+        }
+      }
+    }
+       
+ @endphp
 @section('main-wrapper')
 <!-- main wrapper -->
   <section class="main-wrapper">
 
-<!-- Modal -->
-<div id="ageModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header text-danger">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Age Restricted Video</h4>
-      </div>
-       {!! Form::open(['method' => 'POST', 'action' => 'UsersController@update_age']) !!}
-      <div class="modal-body">
-        <h6 style="color: #e74c3c">This is an Age Restricted Video. Please Provide Your Date of Birth</h6><br>
-  
-              
-           <div class="search form-group{{ $errors->has('dob') ? ' has-error' : '' }}">
-                {!! Form::label('dob', 'Date Of Birth') !!}
-
-                <input type="date" class="form-control"  name="dob"  />   
-                <small class="text-danger">{{ $errors->first('dob') }}</small>
-              </div>
-            
-            
-        
-      </div>
-      <div class="modal-footer">
-        <div class="pull-right">      
-              <button type="submit" class="btn btn-primary">Update</button>
-            </div>
-      </div>
-     {!! Form::close() !!}
-    </div>
-
-  </div>
-</div>
-<!-- Modal -->
-<div id="ageWarningModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header text-danger">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Age Restricted Video</h4>
-      </div>
-      <div class="modal-body">
-        <h5 style="color: #c0392b">Sorry! This is Age Restricted Video. You are Not Allowed to Wactch</h5>
-      </div>
-      </div>
-      <div class="modal-footer">
-       
-      </div>
-     {!! Form::close() !!}
-    </div>
-
-  </div>
+  <!-- Age -->
+  @include('modal.agemodal')
+  <!-- Age warning -->
+  @include('modal.agewarning')
 
     @if(isset($movie))
       @if($movie->poster != null)
-        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{asset('images/movies/posters/'.$movie->poster)}}');">
+        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{url('images/movies/posters/'.$movie->poster)}}');">
           <div class="overlay-bg"></div>
         </div>
       @else
-        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{asset('images/default-poster.jpg')}}');">
+        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{url('images/default-poster.jpg')}}');">
           <div class="overlay-bg"></div>
         </div>
       @endif
     @endif
     @if(isset($season))
       @if($season->poster != null)
-        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{asset('images/tvseries/posters/'.$season->poster)}}');">
+        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{url('images/tvseries/posters/'.$season->poster)}}');">
           <div class="overlay-bg"></div>
         </div>
       @elseif($season->tvseries->poster != null)
-        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{asset('images/tvseries/posters/'.$season->tvseries->poster)}}');">
+        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{url('images/tvseries/posters/'.$season->tvseries->poster)}}');">
           <div class="overlay-bg"></div>
         </div>
       @else
-        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{asset('images/default-poster.jpg')}}');">
+        <div id="big-main-poster-block" class="big-main-poster-block" style="background-image: url('{{url('images/default-poster.jpg')}}');">
           <div class="overlay-bg"></div>
         </div>
       @endif
@@ -160,18 +113,7 @@
       <div class="container-fluid">
         @if(isset($movie))
           @php
-          
-            $subtitles = collect();
-            if ($movie->subtitle == 1) {
-              $subtitle_list = explode(',', $movie->subtitle_list);
-              for($i = 0; $i < count($subtitle_list); $i++) {
-                try {
-                  $subtitle = \App\AudioLanguage::find($subtitle_list[$i])->language;
-                  $subtitles->push($subtitle);
-                } catch (Exception $e) {
-                }
-              }
-            }
+           
             $a_languages = collect();
             if ($movie->a_language != null) {
               $a_lan_list = explode(',', $movie->a_language);
@@ -242,27 +184,34 @@
                   <ul>
                     <li>{{$movie->publish_year}}</li>
                      @if($movie->live!=1)
-                    <li>{{$movie->duration}} {{$popover_translations->where('key', 'mins')->first->value->value}}</li>
+                    <li>{{$movie->duration}} {{__('staticwords.mins')}}</li>
                     @endif
                     <li>{{$movie->maturity_rating}}</li>
                      @if($movie->live!=1)
-                    <li>{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$movie->rating}}</li>
+                    <li>{{__('staticwords.tmdbrating')}} {{$movie->rating}}</li>
                     @endif
-                    @if($movie->subtitle == 1 && isset($subtitles))
-                      <li>CC</li>
-                      <li>
-                        @for($i = 0; $i < count($subtitles); $i++)
-                          @if($i == count($subtitles)-1)
-                            {{$subtitles[$i]}}
-                          @else
-                            {{$subtitles[$i]}},
-                          @endif
-                        @endfor
-                      </li>
+                     <li>
+                    @if(count($movie->subtitles)>0)
+                    <li>CC</li>
+                      @foreach($movie->subtitles as $key=> $sub)
+                       @if($key == count($movie->subtitles)-1)
+                        {{ $sub['sub_lang'] }}
+                       @else
+                         {{ $sub['sub_lang'] }},
+                       @endif
+                      @endforeach   
+                    @else
+                     {{ __('staticwords.noavailable') }}
                     @endif
+                  </li>
                     <li><i title="views" class="fa fa-eye"></i> {{ views($movie)
                       ->unique()
-                      ->count() }}</li>
+                      ->count() }}
+                    </li>
+                    <li data-toggle="modal" href="#sharemodal">
+                      <i title="Share" class="fa fa-share-alt" aria-hidden="true"></i>
+                    </li>
+
                   </ul>
                 </div>
                    @auth
@@ -273,15 +222,15 @@
                 where('movie_id',$movie->id)->first();
                 $avg_rating=App\UserRating::where('movie_id',$movie->id)->avg('rating');
                 @endphp
-                   <h6>{{$header_translations->where('key', 'average rating') ? $header_translations->where('key', 'average rating')->first->value->value : ''}}  <span style="margin-left: 10px;">{{ number_format($avg_rating, 2) }}</span></h6>
+                   <h6>{{__('staticwords.averagerating')}}  <span style="margin-left: 10px;">{{ number_format($avg_rating, 2) }}</span></h6>
                     {!! Form::open(['method' => 'POST', 'id'=>'formrating', 'action' => 'UserRatingController@store']) !!}
                   <input type="text" hidden="" name="movie_id" value="{{$movie->id}}">
                     <input type="text" hidden="" name="user_id" value="{{$auth->id}}">
                   <input id="rating" name="rating" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" onmouseover="mouseoverrating()" value="{{isset($rating)? $rating->rating: 2}}">
                   <button type="submit" hidden="" id="submitrating"> Submit Rating</button>
                   {!!Form::close()!!} 
-                  <a href="javascript:video(0)" onclick="myrate()">Give Rating</a>
-                  <button onclick="myrate()">Click me</button>
+                 {{--  <a href="javascript:video(0)" onclick="myrate()">Give Rating</a>
+                  <button onclick="myrate()">Click me</button> --}}
                   @endif
                  @endauth
                 <p>
@@ -291,136 +240,206 @@
               <div class="screen-casting-dtl">
                 <ul class="casting-headers">
                   @if($movie->live!=1)
-                  <li>{{$home_translations->where('key', 'directors')->first->value->value}}</li>
-                  <li>{{$home_translations->where('key', 'starring')->first->value->value}}</li>
-                  @endif
-                  <li>{{$home_translations->where('key', 'genres')->first->value->value}}</li>
-                  <li>{{$popover_translations->where('key', 'subtitles')->first->value->value}}</li>
-                  <li>{{$home_translations->where('key', 'audio languages')->first->value->value}}</li>
-                </ul>
-                <ul class="casting-dtl">
-                   @if($movie->live!=1)
-                  <li>
-                    @if (count($directors) > 0)
-                      @for($i = 0; $i < count($directors); $i++)
-                        @if($i == count($directors)-1)
-                          <a href="{{url('video/detail/director_search', trim($directors[$i]))}}">{{$directors[$i]}}</a>
+                  <li>{{__('staticwords.directors')}}
+                      <span class="categories-count">
+                        @if (count($directors) > 0)
+                          @for($i = 0; $i < count($directors); $i++)
+                            @if($i == count($directors)-1)
+                              <a href="{{url('video/detail/director_search', trim($directors[$i]))}}">{{$directors[$i]}}</a>
+                            @else
+                              <a href="{{url('video/detail/director_search', trim($directors[$i]))}}">{{$directors[$i]}}</a>,
+                            @endif
+                          @endfor
                         @else
-                          <a href="{{url('video/detail/director_search', trim($directors[$i]))}}">{{$directors[$i]}}</a>,
+                          -
                         @endif
-                      @endfor
-                    @else
-                      -
-                    @endif
+                      </span>
                   </li>
-                  <li>
-                    @if (count($actors) > 0)
-                      @for($i = 0; $i < count($actors); $i++)
-                        @if($i == count($actors)-1)
-                          <a href="{{url('video/detail/actor_search', trim($actors[$i]))}}">{{$actors[$i]}}</a>
+                  <li>{{__('staticwords.starring')}}
+                      <span class="categories-count">
+                         @if (count($actors) > 0)
+                          @for($i = 0; $i < count($actors); $i++)
+                            @if($i == count($actors)-1)
+                              <a href="{{url('video/detail/actor_search', trim($actors[$i]))}}">{{$actors[$i]}}</a>
+                            @else
+                              <a href="{{url('video/detail/actor_search', trim($actors[$i]))}}">{{$actors[$i]}}</a>,
+                            @endif
+                          @endfor
                         @else
-                          <a href="{{url('video/detail/actor_search', trim($actors[$i]))}}">{{$actors[$i]}}</a>,
+                          -
                         @endif
-                      @endfor
-                    @else
-                      -
-                    @endif
+                      </span>
                   </li>
                   @endif
-                  <li>
-                    @if (count($genres) > 0)
-                      @for($i = 0; $i < count($genres); $i++)
-                        @if($i == count($genres)-1)
-                          <a href="{{url('video/detail/genre_search', trim($genres[$i]))}}">{{$genres[$i]}}</a>
+                  <li>{{__('staticwords.genres')}}
+                      <span class="categories-count">
+                        @if (count($genres) > 0)
+                          @for($i = 0; $i < count($genres); $i++)
+                            @if($i == count($genres)-1)
+                              <a href="{{url('video/detail/genre_search', trim($genres[$i]))}}">{{$genres[$i]}}</a>
+                            @else
+                              <a href="{{url('video/detail/genre_search', trim($genres[$i]))}}">{{$genres[$i]}}</a>,
+                            @endif
+                          @endfor
                         @else
-                          <a href="{{url('video/detail/genre_search', trim($genres[$i]))}}">{{$genres[$i]}}</a>,
+                          -
                         @endif
-                      @endfor
-                    @else
-                      -
-                    @endif
+                      </span>
                   </li>
-                  <li>
-                    @if (count($subtitles) > 0)
-                      @if($movie->subtitle == 1 && isset($subtitles))
-                        @for($i = 0; $i < count($subtitles); $i++)
-                          @if($i == count($subtitles)-1)
-                            {{$subtitles[$i]}}
-                          @else
-                            {{$subtitles[$i]}},
-                          @endif
-                        @endfor
-                      @else
-                        -
-                      @endif
-                    @else
-                      -
-                    @endif
+                  <li>{{__('staticwords.subtitles')}}
+                      <span class="categories-count">
+                        @if(count($movie->subtitles)>0)
+                          @foreach($movie->subtitles as $key=> $sub)
+                           @if($key == count($movie->subtitles)-1)
+                            {{ $sub['sub_lang'] }}
+                           @else
+                             {{ $sub['sub_lang'] }},
+                           @endif
+                          @endforeach   
+                        @else
+                         {{ __('staticwords.noavailable') }}
+                        @endif
+                      </span>
                   </li>
-                  <li>
-                    @if (count($a_languages) > 0)
-                      @if($movie->a_language != null && isset($a_languages))
-                        @for($i = 0; $i < count($a_languages); $i++)
-                          @if($i == count($a_languages)-1)
-                            {{$a_languages[$i]}}
+                  <li>{{__('staticwords.audiolanguage')}}
+                     <span class="categories-count"> 
+                       @if (count($a_languages) > 0)
+                          @if($movie->a_language != null && isset($a_languages))
+                            @for($i = 0; $i < count($a_languages); $i++)
+                              @if($i == count($a_languages)-1)
+                                {{$a_languages[$i]}}
+                              @else
+                                {{$a_languages[$i]}},
+                              @endif
+                            @endfor
                           @else
-                            {{$a_languages[$i]}},
+                            -
                           @endif
-                        @endfor
-                      @else
-                        -
-                      @endif
-                    @else
-                      -
-                    @endif
+                        @else
+                          -
+                        @endif
+                     </span>
                   </li>
                 </ul>
+          
               </div>
-              <div id="wishlistelement" class="screen-play-btn-block">
-   @if($subscribed==1)
-     @if($age>=str_replace('+', '',$movie->maturity_rating))
-               @if($movie->video_link['iframeurl'] != null)
-                
-                 <a href="#" onclick="playoniframe('{{ $movie->video_link['iframeurl'] }}','{{ $movie->id }}','movie')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                 </a>
-       
-                @else
+              <div id="wishlistelement" class="screen-play-btn-block ">
+                @if($subscribed==1 && $auth)
+                  @if($movie->maturity_rating == 'all age' || $age>=str_replace('+', '',$movie->maturity_rating))
+                    @if($movie->video_link['iframeurl'] != null)
+                      
+                      <a href="{{route('watchmovieiframe',$movie->id)}}"class="btn btn-play iframe"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                       </a>
+             
+                    @else
 
-                  <a href="{{route('watchmovie',$movie->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                  </a>
-                  
-                @endif
-                @else
-
-                  <a onclick="myage({{$age}})"  class=" btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                  </a>
-                  
-                @endif
-                
-                <div class="btn-group btn-block">
-                  @if($movie->trailer_url != null || $movie->trailer_url != '')
-                    <a href="{{ route('watchTrailer',$movie->id)  }}" class="iframe btn btn-default">{{$popover_translations->where('key', 'watch trailer')->first->value->value}}</a>
-                  @endif
-                   @if($config->download ==1 && $movie->video_link['upload_video']!='')
-                  <a href="{{route('movie.download',$movie->video_link['upload_video'])}}" class="btn-default"><i class="fa fa-download" aria-hidden="true"></i> {{$popover_translations->where('key', 'Download')->first->value->value}}</a>
-                   @endif
-                  @if (isset($wishlist_check->added))
-                    <a onclick="addWish({{$movie->id}},'{{$movie->type}}')" class="addwishlistbtn{{$movie->id}}{{$movie->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
+                      <a href="{{route('watchmovie',$movie->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                        </a>
+                        
+                    @endif
                   @else
-                    <a onclick="addWish({{$movie->id}},'{{$movie->type}}')" class="addwishlistbtn{{$movie->id}}{{$movie->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}</a>
+
+                    <a onclick="myage({{$age}})"  class=" btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                    </a>
+                    
                   @endif
-                   @endif
-                </div>
+                  @if($movie->trailer_url != null || $movie->trailer_url != '')
+                    <a href="{{ route('watchTrailer',$movie->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                  @endif
+                @else
+                   @if($movie->trailer_url != null || $movie->trailer_url != '')
+                    <a href="{{ route('guestwatchtrailer',$movie->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                  @endif
+                @endif
+                @if($catlog ==0 && $subscribed ==1)
+                  @if (isset($wishlist_check->added))
+                    <a onclick="addWish({{$movie->id}},'{{$movie->type}}')" class="addwishlistbtn{{$movie->id}}{{$movie->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                  @else
+                    <a onclick="addWish({{$movie->id}},'{{$movie->type}}')" class="addwishlistbtn{{$movie->id}}{{$movie->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                  @endif
+                @elseif($catlog ==1 && $auth)
+                  @if (isset($wishlist_check->added))
+                    <a onclick="addWish({{$movie->id}},'{{$movie->type}}')" class="addwishlistbtn{{$movie->id}}{{$movie->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                  @else
+                    <a onclick="addWish({{$movie->id}},'{{$movie->type}}')" class="addwishlistbtn{{$movie->id}}{{$movie->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                  @endif
+                @endif
                  
+                @php
+                 $mlc = array();
+                  if(isset($movie->multilinks)){
+                    foreach ($movie->multilinks as $key => $value) {
+                       if($value->download == 1){
+                        $mlc[] = 1;
+                       }else{
+                          $mlc[] = 0;
+                       }
+                    }
+                  }
+                @endphp
+
+                @if(isset($movie->multilinks) && count($movie->multilinks) > 0 )   
+                  @if(Auth::user() && $subscribed==1)
+                  @if(in_array(1, $mlc))
+                     <button type="button" class="btn btn-default" data-toggle="collapse" data-target="#downloadmovie">{{__('staticwords.download')}}</button>
+
+                    <div id="downloadmovie" class="collapse">
+                      <table  class=" text-center table table-bordered table-responsive detail-multiple-link">
+                        <thead>
+                          <th align="center">#</th>
+                          <th align="center">{{__('staticwords.download')}}</th>
+                          <th align="center">{{__('staticwords.quality')}}</th>
+                          <th align="center">{{__('staticwords.size')}}</th>
+                          <th align="center">{{__('staticwords.language')}}</th>
+                          <th align="center">{{__('staticwords.clicks')}}</th>
+                          <th align="center">{{__('staticwords.user')}}</th>
+                          <th align="center">{{__('staticwords.added')}}</th>
+                        </thead>
+                   
+                        <tbody>
+                          
+                         @foreach($movie->multilinks as $key=> $link)
+                          
+                            @if($link->download == 1)
+                              <tr>
+
+                                @php
+                              
+                                  $lang = App\Audiolanguage::where('id',$link->language)->first();
+                                @endphp
+
+                                <td align="center">{{$key+1}}</td>
+                                <td align="center"><a data-id="{{$link->id}}" class="download btn btn-sm btn-success" title="{{__('staticwords.download')}}" href="{{$link->url}}" ><i class="fa fa-download"></i></td>
+                                <td align="center">{{$link->quality}}</td>
+                                <td align="center">{{$link->size}}</td>
+                                <td align="center">@if(isset($lang)){{$lang->language}}@endif</td>
+                                <td>{{$link->clicks}}</td>
+                                <td align="center">{{$link->movie->user->name}}</td>
+                                <td align="center">{{date('Y-m-d',strtotime($link->created_at))}}</td>
+                               
+                                
+                              </tr>
+
+                            @endif
+
+                        @endforeach
+                        
+                        </tbody>
+                        
+                      </table>
+                    </div>
+                  @endif
+                  @endif
+                @endif
  
               </div>
             </div>
             <div class="col-md-4">
               <div id="poster-thumbnail" class="poster-thumbnail-block">
                 @if($movie->thumbnail != null || $movie->thumbnail != '')
-                  <img src="{{asset('images/movies/thumbnails/'.$movie->thumbnail)}}" class="img-responsive" alt="genre-image">
+                  <img src="{{url('images/movies/thumbnails/'.$movie->thumbnail)}}" class="img-responsive" alt="genre-image">
                 @else
-                  <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                  <img src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
                 @endif
               </div>
             </div>
@@ -489,7 +508,7 @@
                 <select style="width:20%;-webkit-box-shadow: none;box-shadow: none;color: #FFF;background: #000;display: block;clear: both;border: 1px solid #666;border-radius: 0;" name="" id="selectseason" class="form-control">
                   @foreach($season->tvseries->seasons as $allseason)
 
-                    <option {{ $season->id == $allseason->id ? "selected" : "" }} value="{{ $allseason->id }}">Season {{ $allseason->season_no }}</option>
+                    <option {{ $season->id == $allseason->id ? "selected" : "" }} value="{{ $allseason->id }}">{{__('staticwords.season')}}{{ $allseason->season_no }}</option>
                   
                   @endforeach
                 </select>
@@ -497,23 +516,48 @@
                 <div class="imdb-ratings-block">
                   <ul>
                     <li>{{$season->publish_year}}</li>
-                    <li>{{$season->season_no}} {{$popover_translations->where('key', 'season')->first->value->value}}</li>
+                    <li>{{$season->season_no}} {{__('staticwords.season')}}</li>
                     <li>{{$season->tvseries->age_req}}</li>
-                    <li>{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$season->tvseries->rating}}</li>
+                    <li>{{__('staticwords.tmdbrating')}} {{$season->tvseries->rating}}</li>
                     @if(isset($subtitles))
                       <li>CC</li>
-                      <li>
-                        @for($i = 0; $i < count($subtitles); $i++)
-                          @if($i == count($subtitles)-1)
-                            {{$subtitles[$i]}}
+                     <li>
+                    @if(count($season->episodes)>0)
+                      @php
+                        $subtitles = collect();
+                        foreach ($season->episodes as $e) {
+                            foreach ($e->subtitles as $sub) {
+                                $subtitles->push($sub->sub_lang);
+                            }
+                        }
+
+                        $subtitles = $subtitles->unique();
+                      @endphp
+
+                      @foreach($subtitles as $key=> $sub)
+                        @if(count($subtitles)>0)
+                          @if($key == count($subtitles)-1)
+                                {{ $sub }}
                           @else
-                            {{$subtitles[$i]}},
+                                  {{ $sub }},
                           @endif
-                        @endfor
-                      </li>
+                        @else
+                           {{ __('staticwords.noavailable') }}
+                        @endif
+                      @endforeach
+                    @else
+                     {{ __('staticwords.noavailable') }}
+                    @endif
+                  </li>
                       <li> <li><i title="views" class="fa fa-eye"></i> {{ views($season)
                         ->unique()
                         ->count() }}</li></li>
+
+                      <li data-toggle="modal" href="#sharemodal">
+                        
+                        <i title="Share" class="fa fa-share-alt" aria-hidden="true"></i>
+
+                      </li>
                     @endif
                   </ul>
 
@@ -526,7 +570,7 @@
                 where('tv_id',$season->tvseries->id)->first();
                 $avg_rating=App\UserRating::where('tv_id',$season->tvseries->id)->avg('rating');
                 @endphp
-                  <h6>{{$header_translations->where('key', 'average rating') ? $header_translations->where('key', 'average rating')->first->value->value : ''}}  <span style="margin-left: 10px;"> {{ number_format($avg_rating, 2) }}</span></h6>
+                  <h6>{{__('staticwords.averagerating')}}  <span style="margin-left: 10px;"> {{ number_format($avg_rating, 2) }}</span></h6>
                     {!! Form::open(['method' => 'POST', 'id'=>'formratingtv', 'action' => 'UserRatingController@store']) !!}
                   <input type="text" hidden="" name="tv_id" 
                   value="{{$season->tvseries->id}}">
@@ -535,8 +579,8 @@
                   value="{{isset($rating)? $rating->rating: 2}}">
                   <button type="submit" hidden="" id="submitrating"> Submit Rating</button>
                   {!!Form::close()!!}
-                  <a href="javascript:video(0)" onclick="myrateTv()">Give Rating</a>
-                  <button onclick="myrateTv()">Click me</button>
+                 {{--  <a href="javascript:video(0)" onclick="myrateTv()">Give Rating</a>
+                  <button onclick="myrateTv()">Click me</button> --}}
                   @endif
                  @endauth
                 <p>
@@ -549,12 +593,54 @@
               </div>
               <div class="screen-casting-dtl">
                 <ul class="casting-headers">
-                  <li>{{$home_translations->where('key', 'starring')->first->value->value}}</li>
-                  <li>{{$home_translations->where('key', 'genres')->first->value->value}}</li>
-                  <li>{{$popover_translations->where('key', 'subtitles')->first->value->value}}</li>
-                  <li>{{$home_translations->where('key', 'audio languages')->first->value->value}}</li>
+                  <li>{{__('staticwords.starring')}}
+                     <span class="categories-count">
+                       @if (count($actors) > 0)
+                        @for($i = 0; $i < count($actors); $i++)
+                          @if($i == count($actors)-1)
+                            <a href="{{url('video/detail/actor_search', trim($actors[$i]))}}">{{$actors[$i]}}</a>
+                          @else
+                            <a href="{{url('video/detail/actor_search', trim($actors[$i]))}}">{{$actors[$i]}}</a>,
+                          @endif
+                        @endfor
+                      @else
+                        -
+                      @endif
+                     </span>
+                  </li>
+                  <li>{{__('staticwords.genres')}}
+                     <span class="categories-count">
+                      @if (count($genres) > 0)
+                        @for($i = 0; $i < count($genres); $i++)
+                          @if($i == count($genres)-1)
+                            <a href="{{url('video/detail/genre_search', trim($genres[$i]))}}">{{$genres[$i]}}</a>
+                          @else
+                            <a href="{{url('video/detail/genre_search', trim($genres[$i]))}}">{{$genres[$i]}}</a>,
+                          @endif
+                        @endfor
+                      @else
+                        -
+                      @endif
+                     </span>
+                  </li>
+                  
+                  <li>{{__('staticwords.audiolanguage')}}
+                     <span class="categories-count">
+                       @if($season->a_language != null && isset($a_languages))
+                        @for($i = 0; $i < count($a_languages); $i++)
+                          @if($i == count($a_languages)-1)
+                            {{$a_languages[$i]}}
+                          @else
+                            {{$a_languages[$i]}},
+                          @endif
+                        @endfor
+                      @else
+                        
+                      @endif
+                     </span>
+                  </li>
                 </ul>
-                <ul class="casting-dtl">
+                <!-- <ul class="casting-dtl">
                   <li>
                     @if (count($actors) > 0)
                       @for($i = 0; $i < count($actors); $i++)
@@ -582,17 +668,11 @@
                     @endif
                   </li>
                   <li>
-                    @if (count($subtitles) > 0)
-                      @for($i = 0; $i < count($subtitles); $i++)
-                        @if($i == count($subtitles)-1)
-                          {{$subtitles[$i]}}
-                        @else
-                          {{$subtitles[$i]}},
-                        @endif
-                      @endfor
-                    @else
-                      -
-                    @endif
+                     <li>
+                     
+                  
+                   
+                  </li>
                   </li>
                   <li>
                     @if($season->a_language != null && isset($a_languages))
@@ -607,45 +687,48 @@
                       
                     @endif
                   </li>
-                </ul>
+                </ul> -->
               </div>
-                @if($subscribed==1)
+               
               <div class="screen-play-btn-block">
-                @if(isset($season->episodes[0]))
-                  @if($age>=str_replace('+', '',$season->tvseries->age_req))
-                @if($season->episodes[0]->video_link['iframeurl'] !="")
-                   
-                  <a href="#" onclick="playoniframe('{{ $season->episodes[0]->video_link['iframeurl'] }}','{{ $season->tvseries->id }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                    </a>
-                            @else
-                <a href="{{ route('watchTvShow',$season->id)  }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                @endif
-                @else
-                  <a  onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                @endif
-                @endif
-                 @if($subscribed==1)
-                <div id="wishlistelement" class="btn-group btn-block">
-                  <div>
-                    @if (isset($wishlist_check->added))
-                      <a onclick="addWish({{$season->id}},'{{$season->type}}')" class="addwishlistbtn{{$season->id}}{{$season->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
+                @if($subscribed==1 && $auth)
+                  @if(isset($season->episodes[0]))
+                    @if($season->tvseries->age_req =='all age' || $age>=str_replace('+', '',$season->tvseries->age_req))
+                      @if($season->episodes[0]->video_link['iframeurl'] !="")
+                       
+                        <a href="#" onclick="playoniframe('{{ $season->episodes[0]->video_link['iframeurl'] }}','{{ $season->tvseries->id }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                        </a>
+                      @else
+                        <a href="{{ route('watchTvShow',$season->id)  }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
+                      @endif
                     @else
-                      <a onclick="addWish({{$season->id}},'{{$season->type}}')" class="addwishlistbtn{{$season->id}}{{$season->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}</a>
+                      <a  onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
                     @endif
-                  </div>
-                </div>
+                  @endif
+                @endif
+                @if($catlog ==1 && $subscribed==1)
+                  @if (isset($wishlist_check->added))
+                    <a onclick="addWish({{$season->id}},'{{$season->type}}')" class="addwishlistbtn{{$season->id}}{{$season->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                  @else
+                    <a onclick="addWish({{$season->id}},'{{$season->type}}')" class="addwishlistbtn{{$season->id}}{{$season->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                  @endif
+                @elseif($catlog ==1 && $auth)
+                  @if (isset($wishlist_check->added))
+                    <a onclick="addWish({{$season->id}},'{{$season->type}}')" class="addwishlistbtn{{$season->id}}{{$season->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                  @else
+                    <a onclick="addWish({{$season->id}},'{{$season->type}}')" class="addwishlistbtn{{$season->id}}{{$season->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                  @endif
                 @endif
               </div>
-              @endif
             </div>
             <div class="col-md-4">
               <div id="poster-thumbnail" class="poster-thumbnail-block">
                 @if($season->thumbnail != null)
-                  <img src="{{asset('images/tvseries/thumbnails/'.$season->thumbnail)}}" class="img-responsive" alt="genre-image">
+                  <img src="{{url('images/tvseries/thumbnails/'.$season->thumbnail)}}" class="img-responsive" alt="genre-image">
                 @elseif($season->tvseries->thumbnail != null)
-                  <img src="{{asset('images/tvseries/thumbnails/'.$season->tvseries->thumbnail)}}" class="img-responsive" alt="genre-image">
+                  <img src="{{url('images/tvseries/thumbnails/'.$season->tvseries->thumbnail)}}" class="img-responsive" alt="genre-image">
                 @else
-                  <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                  <img src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
                 @endif
               </div>
             </div>
@@ -657,7 +740,7 @@
     @if(isset($movie->movie_series) && $movie->series != 1)
       @if(count($movie->movie_series) > 0)
         <div class="container-fluid movie-series-section search-section">
-          <h5 class="movie-series-heading">Series {{count($movie->movie_series)}}</h5>
+          <h5 class="movie-series-heading">{{count($movie->movie_series)}} Series </h5>
           <div>
             @foreach($movie->movie_series as $series)
               @php
@@ -675,37 +758,136 @@
                   <div class="col-sm-3">
                     <div class="movie-series-img">
                       @if($single_series->thumbnail != null || $single_series->thumbnail != '')
-                        <img src="{{asset('images/movies/thumbnails/'.$single_series->thumbnail)}}" class="img-responsive" alt="genre-image">
+                        <img src="{{url('images/movies/thumbnails/'.$single_series->thumbnail)}}" class="img-responsive" alt="genre-image">
                       @endif
                     </div>
                   </div>
                   <div class="col-sm-7 pad-0">
-                    <h5 class="movie-series-heading movie-series-name"><a href="{{url('movie/detail', $single_series->id)}}">{{$single_series->title}}</h5>
+                    @if($auth && $subscribed ==1)
+                      <h5 class="movie-series-heading movie-series-name"><a href="{{url('movie/detail', $single_series->slug)}}">{{$single_series->title}}</h5>
+                    @else
+                      <h5 class="movie-series-heading movie-series-name"><a href="{{url('movie/guest/detail', $single_series->slug)}}">{{$single_series->title}}</h5>
+                    @endif
                     <ul class="movie-series-des-list">
-                      <li>{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$single_series->rating}}</li>
-                      <li>{{$single_series->duration}} {{$popover_translations->where('key', 'mins')->first->value->value}}</li>
+                      <li>{{__('staticwords.tmdbrating')}} {{$single_series->rating}}</li>
+                      <li>{{$single_series->duration}} {{__('staticwords.mins')}}</li>
                       <li>{{$single_series->publish_year}}</li>
                       <li>{{$single_series->maturity_rating}}</li>
                       @if($single_series->subtitle == 1)
-                        <li>{{$popover_translations->where('key', 'subtitles')->first->value->value}}</li>
+                        <li>{{__('staticwords.subtitles')}}</li>
                       @endif
                     </ul>
                     <p>
                       {{$single_series->detail}}
                     </p>
-                     @if($subscribed==1)
+                     
                     <div class="des-btn-block des-in-list">
-                      <a href="{{ route('watchmovie',$single_series->id)  }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                      @if($single_series->trailer_url != null || $single_series->trailer_url != '')
-                        <a href="{{ route('watchTrailer',$movie->id)  }}" class="iframe btn-default">{{$popover_translations->where('key', 'watch trailer')->first->value->value}}</a>
-                      @endif
+                    @if($subscribed==1 && $auth)
+                      @if($single_series->maturity_rating == 'all age' || $age>=str_replace('+', '',$single_series->maturity_rating))
+                        @if($single_series->video_link['iframeurl'] != null)
+                          
+                          <a href="{{route('watchmovieiframe',$single_series->id)}}"class="btn btn-play iframe"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                           </a>
+                 
+                        @else
 
-                      @if (isset($wishlist_check->added))
-                        <a onclick="addWish({{$single_series->id}},'{{$single_series->type}}')" class="addwishlistbtn{{$single_series->id}}{{$single_series->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
+                          <a href="{{route('watchmovie',$single_series->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                            </a>
+                            
+                        @endif
                       @else
-                        <a onclick="addWish({{$single_series->id}},'{{$single_series->type}}')" class="addwishlistbtn{{$single_series->id}}{{$single_series->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}</a>
+
+                        <a onclick="myage({{$age}})"  class=" btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                        </a>
+                        
                       @endif
-                    </div>
+                      @if($single_series->trailer_url != null || $single_series->trailer_url != '')
+                        <a href="{{ route('watchTrailer',$single_series->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                      @endif
+                    @else
+                       @if($single_series->trailer_url != null || $single_series->trailer_url != '')
+                        <a href="{{ route('guestwatchtrailer',$single_series->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                      @endif
+                    @endif
+                    @if($catlog ==0 && $subscribed ==1)
+                      @if (isset($wishlist_check->added))
+                        <a onclick="addWish({{$single_series->id}},'{{$single_series->type}}')" class="addwishlistbtn{{$single_series->id}}{{$single_series->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                      @else
+                        <a onclick="addWish({{$single_series->id}},'{{$single_series->type}}')" class="addwishlistbtn{{$single_series->id}}{{$single_series->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                      @endif
+                    @elseif($catlog ==1 && $auth)
+                      @if (isset($wishlist_check->added))
+                        <a onclick="addWish({{$single_series->id}},'{{$single_series->type}}')" class="addwishlistbtn{{$single_series->id}}{{$single_series->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                      @else
+                        <a onclick="addWish({{$single_series->id}},'{{$single_series->type}}')" class="addwishlistbtn{{$single_series->id}}{{$single_series->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                      @endif
+                    @endif
+                     
+                    @php
+                     $mlc = array();
+                      if(isset($single_series->multilinks)){
+                        foreach ($single_series->multilinks as $key => $value) {
+                           if($value->download == 1){
+                            $mlc[] = 1;
+                           }else{
+                              $mlc[] = 0;
+                           }
+                        }
+                      }
+                    @endphp
+
+                    @if(isset($single_series->multilinks) && count($single_series->multilinks) > 0 )   
+                      @if(Auth::user() && $subscribed==1)
+                        @if(in_array(1, $mlc))
+                           <button type="button" class="btn btn-sm btn-default" data-toggle="collapse" data-target="#downloadmovie">{{__('staticwords.download')}}</button>
+
+                          <div id="downloadmovie" class="collapse">
+                            <table  class=" text-center table table-bordered table-responsive detail-multiple-link">
+                              <thead>
+                                <th align="center">#</th>
+                                <th align="center">{{__('staticwords.download')}}</th>
+                                <th align="center">{{__('staticwords.quality')}}</th>
+                                <th align="center">{{__('staticwords.size')}}</th>
+                                <th align="center">{{__('staticwords.language')}}</th>
+                                <th align="center">{{__('staticwords.clicks')}}</th>
+                                <th align="center">{{__('staticwords.user')}}</th>
+                                <th align="center">{{__('staticwords.added')}}</th>
+                              </thead>
+                         
+                              <tbody>
+                                
+                               @foreach($single_series->multilinks as $key=> $link)
+                                
+                                  @if($link->download == 1)
+                                    <tr>
+
+                                      @php
+                                    
+                                        $lang = App\Audiolanguage::where('id',$link->language)->first();
+                                      @endphp
+
+                                      <td align="center">{{$key+1}}</td>
+                                      <td align="center"><a data-id="{{$link->id}}" class="download btn btn-sm btn-success" title="{{__('staticwords.download')}}" href="{{$link->url}}" ><i class="fa fa-download"></i></td>
+                                      <td align="center">{{$link->quality}}</td>
+                                      <td align="center">{{$link->size}}</td>
+                                      <td align="center">@if(isset($lang)){{$lang->language}}@endif</td>
+                                      <td>{{$link->clicks}}</td>
+                                      <td align="center">{{$link->movie->user->name}}</td>
+                                      <td align="center">{{date('Y-m-d',strtotime($link->created_at))}}</td>
+                                     
+                                      
+                                    </tr>
+
+                                  @endif
+
+                                @endforeach
+                              
+                              </tbody>
+                              
+                            </table>
+                          </div>
+                        @endif
+                      @endif
                     @endif
                   </div>
                 </div>
@@ -718,7 +900,7 @@
     @if(isset($filter_series) && $movie->series == 1)
       @if(count($filter_series) > 0)
         <div class="container-fluid movie-series-section search-section">
-          <h5 class="movie-series-heading">{{$home_translations->where('key', 'series')->first->value->value}} {{count($filter_series)}}</h5>
+          <h5 class="movie-series-heading">SEries{{count($filter_series)}}</h5>
           <div>
             @foreach($filter_series as $key => $series)
               @php
@@ -734,37 +916,138 @@
                   <div class="col-sm-3">
                     <div class="movie-series-img">
                       @if($series->thumbnail != null)
-                        <img src="{{asset('images/movies/thumbnails/'.$series->thumbnail)}}" class="img-responsive" alt="genre-image">
+                        <img src="{{url('images/movies/thumbnails/'.$series->thumbnail)}}" class="img-responsive" alt="genre-image">
                       @endif
                     </div>
                   </div>
                   <div class="col-sm-7 pad-0">
-                    <h5 class="movie-series-heading movie-series-name"><a href="{{url('movie/detail', $series->id)}}">{{$series->title}}</a></h5>
+                    @if($auth && $subscribed ==1)
+                      <h5 class="movie-series-heading movie-series-name"><a href="{{url('movie/detail', $series->slug)}}">{{$series->title}}</a></h5>
+                    @else
+                      <h5 class="movie-series-heading movie-series-name"><a href="{{url('movie/guest/detail', $series->slug)}}">{{$series->title}}</a></h5>
+                    @endif
                     <ul class="movie-series-des-list">
-                      <li>{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$series->rating}}</li>
-                      <li>{{$series->duration}} {{$popover_translations->where('key', 'mins')->first->value->value}}</li>
+                      <li>{{__('staticwords.tmdbrating')}} {{$series->rating}}</li>
+                      <li>{{$series->duration}} {{__('staticwords.mins')}}</li>
                       <li>{{$series->publish_year}}</li>
                       <li>{{$series->maturity_rating}}</li>
                       @if($series->subtitle == 1)
-                        <li>{{$popover_translations->where('key', 'subtitles')->first->value->value}}</li>
+                        <li>{{__('staticwords.subtitles')}}</li>
                       @endif
                     </ul>
                     <p>
                       {{$series->detail}}
                     </p>
-                     @if($subscribed==1)
+                     
                     <div class="des-btn-block des-in-list">
-                      <a href="{{ route('watchmovie',$series->id)  }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                      @if($series->trailer_url != null || $series->trailer_url != '')
-                        <a href="{{ route('watchTrailer',$series->id)  }}" class="iframe btn-default">{{$popover_translations->where('key', 'watch trailer')->first->value->value}}</a>
-                      @endif
-                      @if (isset($wishlist_check->added))
-                        <a onclick="addWish({{$series->id}},'{{$series->type}}')" class="addwishlistbtn{{$series->id}}{{$series->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
+                      @if($subscribed==1 && $auth)
+                        @if($series->maturity_rating == 'all age' || $age>=str_replace('+', '',$series->maturity_rating))
+                          @if($series->video_link['iframeurl'] != null)
+                            
+                            <a href="{{route('watchmovieiframe',$series->id)}}"class="btn btn-play iframe"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                             </a>
+                   
+                          @else
+
+                            <a href="{{route('watchmovie',$series->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                              </a>
+                              
+                          @endif
+                        @else
+
+                          <a onclick="myage({{$age}})"  class=" btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                          </a>
+                          
+                        @endif
+                        @if($series->trailer_url != null || $series->trailer_url != '')
+                          <a href="{{ route('watchTrailer',$series->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                        @endif
                       @else
-                        <a onclick="addWish({{$series->id}},'{{$series->type}}')" class="addwishlistbtn{{$series->id}}{{$series->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}</a>
+                         @if($series->trailer_url != null || $series->trailer_url != '')
+                          <a href="{{ route('guestwatchtrailer',$series->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                        @endif
+                      @endif
+                      @if($catlog ==0 && $subscribed ==1)
+                        @if (isset($wishlist_check->added))
+                          <a onclick="addWish({{$series->id}},'{{$series->type}}')" class="addwishlistbtn{{$series->id}}{{$series->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                        @else
+                          <a onclick="addWish({{$series->id}},'{{$series->type}}')" class="addwishlistbtn{{$series->id}}{{$series->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                        @endif
+                      @elseif($catlog ==1 && $auth)
+                        @if (isset($wishlist_check->added))
+                          <a onclick="addWish({{$series->id}},'{{$series->type}}')" class="addwishlistbtn{{$series->id}}{{$series->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                        @else
+                          <a onclick="addWish({{$series->id}},'{{$series->type}}')" class="addwishlistbtn{{$single_series->id}}{{$series->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                        @endif
+                      @endif
+                       
+                      @php
+                       $mlc = array();
+                        if(isset($series->multilinks)){
+                          foreach ($series->multilinks as $key => $value) {
+                             if($value->download == 1){
+                              $mlc[] = 1;
+                             }else{
+                                $mlc[] = 0;
+                             }
+                          }
+                        }
+                      @endphp
+
+                      @if(isset($series->multilinks) && count($series->multilinks) > 0 )   
+                        @if(Auth::user() && $subscribed==1)
+                          @if(in_array(1, $mlc))
+                             <button type="button" class="btn btn-sm btn-default" data-toggle="collapse" data-target="#downloadmovie">{{__('staticwords.download')}}</button>
+
+                            <div id="downloadmovie" class="collapse">
+                              <table  class=" text-center table table-bordered table-responsive detail-multiple-link">
+                                <thead>
+                                  <th align="center">#</th>
+                                  <th align="center">{{__('staticwords.download')}}</th>
+                                  <th align="center">{{__('staticwords.quality')}}</th>
+                                  <th align="center">{{__('staticwords.size')}}</th>
+                                  <th align="center">{{__('staticwords.language')}}</th>
+                                  <th align="center">{{__('staticwords.clicks')}}</th>
+                                  <th align="center">{{__('staticwords.user')}}</th>
+                                  <th align="center">{{__('staticwords.added')}}</th>
+                                </thead>
+                           
+                                <tbody>
+                                  
+                                 @foreach($series->multilinks as $key=> $link)
+                                  
+                                    @if($link->download == 1)
+                                      <tr>
+
+                                        @php
+                                      
+                                          $lang = App\Audiolanguage::where('id',$link->language)->first();
+                                        @endphp
+
+                                        <td align="center">{{$key+1}}</td>
+                                        <td align="center"><a data-id="{{$link->id}}" class="download btn btn-sm btn-success" title="{{__('staticwords.download')}}" href="{{$link->url}}" ><i class="fa fa-download"></i></td>
+                                        <td align="center">{{$link->quality}}</td>
+                                        <td align="center">{{$link->size}}</td>
+                                        <td align="center">@if(isset($lang)){{$lang->language}}@endif</td>
+                                        <td>{{$link->clicks}}</td>
+                                        <td align="center">{{$link->movie->user->name}}</td>
+                                        <td align="center">{{date('Y-m-d',strtotime($link->created_at))}}</td>
+                                       
+                                        
+                                      </tr>
+
+                                    @endif
+
+                                  @endforeach
+                                
+                                </tbody>
+                                
+                              </table>
+                            </div>
+                          @endif
+                        @endif
                       @endif
                     </div>
-                    @endif
                   </div>
                 </div>
               </div>
@@ -773,233 +1056,180 @@
         </div>
       @endif
     @endif
+    <br/>
     <!-- end movie series -->
-      {{-- comments section start from here --}}
-   @if(isset($season))
- @if($configs->comments==1)
-    <div class="container"  style="margin-top: 20px;">
-   <!-- Nav tabs -->
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#showcomment" aria-controls="showcomment" role="tab" data-toggle="tab">Comments</a></li>
-    <li role="presentation"><a href="#postcomment" aria-controls="postcomment" role="tab" data-toggle="tab">Post Comment</a></li>
-  </ul>
-  <br/>
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane fade in active" id="showcomment">
-      <h4 class="title" style="color:#B1B1B1;"><span class="glyphicon glyphicon-comment"></span> {{$season->tvseries->comments->count()}} Comments </h4> <br/>
-         
-          @foreach ($season->tvseries->comments as $comment)
 
-              <div class="comment">
-                <div class="author-info">
-                  <img src="{{"https://www.gravatar.com/avatar/" . md5(strtolower(trim($comment->name))). "?s=50&d=monsterid" }}" class="author-image">
-                  <div class="author-name">
-                    <h4>{{$comment->name}}</h4>
-                    <p class="author-time">{{date('F dS, Y - g:i a',strtotime($comment->created_at))}}</p>
-                  </div>
-                </div>
-
-                <div class="comment-content">
-                 {{$comment->comment}}
-                </div>
-              </div>
-              <div>
-                  <button type="button" class="btn-danger btn-floating pull-right" data-toggle="modal" data-target="#{{$comment->id}}deleteModal">Reply </button>
-                    <!-- Modal -->
-                    <br/>
-                    <div id="{{$comment->id}}deleteModal" class="delete-modal modal fade" role="dialog" style="margin-top: 20px;">
-                      <div class="modal-dialog modal-md" style="margin-top:70px;">
-                        <!-- Modal content-->
-                        <div class="modal-content">
-                          <div class="modal-header">
-                             
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            <div class="delete-icon"></div>
-                           <h4 style="color:#B1B1B1;"> Reply for {{$comment->name}}</h4>
-                          </div>
-                          <div class="modal-body text-center">
-                             
-                              <form action="{{route('tv.comment.reply', ['cid' =>$comment->id])}}" method ="POST">
-                                {{ csrf_field() }}
-                              {{Form::label('reply','Your Reply:')}}
-                              {{Form::textarea('reply', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}} 
-                              <br/>
-                                <button type="submit" class="btn btn-danger">Submit</button>
-                           </form>
-                          </div>
-                          <div class="modal-footer">
-                           
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-              </div>
-               @foreach($comment->subcomments as $subcomment)
-
-                  <div class="comment" style="margin-left:50px;">
-                  <div class="author-info">
-                    <img src="{{"https://www.gravatar.com/avatar/" . md5(strtolower(trim($subcomment->name))). "?s=50&d=monsterid" }}" class="author-image">
-                    <div class="author-name">
-                      @php
-                         $name=App\User::where('id',$subcomment->user_id)->first();
-                       @endphp
-                      <h5>{{$name->name}}</h5>
-                      <p class="author-time">{{date('F dS, Y - g:i a',strtotime($subcomment->created_at))}}</p>
-                    </div>
-                  </div>
-
-                  <div class="comment-content">
-                   {{$subcomment->reply}}
-                  </div>
-                </div>
-
-              @endforeach
-             
-              
-
-          @endforeach
-          
-
-    </div>
-    @auth
-    <div role="tabpanel" class="tab-pane fade" id="postcomment">
-        <div style="width: 90%;color:#B1B1B1;" class=" " >
-            <h3>Post Comment:</h3><br/>
-          
-                {{Form::open( ['route' => ['tv.comment.store', $season->tvseries->id], 'method' => 'POST'])}}
-                {{Form::label('name', 'Name:')}}
-                {{Form::text('name', null, ['class' => 'form-control'])}}
-                <br/>
-                {{Form::label('email', 'Email:')}}
-                 {{Form::email('email', null, ['class' => 'form-control'])}}
-                <br/>
-                {{Form::label('comment','Comment:')}}
-                {{Form::textarea('comment', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}}
-                <br/>
-                {{Form::submit('Add Comment', ['class' => 'btn btn-md btn-primary'])}}
-        </div>
-
-    </div>
-    @endauth
-  </div>
-</div>
-@endif
- @endif
     <!-- episodes -->
     @if(isset($season->episodes))
       @if(count($season->episodes) > 0)
         <div class="container-fluid movie-series-section search-section">
-          <h5 class="movie-series-heading">{{$home_translations->where('key', 'episodes')->first->value->value}} {{count($season->episodes)}}</h5>
+          <h5 class="movie-series-heading">{{__('staticwords.episodes')}} {{count($season->episodes)}}</h5>
           <div>
             @foreach($season->episodes as $key => $episode)
               <div class="movie-series-block">
-                <div class="row">
+                <div  class="row">
                   <div class="col-sm-3">
                     <div class="movie-series-img">
                       @if($episode->thumbnail != null)
-                        <img src="{{asset('images/tvseries/episodes/'.$episode->thumbnail)}}" class="img-responsive" alt="genre-image">
+                        <img src="{{url('images/tvseries/episodes/'.$episode->thumbnail)}}" class="img-responsive" alt="genre-image">
                       @elseif($episode->thumbnail != null)
-                        <img src="{{asset('images/tvseries/episodes/'.$episode->thumbnail)}}" class="img-responsive" alt="genre-image">
+                        <img src="{{url('images/tvseries/episodes/'.$episode->thumbnail)}}" class="img-responsive" alt="genre-image">
                       @else
-                        <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                        <img src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
                       @endif
                     </div>
                   </div>
-                    @if($subscribed==1)
+                   
                   <div class="col-sm-7 pad-0">
-                         @if($age>=str_replace('+', '',$episode->seasons->tvseries->maturity_rating))
-                    @if($episode->video_link['iframeurl'] !="")
-                       <a onclick="playoniframe('{{ $episode->video_link['iframeurl'] }}','{{ $episode->seasons->tvseries->id }}','tv')" class="btn btn-play btn-sm-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text"><h5 class="movie-series-heading movie-series-name">{{$key+1}}. {{$episode->title}}</h5></span></a>
+                    @if($auth && $subscribed==1)
+                      @if($episode->seasons->tvseries->maturity_rating =='all age' || $age>=str_replace('+', '',$episode->seasons->tvseries->maturity_rating))
+                        @if($episode->video_link['iframeurl'] !="")
+                           <a onclick="playoniframe('{{ $episode->video_link['iframeurl'] }}','{{ $episode->seasons->tvseries->id }}','tv')" class="btn btn-play btn-sm-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text"><h5 class="movie-series-heading movie-series-name">{{$key+1}}. {{$episode->title}}</h5></span></a>
+                        @else
+                           <a href="{{ route('watch.Episode', $episode->id) }}" class="iframe btn btn-play btn-sm-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text"><h5 class="movie-series-heading movie-series-name">{{$key+1}}. {{$episode->title}}</h5></span></a>
+                        @endif
+                      @else
+                        <a onclick="myage({{$age}})" class="btn btn-play btn-sm-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text"><h5 class="movie-series-heading movie-series-name">{{$key+1}}. {{$episode->title}}</h5></span></a>
+                      @endif
                     @else
-                       <a href="{{ route('watch.Episode', $episode->id) }}" class="iframe btn btn-play btn-sm-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text"><h5 class="movie-series-heading movie-series-name">{{$key+1}}. {{$episode->title}}</h5></span></a>
-                    @endif
-                    @else
-                     <a onclick="myage({{$age}})" class="btn btn-play btn-sm-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text"><h5 class="movie-series-heading movie-series-name">{{$key+1}}. {{$episode->title}}</h5></span></a>
+                      <h5 class="movie-series-heading movie-series-name">{{$key+1}}. {{$episode->title}}</h5>
                     @endif
                    
                     <ul class="movie-series-des-list">
-                      <li>{{$episode->duration}} {{$popover_translations->where('key', 'mins')->first->value->value}}</li>
+                      <li>{{$episode->duration}} {{__('staticwords.mins')}}</li>
                       <li>{{$episode->released}}</li>
                       <li>{{$episode->seasons->tvseries->maturity_rating}}</li>
                       <li>
                         @if($episode->subtitle == 1)
-                         {{$popover_translations->where('key', 'subtitles')->first->value->value}}
+                         {{__('staticwords.subtitles')}}
                         @endif
                       </li>
                     </ul>
-                       @php
-                    $subtitles = collect();
-           
-            $a_languages = collect();
-           
-                    if ($episode->subtitle==1) {
-                        $subtitle_list = explode(',', $episode->subtitle_list);
-                         for($i = 0; $i < count($subtitle_list); $i++) {
-                try {
-                  $subtitle = \App\AudioLanguage::find($subtitle_list[$i])->language;
-                  $subtitles->push($subtitle);
-                } catch (Exception $e) {
-                }
-              }
-                    }
-                     if ($episode->a_language != null) {
-              $a_lan_list = explode(',', $episode->a_language);
-              for($i = 0; $i < count($a_lan_list); $i++) {
-                try {
-                  $a_language = \App\AudioLanguage::find($a_lan_list[$i])->language;
-                  $a_languages->push($a_language);
-                } catch (Exception $e) {
-                }
-              }
-            }
+                    @php
+                      $a_language = collect();
+                      if ($episode->a_language != null) {
+                          $a_lan_list = explode(',', $episode->a_language);
+                          for($i = 0; $i < count($a_lan_list); $i++) {
+                            try {
+                              $a_language = \App\AudioLanguage::find($a_lan_list[$i])->language;
+                              $a_languages->push($a_language);
+                            } catch (Exception $e) {
+                            }
+                          }
+                        }
                     @endphp
                     <ul class="casting-headers">
                   
-                  <li>{{$popover_translations->where('key', 'subtitles')->first->value->value}}</li>
-                  <li>{{$home_translations->where('key', 'audio languages')->first->value->value}}</li>
-                </ul>
-               <ul class="casting-dtl">
-                 <li>
-                  @if(isset($subtitles))
-                    @if (count($subtitles) > 0)
-                      @for($i = 0; $i < count($subtitles); $i++)
-                        @if($i == count($subtitles)-1)
-                          {{$subtitles[$i]}}
-                        @else
-                          {{$subtitles[$i]}},
-                        @endif
-                      @endfor
-                    @else
-                      -
-                    @endif
-                    @endif
-                  </li>
-                  <li>
-                    @if($episode->a_language != null && isset($a_languages))
-                      @for($i = 0; $i < count($a_languages); $i++)
-                        @if($i == count($a_languages)-1)
-                          {{$a_languages[$i]}}
-                        @else
-                          {{$a_languages[$i]}},
-                        @endif
-                      @endfor
-                    @else
-                      -
-                    @endif
-                  </li>
-               </ul>
-                 </br>
+                      <li>{{__('staticwords.subtitles')}}
+                        <span class="categories-count">
+                          @if(count($episode->subtitles)>0)
+
+                          @foreach($episode->subtitles as $key=> $sub)
+                           
+                              @if($key == count($episode->subtitles)-1)
+                                    {{ $sub['sub_lang'] }}
+                              @else
+                                      {{ $sub['sub_lang'] }},
+                              @endif
+                            
+                          @endforeach
+
+                          @else
+                             {{ __('staticwords.noavailable') }}
+                          @endif
+                        </span>
+                      </li>
+                      <li>{{__('staticwords.audiolanguage')}}
+                        <span class="categories-count">
+                          @if($episode->a_language != null && isset($a_languages))
+                            @for($i = 0; $i < count($a_languages); $i++)
+                              @if($i == count($a_languages)-1)
+                                {{$a_languages[$i]}}
+                              @else
+                                {{$a_languages[$i]}},
+                              @endif
+                            @endfor
+                          @else
+                            -
+                          @endif
+                        </span>
+                      </li>
+                    </ul>
+             
+                    </br>
                     <p>
                       {{$episode->detail}}
                     </p>
-                    <br>
-                     @if($config->download ==1 && $episode->video_link['upload_video']!='')
-                  <a href="{{route('season.download',$episode->video_link['upload_video'])}}" class="btn-default btn-sm"><i class="fa fa-download" aria-hidden="true"></i> {{$popover_translations->where('key', 'Download')->first->value->value}}</a>
-                   @endif
+                    <br/>
+                        
+
+                    @php
+                       $elc = array();
+                      if(isset($episode->multilinks)){
+                        foreach ($episode->multilinks as $key => $value) {
+                           if($value->download == 1){
+                            $elc[] = 1;
+                           }else{
+                              $elc[] = 0;
+                           }
+                        }
+                      }
+                    @endphp
+                    @if(isset($episode->multilinks) &&  count($episode->multilinks) >0)
+                      @if(Auth::user() && $subscribed==1)
+                        @if(in_array(1, $elc))
+
+                         <button type="button" class="btn-default" data-toggle="collapse" data-target="#downloadtvseries">{{__('staticwords.download')}}</button>
+
+                        <div id="downloadtvseries" class="collapse">
+                          <br/>
+                          <table   class=" text-center table table-bordered table-responsive detail-multiple-link">
+                            <thead>
+                              <th align="center">#</th>
+                              <th align="center">{{__('staticwords.download')}}</th>
+                              <th align="center">{{__('staticwords.quality')}}</th>
+                              <th align="center">{{__('staticwords.size')}}</th>
+                              <th align="center">{{__('staticwords.language')}}</th>
+                              <th align="center">{{__('staticwords.clicks')}}</th>
+                              <th align="center">{{__('staticwords.user')}}</th>
+                              <th align="center">{{__('staticwords.added')}}</th>
+                            </thead>
+                       
+                            <tbody>
+                            
+                              @foreach($episode->multilinks as $key=> $link)
+                               
+                                @if($link->download == 1)
+                                <tr>
+                                   @php
+                                
+                                  $lang = App\Audiolanguage::where('id',$link->language)->first();
+                                @endphp
+
+                                  <td align="center">{{$key+1}}</td>
+                                  <td align="center"><a data-id="{{$link->id}}" class="download btn btn-sm btn-success" title="download" href="{{$link->url}}" ><i class="fa fa-download"></i></td>
+                                  <td align="center">{{$link->quality}}</td>
+                                  <td align="center">{{$link->size}}</td>
+                                  <td align="center">@if(isset($lang)){{$lang->language}}@endif</td>
+                                  <td>{{$link->clicks}}</td>
+                                  <td align="center">{{$link->episode->seasons->tvseries->user->name}}</td>
+                                  <td align="center">{{date('Y-m-d',strtotime($link->created_at))}}</td>
+                                 
+                                  
+                                </tr>
+                                @endif
+                              @endforeach
+                          
+                            </tbody>
+                          
+                          </table>
+                        </div>
+               
+                        @endif
+                      @endif
+                    @endif     
+             
                   </div>
-                    
-                  @endif
                 </div>
               </div>
             @endforeach
@@ -1008,7 +1238,7 @@
       @endif
     @endif
 </section>
-
+<br/>
 
 
     {{-- comments section start from here --}}
@@ -1017,99 +1247,350 @@
 <div class="container-fluid"  style="margin-top: 20px;">
    <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#showcomment" aria-controls="showcomment" role="tab" data-toggle="tab">Comments</a></li>
-      <li role="presentation"><a href="#postcomment" aria-controls="postcomment" role="tab" data-toggle="tab">Post Comment</a></li>
+      <li role="presentation" class="active"><a href="#showcomment" aria-controls="showcomment" role="tab" data-toggle="tab" style="z-index:999;">{{__('staticwords.comment')}}</a></li>
+      @if($subscribed == 1)
+      <li role="presentation"><a href="#postcomment" aria-controls="postcomment" role="tab" data-toggle="tab" style="z-index:999;">{{__('staticwords.postcomment')}}</a></li>
+      @endif
     </ul>
   <br/>
   <!-- Tab panes -->
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane fade in active" id="showcomment">
-      <h4 class="title" style="color:#B1B1B1;"><span class="glyphicon glyphicon-comment"></span> {{$movie->comments->count()}} Comments </h4> <br/>
+      <h4 class="title" style="color:#B1B1B1;"><span class="glyphicon glyphicon-comment"></span> {{$movie->comments->count()}} {{__('staticwords.comment')}}</h4> <br/>
         @foreach ($movie->comments as $comment)
-          <div class="comment">
-            <div class="author-info">
-              <img src="{{"https://www.gravatar.com/avatar/" . md5(strtolower(trim($comment->name))). "?s=50&d=monsterid" }}" class="author-image">
-              <div class="author-name">
-                <h4>{{$comment->name}}</h4>
-                <p class="author-time">{{$comment->created_at}}</p>
-              </div>
-            </div>
-            <div class="comment-content">
-             {{$comment->comment}}
-            </div>
-          </div>
-          <div>
-            <button type="button" class="btn-danger btn-floating pull-right" data-toggle="modal" data-target="#{{$comment->id}}deleteModal">Reply </button>
-              <!-- Modal -->
-              <br/>
-              <div id="{{$comment->id}}deleteModal" class="delete-modal modal fade" role="dialog"  style="margin-top: 20px;">
-                <div class="modal-dialog modal-md" style="margin-top:70px;">
-                  <!-- Modal content-->
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                      <div class="delete-icon"></div>
-                     <h4 style="color:#B1B1B1;"> Reply for {{$comment->name}}</h4>
-                    </div>
-                    <div class="modal-body text-center">
-                      <form action="{{route('movie.comment.reply', ['cid' =>$comment->id])}}" method ="POST">
-                          {{ csrf_field() }}
-                        {{Form::label('reply','Your Reply:')}}
-                        {{Form::textarea('reply', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}} 
-                        <br/>
-                          <button type="submit" class="btn btn-danger">Submit</button>
-                     </form>
-                    </div>
-                    <div class="modal-footer">
-                     
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-           
-            @foreach($comment->subcomments as $subcomment)
-              <div class="comment" style="margin-left:50px;">
+
+              <div class="comment">
                 <div class="author-info">
-                  <img src="{{"https://www.gravatar.com/avatar/" . md5(strtolower(trim($subcomment->name))). "?s=50&d=monsterid" }}" class="author-image">
+                  <img src="{{ Avatar::create($comment->name )->toBase64() }}" class="author-image">
                   <div class="author-name">
-                    @php
-                       $name=App\User::where('id',$subcomment->user_id)->first();
-                     @endphp
-                    <h5>{{$name->name}}</h5>
-                    <p class="author-time">{{$subcomment->created_at}}</p>
+                    <h4>{{$comment->name}}</h4>
+                    <p class="author-time">{{date('F jS, Y - g:i a',strtotime($comment->created_at))}}</p>
                   </div>
+                   @if(Auth::check() && (Auth::user()->is_admin == 1 || $comment->user_id == Auth::user()->id))  
+                  <button type="button" class="btn btn-danger btn-floating pull-right" data-toggle="modal" data-target="#deleteModal{{$comment->id}}" style="left:10px;position:relative;"><i class="fa fa-trash-o"></i></button>
+                  @endif
+                  @if($subscribed ==1)
+                  <button type="button" class="btn btn-danger btn-floating pull-right" data-toggle="modal" data-target="#{{$comment->id}}deleteModal"><i class="fa fa-reply"></i></button>
+                  @endif
+                  
                 </div>
 
                 <div class="comment-content">
-                 {{$subcomment->reply}}
+                 {{$comment->comment}}
                 </div>
               </div>
-            @endforeach
-        @endforeach
+              <div>
+                
+              <!-- ---------------- comment delete ------------>
+                  <div id="deleteModal{{$comment->id}}" class="delete-modal modal fade" role="dialog">
+                    <div class="modal-dialog modal-sm">
+                      <!-- Modal content-->
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <div class="delete-icon"></div>
+                        </div>
+                        <div class="modal-body text-center">
+                          <h4 class="modal-heading comment-delete-heading">{{__('staticwords.areyousure')}}</h4>
+                          <p class="comment-delete-detail">{{__('staticwords.modalmessage')}}</p>
+                        </div>
+                         <div class="modal-footer">
+                          {!! Form::open(['method' => 'DELETE', 'action' => ['MovieCommentController@deletecomment', $comment->id]]) !!}
+                              <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">{{__('staticwords.no')}}</button>
+                              <button type="submit" class="btn btn-danger">{{__('staticwords.yes')}}</button>
+                          {!! Form::close() !!}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <!-------------------- end comment delete ------------------->
+             
+                  
+                    <!-- Modal -->
+                  
+                   
+              </div>
+
+               @foreach($comment->subcomments as $subcomment)
+
+                  <div class="comment" style="margin-left:50px;">
+                  <div class="author-info">
+                     @php
+                         $name=App\user::where('id',$subcomment->user_id)->first();
+                       @endphp
+                    <img src="{{ Avatar::create($name->name )->toBase64() }}" class="author-image">
+                    <div class="author-name">
+                     
+                      <h5>{{$name->name}}</h5>
+                      <p class="author-time">{{date('F jS, Y - g:i a',strtotime($subcomment->created_at))}}</p>
+                    </div>
+                     @if(Auth::check() && (Auth::user()->is_admin == 1 || $subcomment->user_id == Auth::user()->id))
+                   
+                       <button type="button" class="btn btn-danger btn-floating pull-right" data-toggle="modal" data-target="#subdeleteModal{{$subcomment->id}}"><i class="fa fa-trash-o"></i></button>        
+                    <div id="subdeleteModal{{$subcomment->id}}" class="delete-modal modal fade" role="dialog">
+                    <div class="modal-dialog modal-sm">
+                      <!-- Modal content-->
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <div class="delete-icon"></div>
+                        </div>
+                        <div class="modal-body text-center">
+                          <h4 class="modal-heading comment-delete-heading">{{__('staticwords.areyousure')}}</h4>
+                          <p class="comment-delete-detail">{{__('staticwords.modelmessage')}}</p>
+                        </div>
+                         <div class="modal-footer">
+                          {!! Form::open(['method' => 'DELETE', 'action' => ['MovieCommentController@deletesubcomment', $subcomment->id]]) !!}
+                              <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">{{__('staticwords.no')}}</button>
+                              <button type="submit" class="btn btn-danger">{{__('staticwords.yes')}}</button>
+                          {!! Form::close() !!}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                   
+                  @endif
+                  </div>
+
+                  <div class="comment-content">
+                   {{$subcomment->reply}}
+                  </div>
+                 
+                </div>
+              
+              @endforeach
+               <div id="{{$comment->id}}deleteModal" class="modal fade" role="dialog"  style="margin-top: 20px;">
+                      <div class="modal-dialog modal-md" style="margin-top:70px;">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                          <div class="modal-header">
+                             
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <div class="delete-icon"></div>
+                           <h4 style="color:#B1B1B1;"> {{__('staticwords.replyfor')}} {{$comment->name}}</h4>
+                          </div>
+                          <div class="modal-body text-center">
+                             
+                              <form action="{{route('movie.comment.reply', ['cid' =>$comment->id])}}" method ="POST">
+                                {{ csrf_field() }}
+                              {{Form::label('reply',__('staticwords.yourreply'))}}
+                              {{Form::textarea('reply', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}} 
+                              <br/>
+                                <button type="submit" class="btn btn-danger">{{__('staticwords.submit')}}</button>
+                           </form>
+                          </div>
+                          <div class="modal-footer">
+                           
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+          @endforeach
     </div>
-    @auth
+     @auth
     <div role="tabpanel" class="tab-pane fade" id="postcomment">
-      <div style="width: 90%;color:#B1B1B1;" class=" " >
-        <h3>Post Comment:</h3><br/>
-            {{Form::open( ['route' => ['movie.comment.store', $movie->id], 'method' => 'POST'])}}
-            {{Form::label('name', 'Name:')}}
-            {{Form::text('name', null, ['class' => 'form-control'])}}
-            <br/>
-            {{Form::label('email', 'Email:')}}
-             {{Form::email('email', null, ['class' => 'form-control'])}}
-            <br/>
-            {{Form::label('comment','Comment:')}}
-            {{Form::textarea('comment', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}}
-            <br/>
-            {{Form::submit('Add Comment', ['class' => 'btn btn-md btn-primary'])}}
-      </div>
+        <div style="width: 90%;color:#B1B1B1;" class=" " >
+            <h3>{{__('staticwords.postcomment')}}:</h3><br/>
+             
+                {{Form::open( ['route' => ['movie.comment.store', $movie->id], 'method' => 'POST'])}}
+                {{Form::label('name', __('staticwords.name'))}}
+                {{Form::text('name', Auth::user()->name, ['class' => 'form-control','disabled'])}}
+                <br/>
+                {{Form::label('email', __('staticwords.email'))}}
+                 {{Form::email('email', Auth::user()->email, ['class' => 'form-control','disabled'])}}
+                <br/>
+                {{Form::label('comment',__('staticwords.comment'))}}
+                {{Form::textarea('comment', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}}
+                <br/>
+                {{Form::submit(__('staticwords.addcomment'), ['class' => 'btn btn-md btn-default'])}}
+        </div>
+
     </div>
     @endauth
   </div>
 </div>
+<br/>
 @endif
 @endif
+
+      {{-- comments section start from here --}}
+@if(isset($season))
+ @if($configs->comments==1)
+    <div class="container-fluid"  style="margin-top: 20px;">
+   <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active" style="z-index:999;"><a href="#showcomment" aria-controls="showcomment" role="tab" data-toggle="tab" >{{__('staticwords.comment')}}</a></li>
+    @if($subscribed == 1)
+    <li role="presentation" style="z-index:999;"><a href="#postcomment" aria-controls="postcomment" role="tab" data-toggle="tab">{{__('staticwords.postcomment')}}</a></li>
+    @endif
+  </ul>
+  <br/>
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane fade in active" id="showcomment">
+      <h4 class="title" style="color:#B1B1B1;"><span class="glyphicon glyphicon-comment"></span> {{$season->tvseries->comments->count()}} {{__('staticwords.comment')}} </h4> <br/>
+         
+         @foreach ($season->tvseries->comments as $comment)
+
+              <div class="comment">
+                <div class="author-info">
+                  <img src="{{ Avatar::create($comment->name )->toBase64() }}" class="author-image">
+                  <div class="author-name">
+                    <h4>{{$comment->name}}</h4>
+                    <p class="author-time">{{date('F jS, Y - g:i a',strtotime($comment->created_at))}}</p>
+                  </div>-
+                   @if(Auth::check() && (Auth::user()->is_admin == 1 || $comment->user_id == Auth::user()->id)) 
+                  <button type="button" class="btn btn-danger btn-floating pull-right" data-toggle="modal" data-target="#deleteModal{{$comment->id}}" style="left:10px;position:relative;"><i class="fa fa-trash-o"></i></button>
+
+
+                    <!-- ---------------- comment delete ------------>
+                  <div id="deleteModal{{$comment->id}}" class="delete-modal modal fade" role="dialog">
+                    <div class="modal-dialog modal-sm">
+                      <!-- Modal content-->
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <div class="delete-icon"></div>
+                        </div>
+                        <div class="modal-body text-center">
+                          <h4 class="modal-heading comment-delete-heading">{{__('staticwords.areyousure')}}</h4>
+                          <p class="comment-delete-detail">{{__('staticwords.modelmessage')}}</p>
+                        </div>
+                         <div class="modal-footer">
+                          {!! Form::open(['method' => 'DELETE', 'action' => ['TVCommentController@deletecomment', $comment->id]]) !!}
+                              <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">{{__('staticwords.no')}}</button>
+                              <button type="submit" class="btn btn-danger">{{__('staticwords.yes')}}</button>
+                          {!! Form::close() !!}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <!-------------------- end comment delete ------------------->
+
+
+                  @endif
+                  @if($subscribed==1)
+                   <button type="button" class=" btn btn-danger btn-floating pull-right" data-toggle="modal" data-target="#{{$comment->id}}deleteModal"><i class="fa fa-reply"></i> </button>
+                  @endif
+                </div>
+
+                <div class="comment-content">
+                 {{$comment->comment}}
+                </div>
+              </div>
+              <div>
+                 
+                    <!-- Modal -->
+                   
+                <div id="{{$comment->id}}deleteModal" class="delete-modal modal fade" role="dialog"  style="margin-top: 20px;">
+                  <div class="modal-dialog modal-md" style="margin-top:70px;">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                         
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <div class="delete-icon"></div>
+                       <h4 style="color:#B1B1B1;"> {{__('staticwords.replyfor')}}  {{$comment->name}}</h4>
+                      </div>
+                      <div class="modal-body text-center">
+                         
+                          <form action="{{route('tv.comment.reply', ['cid' =>$comment->id])}}" method ="POST">
+                            {{ csrf_field() }}
+                          {{Form::label('reply',__('staticwords.yourreply'))}}
+                          {{Form::textarea('reply', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}} 
+                          <br/>
+                            <button type="submit" class="btn btn-danger">{{__('staticwords.submit')}}</button>
+                       </form>
+                      </div>
+                      <div class="modal-footer">
+                       
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+               @foreach($comment->subcomments as $subcomment)
+                
+                  <div class="comment" style="margin-left:50px;">
+                  <div class="author-info">
+                     @php
+                         $name=App\user::where('id',$subcomment->user_id)->first();
+                       @endphp
+                    <img src="{{ Avatar::create($name->name )->toBase64() }}" class="author-image">
+                    <div class="author-name">
+                     
+                      <h5>{{$name->name}}</h5>
+                      <p class="author-time">{{date('F jS, Y - g:i a',strtotime($subcomment->created_at))}}</p>
+                    </div>
+                      @if(Auth::check() && (Auth::user()->is_admin == 1 || $subcomment->user_id == Auth::user()->id))
+                   
+                       <button type="button" class="btn btn-danger btn-floating pull-right" data-toggle="modal" data-target="#subdeleteModal{{$subcomment->id}}"><i class="fa fa-trash-o"></i></button>   
+                      <div id="subdeleteModal{{$subcomment->id}}" class="delete-modal modal fade" role="dialog">
+                    <div class="modal-dialog modal-sm">
+                      <!-- Modal content-->
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <div class="delete-icon"></div>
+                        </div>
+                        <div class="modal-body text-center">
+                          <h4 class="modal-heading comment-delete-heading">{{__('staticwords.areyousure')}}</h4>
+                          <p class="comment-delete-detail">{{__('staticwords.modalmessage')}}</p>
+                        </div>
+                         <div class="modal-footer">
+                          {!! Form::open(['method' => 'DELETE', 'action' => ['TVCommentController@deletesubcomment', $subcomment->id]]) !!}
+                              <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">{{__('staticwords.no')}}</button>
+                              <button type="submit" class="btn btn-danger">{{__('staticwords.yes')}}</button>
+                          {!! Form::close() !!}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                   
+                  @endif
+                    
+
+
+                  </div>
+
+                  <div class="comment-content">
+                   {{$subcomment->reply}}
+                  </div>
+                </div>
+
+              @endforeach
+          @endforeach
+          
+
+    </div>
+     @auth
+    <div role="tabpanel" class="tab-pane fade" id="postcomment">
+        <div style="width: 90%;color:#B1B1B1;" class=" " >
+            <h3>{{__('staticwords.postcomment')}}:</h3><br/>
+          
+                {{Form::open( ['route' => ['tv.comment.store', $season->tvseries->id], 'method' => 'POST'])}}
+                {{Form::label('name', __('staticwords.name'))}}
+                {{Form::text('name', Auth::user()->name, ['class' => 'form-control','disabled'])}}
+                <br/>
+                {{Form::label('email', __('staticwords.email'))}}
+                 {{Form::email('email', Auth::user()->email, ['class' => 'form-control','disabled'])}}
+                <br/>
+                {{Form::label('comment',__('staticwords.comment'))}}
+                {{Form::textarea('comment', null, ['class' => 'form-control', 'rows'=> '5','cols' => '10'])}}
+                <br/>
+                {{Form::submit(__('staticwords.addcomment'), ['class' => 'btn btn-md btn-default'])}}
+        </div>
+
+    </div>
+    @endauth
+  </div>
+</div>
+<br/>
+@endif
+ @endif
+
 
     <!-- end episodes -->
     @if($prime_genre_slider == 1)
@@ -1163,7 +1644,7 @@
       @if (isset($all) && count($all) > 0)
         <div class="genre-prime-block">
           <div class="container-fluid">
-            <h5 class="section-heading">{{$home_translations->where('key', 'customers also watched')->first->value->value}}</h5>
+            <h5 class="section-heading">{{__('staticwords.customeralsowatched')}}</h5>
             <div class="genre-prime-slider owl-carousel">
               @if(isset($all))
                 @foreach($all as $key => $item)
@@ -1189,58 +1670,86 @@
                     @if(isset($movie))
                     <div class="genre-prime-slide">
                       <div class="genre-slide-image protip" data-pt-placement="outside" data-pt-title="#prime-mix-description-block{{$item->id}}">
-                        <a href="{{url('movie/detail',$item->id)}}">
-                          @if($item->thumbnail != null)
-                            <img src="{{asset('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive" alt="genre-image">
-                          @endif
-                        </a>
+                        @if($auth && $subscribed == 1)
+                          <a href="{{url('movie/detail/'.$item->slug)}}">
+                            @if($item->thumbnail != null)
+                              <img data-src="{{url('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl-lazydata-srcdata-src" alt="genre-image">
+                            @endif
+                          </a>
+                        @else
+                          <a href="{{url('movie/guest/detail/'.$item->slug)}}">
+                            @if($item->thumbnail != null)
+                              <img data-src="{{url('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl-lazydata-srcdata-src" alt="genre-image">
+                            @endif
+                          </a>
+                        @endif
                       </div>
+                      @if(isset($protip) && $protip == 1)
                       <div id="prime-mix-description-block{{$item->id}}" class="prime-description-block">
                         <h5 class="description-heading">{{$item->title}}</h5>
-                        <div class="movie-rating">{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$item->rating}}</div>
+                        <div class="movie-rating">{{__('staticwords.tmdbrating')}} {{$item->rating}}</div>
                         <ul class="description-list">
-                          <li>{{$item->duration}} {{$popover_translations->where('key', 'mins')->first->value->value}}</li>
+                          <li>{{$item->duration}} {{__('staticwords.mins')}}</li>
                           <li>{{$item->publish_year}}</li>
                           <li>{{$item->maturity_rating}}</li>
                           @if($item->subtitle == 1)
                             <li>CC</li>
                             <li>
-                             {{$popover_translations->where('key', 'subtitles')->first->value->value}}
+                             {{__('staticwords.subtitles')}}
                             </li>
                           @endif
                         </ul>
                         <div class="main-des">
-                          <p>{{$item->detail}}</p>
-                          <a href="#"></a>
+
+                          <p>{{str_limit($item->detail,150,'...')}}</p>
+                          @if($auth && $subscribed == 1)
+                            <a href="{{url('movie/detail/'.$item->slug)}}">{{__('staticwords.readmore')}}</a>
+                          @else
+                            <a href="{{url('movie/guest/detail/'.$item->slug)}}">{{__('staticwords.readmore')}}</a>
+                          @endif
                         </div>
-                          @if($subscribed==1)
-                        <div class="des-btn-block">
-                            @if($age>=str_replace('+', '',$item->maturity_rating))
-                          @if($item->video_link['iframeurl'] != null)
                           
-                              <a onclick="playoniframe('{{ $item->video_link['iframeurl'] }}','{{ $item->id }}','movie')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                              </a>
+                        <div class="des-btn-block">
+                          @if($auth  && $subscribed==1)
+                            @if($item->maturity_ratin =='all age' || $age>=str_replace('+', '',$item->maturity_rating))
+                              @if($item->video_link['iframeurl'] != null)
+                          
+                                <a href="{{route('watchmovieiframe',$item->id)}}"class="btn btn-play iframe"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                </a>
 
-                             @else 
-                            <a href="{{ route('watchmovie',$item->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                          @endif
+                              @else 
+                                <a href="{{ route('watchmovie',$item->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
+                              @endif
+                            @else
+                              <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                </a>
+                            @endif
+                            @if($item->trailer_url != null || $item->trailer_url != '')
+                              <a href="{{ route('watchTrailer',$item->id) }}" class="iframe btn-default">{{__('staticwords.watchtrailer')}}</a>
+                            @endif
                           @else
-                           <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                              </a>
+                            @if($item->trailer_url != null || $item->trailer_url != '')
+                              <a href="{{ route('guestwatchtrailer',$item->id) }}" class="iframe btn-default">{{__('staticwords.watchtrailer')}}</a>
+                            @endif
                           @endif
 
+                          @if($catlog ==0 && $subscribed ==1)
                         
-                          @if($item->trailer_url != null || $item->trailer_url != '')
-                            <a href="{{ route('watchTrailer',$item->id) }}" class="iframe btn-default">{{$popover_translations->where('key', 'watch trailer')->first->value->value}}</a>
-                          @endif
-                          @if (isset($wishlist_check->added))
-                            <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
-                          @else
-                            <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}</a>
+                            @if (isset($wishlist_check->added))
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                            @else
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                            @endif
+                          @elseif($catlog ==1 && $auth)
+                            @if (isset($wishlist_check->added))
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('staticwords.addtowatchlist')}}</a>
+                            @else
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                            @endif
                           @endif
                         </div>
-                        @endif
                       </div>
+                      @endif
                     </div>
                   @endif
                   @endif
@@ -1249,19 +1758,32 @@
                     @if(!isset($movie))
                     <div class="genre-prime-slide">
                       <div class="genre-slide-image protip" data-pt-placement="outside" data-pt-title="#prime-mix-description-block{{$item->id}}{{$item->type}}">
-                        <a href="{{url('show/detail',$item->id)}}">
+                       @if($auth && $subscribed == 1)
+                        <a href="{{url('show/detail/'.$item->season_slug)}}">
                           @if($item->thumbnail != null)
-                            <img src="{{asset('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive" alt="genre-image">
+                            <img data-srcdata-src="{{url('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl_lazy" alt="genre-image">
                           @elseif($item->tvseries->thumbnail != null)
-                            <img src="{{asset('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive" alt="genre-image">
+                            <img data-srcdata-src="{{url('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive owl_lazy" alt="genre-image">
                           @else
-                            <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                            <img data-srcdata-src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive owl_lazy" alt="genre-image">
                           @endif
                         </a>
+                        @else
+                        <a href="{{url('show/guest/detail/'.$item->season_slug)}}">
+                          @if($item->thumbnail != null)
+                            <img src="{{url('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl_lazy" alt="genre-image">
+                          @elseif($item->tvseries->thumbnail != null)
+                            <img src="{{url('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive owl_lazy" alt="genre-image">
+                          @else
+                            <img src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive owl_lazy" alt="genre-image">
+                          @endif
+                        </a>
+                        @endif
                       </div>
+                      @if(isset($protip) && $protip == 1)
                       <div id="prime-mix-description-block{{$item->id}}{{$item->type}}" class="prime-description-block">
                         <h5 class="description-heading">{{$item->tvseries->title}}</h5>
-                        <div class="movie-rating">{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$item->tvseries->rating}}</div>
+                        <div class="movie-rating">{{__('staticwords.tmdbrating')}} {{$item->tvseries->rating}}</div>
                         <ul class="description-list">
                           <li>Season {{$item->season_no}}</li>
                           <li>{{$item->publish_year}}</li>
@@ -1269,42 +1791,56 @@
                           @if($item->subtitle == 1)
                             <li>CC</li>
                             <li>
-                             {{$popover_translations->where('key', 'subtitles')->first->value->value}}
+                             {{__('staticwords.subtitles')}}
                             </li>
                           @endif
                         </ul>
                         <div class="main-des">
                           @if ($item->detail != null || $item->detail != '')
-                            <p>{{$item->detail}}</p>
+                            <p>{{str_limit($item->detail,150,'...')}}</p>
                           @else
-                            <p>{{$item->tvseries->detail}}</p>
+                            <p>{{str_limit($item->tvseries->detail,150,'...')}}</p>
                           @endif
-                          <a href="#"></a>
+                          @if($auth && $subscribed == 1)
+                            <a href="{{url('show/detail/'.$item->season_slug)}} ">{{__('staticwords.readmore')}}</a>
+                          @else
+                            <a href="{{url('show/guest/detail/'.$item->season_slug)}} ">{{__('staticwords.readmore')}}</a>
+                          @endif
                         </div>
-                          @if($subscribed==1)
+                         
                         <div class="des-btn-block">
-                          @if(isset($item->episodes[0]))
-                           @if($age>=str_replace('+', '',$item->tvseries->age_req))
-                          @if($item->episodes[0]->video_link['iframeurl'] !="")
+                          @if($subscribed==1)
+                            @if(isset($item->episodes[0]))
+                              @if($item->tvseries->age_req =='all age' || $age>=str_replace('+', '',$item->tvseries->age_req))
+                                @if($item->episodes[0]->video_link['iframeurl'] !="")
 
-                            <a href="#" onclick="playoniframe('{{ $item->episodes[0]->video_link['iframeurl'] }}','{{ $item->tvseries->id }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                             </a>
+                                  <a href="#" onclick="playoniframe('{{ $item->episodes[0]->video_link['iframeurl'] }}','{{ $item->tvseries->id }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                   </a>
+                                @else
+                                  <a href="{{route('watchTvShow',$item->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
+                                @endif
+                              @else
+                                <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                                 </a>
+                              @endif
+                           @endif
+                          @endif
+                          @if($catlog ==0 && $subscribed ==1)
+                            @if (isset($wishlist_check->added))
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('addtowatchlist')}}</a>
                             @else
-                          <a href="{{route('watchTvShow',$item->id)}}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                          @endif
-                          @else
-                           <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                             </a>
-                          @endif
-                          @endif
-                          @if (isset($wishlist_check->added))
-                            <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? ($popover_translations->where('key', 'remove from watchlist')->first->value->value) : ($popover_translations->where('key', 'add to watchlist')->first->value->value)}}</a>
-                          @else
-                            <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}</a>
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                            @endif
+                          @elseif($catlog ==1 && $auth)
+                            @if (isset($wishlist_check->added))
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{$wishlist_check->added == 1 ? __('staticwords.removefromwatchlist') : __('addtowatchlist')}}</a>
+                            @else
+                              <a onclick="addWish({{$item->id}},'{{$item->type}}')" class="addwishlistbtn{{$item->id}}{{$item->type}} btn-default">{{__('staticwords.addtowatchlist')}}</a>
+                            @endif
                           @endif
                         </div>
-                        @endif
                       </div>
+                      @endif
                     </div>
                     @endif
                   @endif
@@ -1368,8 +1904,8 @@
             <div class="row">
               <div class="col-md-3">
                 <div class="genre-dtl-block">
-                  <h3 class="section-heading">{{$home_translations->where('key', 'customers also watched')->first->value->value}}</h3>
-                  <p class="section-dtl">{{$home_translations->where('key', 'at the big screen at home')->first->value->value}}</p>
+                  <h3 class="section-heading">{{__('staticwords.customeralsowatched')}}</h3>
+                  <p class="section-dtl">{{__('staticwords.atthebigscreenathome')}}</p>
                 </div>
               </div>
               <div class="col-md-9">
@@ -1380,33 +1916,60 @@
 
                         <div class="genre-slide">
                           <div class="genre-slide-image">
-                            <a href="{{url('show/detail/'.$item->id)}}">
+                            @if($auth && $subscribed == 1)
+                            <a href="{{url('show/detail/'.$item->season_slug)}}">
                               @if($item->thumbnail != null)
-                                <img src="{{asset('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive" alt="genre-image">
+                                <img data-src="{{url('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl-lazy" alt="genre-image">
                               @elseif($item->tvseries->thumbnail != null)
-                                <img src="{{asset('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive" alt="genre-image">
+                                <img data-src="{{url('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive owl-lazy" alt="genre-image">
                               @else
-                                <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                                <img data-src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive owl-lazy" alt="genre-image">
                               @endif
                             </a>
+                            @else
+                            <a href="{{url('show/guest/detail/'.$item->season_slug)}}">
+                              @if($item->thumbnail != null)
+                                <img src="{{url('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl-lazy" alt="genre-image">
+                              @elseif($item->tvseries->thumbnail != null)
+                                <img data-src="{{url('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive owl-lazy" alt="genre-image">
+                              @else
+                                <img data-src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive owl-lazy" alt="genre-image">
+                              @endif
+                            </a>
+                            @endif
                           </div>
                           <div class="genre-slide-dtl">
-                            <h5 class="genre-dtl-heading"><a href="{{url('show/detail/'.$item->id)}}">{{$item->tvseries->title}}</a></h5>
-                            <div class="genre-small-info">{{$item->detail != null ? $item->detail : $item->tvseries->detail}}</div>
+                            <h5 class="genre-dtl-heading">  @if($auth && $subscribed == 1)<a href="{{url('show/detail/'.$item->season_slug)}}">{{$item->tvseries->title}}</a>
+                            @else
+                            <a href="{{url('show/guest/detail/'.$item->season_slug)}}">{{$item->tvseries->title}}</a>
+                          @endif</h5>
+                            <div class="genre-small-info">{{$item->detail != null ? str_limit($item->detail,150,'...') : str_limit($item->tvseries->detail,150,'...')}}</div>
                           </div>
                         </div>
                       @endif
                       @if($item->type == 'M')
                         <div class="genre-slide">
                           <div class="genre-slide-image">
-                            <a href="{{url('movie/detail/'.$item->id)}}">
+                            @if($auth && $subscribed == 1)
+                            <a href="{{url('movie/detail/'.$item->slug)}}">
                               @if($item->thumbnail != null)
-                                <img src="{{asset('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive" alt="genre-image">
+                                <img data-src="{{url('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl-lazy" alt="genre-image">
                               @endif
                             </a>
+                            @else
+                             <a href="{{url('movie/guest/detail/'.$item->slug)}}">
+                              @if($item->thumbnail != null)
+                                <img data-src="{{url('images/movies/thumbnails/'.$item->thumbnail)}}" class="img-responsive owl-lazy" alt="genre-image">
+                              @endif
+                            </a>
+                            @endif
                           </div>
                           <div class="genre-slide-dtl">
-                            <h5 class="genre-dtl-heading"><a href="{{url('movie/detail/'.$item->id)}}">{{$item->title}}</a></h5>
+                            <h5 class="genre-dtl-heading">@if($auth && $subscribed == 1)<a href="{{url('movie/detail/'.$item->slug)}}">{{$item->title}}</a>
+                            @else
+                            <a href="{{url('movie/guest/detail/'.$item->slug)}}">{{$item->title}}</a>
+                          @endif</h5>
+                          <div class="genre-small-info">{{$item->detail != null ? str_limit($item->detail,150, '...') :''}}</div>
                           </div>
                         </div>
                       @endif
@@ -1419,6 +1982,30 @@
         </div>
       @endif
     @endif
+
+
+     <!-- Share Modal -->
+      <div class="modal fade" id="sharemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">{{__('staticwords.shareiton')}}</h4>
+            </div>
+            
+            <div class="text-center modal-body">
+              @php
+                echo Share::currentPage(null,[],'<div class="row">', '</div>')
+                ->facebook()
+                ->twitter()
+                ->telegram()
+                ->whatsapp();
+              @endphp
+            </div>
+           
+          </div>
+        </div>
+      </div>
   </section>
 
 
@@ -1457,13 +2044,11 @@
       app.addToWishList(id, type);
       setTimeout(function() {
         $('.addwishlistbtn'+id+type).text(function(i, text){
-          return text == "{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}" ? "{{$popover_translations->where('key', 'remove from watchlist')->first->value->value}}" : "{{$popover_translations->where('key', 'add to watchlist')->first->value->value}}";
+          return text == "{{__('staticwords.addtowatchlist')}}" ? "{{__('staticwords.removefromwatchlist')}}" : "{{__('staticwords.addtowatchlist')}}";
         });
       }, 100);
     }
-
-
-</script>
+  </script>
 
   <script>
       $(document).ready(function(){
@@ -1495,14 +2080,14 @@
           return false;
         });
       });
-    </script>
+  </script>
     
-    <script>
+  <script>
 
-      function playoniframe(url,id,type){
+  function playoniframe(url,id,type){
 
  
-   $(document).ready(function(){
+    $(document).ready(function(){
     var SITEURL = '{{URL::to('')}}';
        $.ajax({
             type: "get",
@@ -1514,11 +2099,7 @@
                console.log(data)
             }
         });
-       
-   
-         
-  
-  });       
+      });       
         $.colorbox({ href: url, width: '100%', height: '100%', iframe: true });
       }
       
@@ -1527,22 +2108,26 @@
      <script>
       $('#selectseason').on('change',function(){
         var get = $('#selectseason').val();
+        @if(Auth::check() && $subscribed == '1')
         window.location.href = '{{ url('show/detail/') }}/'+get;
+        @else
+        window.location.href = '{{ url('show/guest/detail/') }}/'+get;
+        @endif
       });
     </script>
 <script>
 
-      function myage(age){
-        if (age==0) {
-        $('#ageModal').modal('show'); 
-      }else{
-          $('#ageWarningModal').modal('show');
-      }
+  function myage(age){
+    if (age==0) {
+      $('#ageModal').modal('show'); 
+    }else{
+        $('#ageWarningModal').modal('show');
     }
+  }
       
-    </script>
-    <script type="text/javascript">
-   function mouseoverrating () {
+</script>
+<script type="text/javascript">
+  function mouseoverrating () {
         
         $.ajax({
             type: "POST",
@@ -1688,17 +2273,17 @@
   });
 
    function mouseoverrating () {
-        // $.ajax({
-        //     type: "GET",
-        //     url: "{{url('/video/rating')}}",
-        //     data:$("#formrating").serialize(),
-        //     success: function (data) {
-        //       console.log(data);
-        //     },
-        //     error: function(XMLHttpRequest, textStatus, errorThrown) {
-        //      console.log(XMLHttpRequest);
-        //     }
-        // });
+        $.ajax({
+            type: "GET",
+            url: "{{url('/video/rating')}}",
+            data:$("#formrating").serialize(),
+            success: function (data) {
+              console.log(data);
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+             console.log(XMLHttpRequest);
+            }
+        });
     
         }
     

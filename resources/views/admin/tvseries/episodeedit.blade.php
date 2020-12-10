@@ -54,53 +54,53 @@
   <div class="admin-form-main-block mrg-t-40">
 
 <!--youtube API Modal -->
-<div id="myyoutubeModal" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-lg">
-    <!--youtube API Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h5 class="modal-title">Search From Youtube API</h5>
-      </div>
-      <div class="modal-body">
-        @if(is_null(env('YOUTUBE_API_KEY')))
-        <p>Make Sure You Have Added Youtube API Key in <a href="{{url('admin/api-settings')}}">API Settings</a></p>
-        @endif
-       
-          <div id="hyv-page-container" style="clear:both;">
-                <div class="hyv-content-alignment">
-                    <div id="hyv-page-content" class="" style="overflow:hidden;">
-                        <div class="container-4">
-                            <form action="" method="post" name="hyv-yt-search" id="hyv-yt-search">
-                                <input type="search" name="hyv-search" id="hyv-search" placeholder="Search..." class="ui-autocomplete-input" autocomplete="off">
-                                <button class="icon" id="hyv-searchBtn"></button>
-                            </form>
-                        </div>
-                        <div>
-                            <input type="hidden" id="pageToken" value="">
-                            <div class="btn-group" role="group" aria-label="...">
-                              <button type="button" id="pageTokenPrev" value="" class="btn btn-default">Prev</button>
-                              <button type="button" id="pageTokenNext" value="" class="btn btn-default">Next</button>
+    <div id="myyoutubeModal" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <!--youtube API Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h5 class="modal-title">Search From Youtube API</h5>
+          </div>
+          <div class="modal-body">
+            @if(is_null(env('YOUTUBE_API_KEY')))
+            <p>Make Sure You Have Added Youtube API Key in <a href="{{url('admin/api-settings')}}">API Settings</a></p>
+            @endif
+           
+              <div id="hyv-page-container" style="clear:both;">
+                    <div class="hyv-content-alignment">
+                        <div id="hyv-page-content" class="" style="overflow:hidden;">
+                            <div class="container-4">
+                                <form action="" method="post" name="hyv-yt-search" id="hyv-yt-search">
+                                    <input type="search" name="hyv-search" id="hyv-search" placeholder="Search..." class="ui-autocomplete-input" autocomplete="off">
+                                    <button class="icon" id="hyv-searchBtn"></button>
+                                </form>
                             </div>
-                        </div>
-                        <div id="hyv-watch-content" class="hyv-watch-main-col hyv-card hyv-card-has-padding">
-                            <ul id="hyv-watch-related" class="hyv-video-list">
-                            </ul>
-                        </div>
+                            <div>
+                                <input type="hidden" id="pageToken" value="">
+                                <div class="btn-group" role="group" aria-label="...">
+                                  <button type="button" id="pageTokenPrev" value="" class="btn btn-default">Prev</button>
+                                  <button type="button" id="pageTokenNext" value="" class="btn btn-default">Next</button>
+                                </div>
+                            </div>
+                            <div id="hyv-watch-content" class="hyv-watch-main-col hyv-card hyv-card-has-padding">
+                                <ul id="hyv-watch-related" class="hyv-video-list">
+                                </ul>
+                            </div>
 
+                        </div>
                     </div>
                 </div>
-            </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
-  </div>
-</div>
-
-    <h4 class="admin-form-text"><a href="{{url('admin/tvseries/seasons/' .$season->id. '/episodes')}}" data-toggle="tooltip" data-original-title="Go back" class="btn-floating"><i class="material-icons">reply</i></a> Edit Episodes <span>Of {{$season->tvseries->title}} Season {{$season->season_no}} Episode Number {{$episode->id}}
+    <h4 class="admin-form-text"><a href="{{url('admin/tvseries/seasons/' .$season->id. '/episodes')}}" data-toggle="tooltip" data-original-title="Go back" class="btn-floating"><i class="material-icons">reply</i></a> Edit Episodes <span>Of {{$season->tvseries->title}} Season {{$season->season_no}} Episode Number {{$episode->episode_no}}
       @if ($season->tmdb == 'Y')
         <span class="min-info">{!!$season->tmdb == 'Y' ? '<i class="material-icons">check_circle</i> by tmdb' : ''!!}</span>
       @endif
@@ -108,52 +108,52 @@
    
 
 <!--vimeo API Modal -->
-<div id="myvimeoModal" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-lg">
+    <div id="myvimeoModal" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-lg">
 
-    <!--vimeo API Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h5 class="modal-title">Search From Vimeo API</h5>
-      </div>
-      <div class="modal-body">
-        @if(is_null(env('VIMEO_ACCESS')))
-        <p>Make Sure You Have Added Vimeo API Key in <a href="{{url('admin/api-settings')}}">API Settings</a></p>
-        @endif
-       
-          <div id="vimeo-page-container" style="clear:both;">
-                <div class="vimeo-content-alignment">
-                    <div id="vimeo-page-content" class="" style="overflow:hidden;">
-                        <div class="container-4">
-                            <form action="" method="post" name="vimeo-yt-search" id="vimeo-yt-search">
-                                <input type="search" name="vimeo-search" id="vimeo-search" placeholder="Search..." class="ui-autocomplete-input" autocomplete="off">
-                                <button class="icon" id="vimeo-searchBtn"></button>
-                            </form>
-                        </div>
-                        <div>
-                            <input type="hidden" id="vpageToken" value="">
-                            <div class="btn-group" role="group" aria-label="...">
-                              <button type="button" id="vpageTokenPrev" value="" class="btn btn-default">Prev</button>
-                              <button type="button" id="vpageTokenNext" value="" class="btn btn-default">Next</button>
+        <!--vimeo API Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h5 class="modal-title">Search From Vimeo API</h5>
+          </div>
+          <div class="modal-body">
+            @if(is_null(env('VIMEO_ACCESS')))
+            <p>Make Sure You Have Added Vimeo API Key in <a href="{{url('admin/api-settings')}}">API Settings</a></p>
+            @endif
+           
+              <div id="vimeo-page-container" style="clear:both;">
+                    <div class="vimeo-content-alignment">
+                        <div id="vimeo-page-content" class="" style="overflow:hidden;">
+                            <div class="container-4">
+                                <form action="" method="post" name="vimeo-yt-search" id="vimeo-yt-search">
+                                    <input type="search" name="vimeo-search" id="vimeo-search" placeholder="Search..." class="ui-autocomplete-input" autocomplete="off">
+                                    <button class="icon" id="vimeo-searchBtn"></button>
+                                </form>
                             </div>
-                        </div>
-                        <div id="vimeo-watch-content" class="vimeo-watch-main-col vimeo-card vimeo-card-has-padding">
-                            <ul id="vimeo-watch-related" class="vimeo-video-list">
-                            </ul>
-                        </div>
+                            <div>
+                                <input type="hidden" id="vpageToken" value="">
+                                <div class="btn-group" role="group" aria-label="...">
+                                  <button type="button" id="vpageTokenPrev" value="" class="btn btn-default">Prev</button>
+                                  <button type="button" id="vpageTokenNext" value="" class="btn btn-default">Next</button>
+                                </div>
+                            </div>
+                            <div id="vimeo-watch-content" class="vimeo-watch-main-col vimeo-card vimeo-card-has-padding">
+                                <ul id="vimeo-watch-related" class="vimeo-video-list">
+                                </ul>
+                            </div>
 
+                        </div>
                     </div>
                 </div>
-            </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
       </div>
     </div>
-
-  </div>
-</div>
     <div class="row">
       <div class="col-md-6">
         <div class="admin-form-block z-depth-1">
@@ -165,450 +165,375 @@
                 {!! Form::model($episode, ['method' => 'PATCH', 'action' => ['TvSeriesController@update_episodes', $episode->id], 'files' => true]) !!}
                  
 
-              <div class="form-group{{ $errors->has('title') ? ' has-error' : '' }}">
-                {!! Form::label('title', 'Episode Title') !!}
-                <p class="inline info"> - Enter your episode title</p>
-                {!! Form::text('title', null, ['class' => 'form-control', 'min' => '1']) !!}
-                <small class="text-danger">{{ $errors->first('title') }}</small>
-              </div>
-              <div class="form-group{{ $errors->has('episode_no') ? ' has-error' : '' }}">
-                {!! Form::label('episode_no', 'Episode No.') !!}
-                <p class="inline info"> - (must fill by tmdb)</p>
-                {!! Form::number('episode_no', null, ['class' => 'form-control', 'min' => '1']) !!}
-                <small class="text-danger">{{ $errors->first('episode_no') }}</small>
-              </div>
-
-             
-
-              <div class="form-group{{ $errors->has('duration') ? ' has-error' : '' }}">
-                {!! Form::label('duration', 'Duration') !!} <p class="inline info">- in minutes (exa. 60)</p>
-                {!! Form::text('duration', null, ['class' => 'form-control']) !!}
-                <small class="text-danger">{{ $errors->first('duration') }}</small>
-              </div>
-              <div class="form-group">
-      <div class="row">
-        <div class="col-xs-6">
-          {!! Form::label('', 'Choose custom thumbnail & poster') !!}
-        </div>
-        <div class="col-xs-5 pad-0">
-          <label class="switch for-custom-image">
-            {!! Form::checkbox('', 1, 0, ['class' => 'checkbox-switch']) !!}
-            <span class="slider round"></span>
-          </label>
-        </div>
-      </div>
-    </div>
-    <div class="upload-image-main-block" style="display: none;">
-      <div class="row">
-       
-          <div class="form-group{{ $errors->has('thumbnail') ? ' has-error' : '' }} input-file-block">
-            {!! Form::label('thumbnail', 'Thumbnail') !!} - <p class="info">Help block text</p>
-            {!! Form::file('thumbnail', ['class' => 'input-file', 'id'=>'thumbnail']) !!}
-            <label for="thumbnail" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Thumbnail">
-              <i class="icon fa fa-check"></i>
-              <span class="js-fileName">Choose a File</span>
-            </label>
-            <p class="info">Choose custom thumbnail</p>
-            <small class="text-danger">{{ $errors->first('thumbnail') }}</small>
-          </div>
-      
-      </div>
-    </div>
-              <div class="form-group{{ $errors->has('a_language') ? ' has-error' : '' }}">
-                  {!! Form::label('a_language', 'Audio Languages') !!}
-                  <p class="inline info"> - Please select audio language</p>
-                  <div class="input-group">
-                    {!! Form::select('a_language[]', $a_lans, null, ['class' => 'form-control select2', 'multiple']) !!}
-                    <a href="#" data-toggle="modal" data-target="#AddLangModal" class="input-group-addon"><i class="material-icons left">add</i></a>
+                  <div class="form-group{{ $errors->has('title') ? ' has-error' : '' }}">
+                    {!! Form::label('title', 'Episode Title') !!}
+                    <p class="inline info"> - Enter your episode title</p>
+                    {!! Form::text('title', null, ['class' => 'form-control', 'min' => '1']) !!}
+                    <small class="text-danger">{{ $errors->first('title') }}</small>
                   </div>
-                  <small class="text-danger">{{ $errors->first('a_language') }}</small>
-              </div>
-                 {{-- select to upload code start from here --}}
-      <div class="form-group{{ $errors->has('selecturl') ? ' has-error' : '' }}">
-        {!! Form::label('selecturls', 'Add Video') !!}
-        <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please select one of the options to add Video/Movie"></i>
-          <select class="form-control select2" id="selecturl" name="selecturl">
-          <option></option>
-          @if($video_link['iframeurl']!='')
-          <option value="iframeurl" selected="">IFrame URL</option>
-          @else
-            <option value="iframeurl">IFrame URL</option>
-          @endif
-          
-          <option value="youtubeapi">Youtube Api</option>
-           <option value="vimeoapi">Vimeo Api</option>
-           @if($video_link['ready_url']!='')
-           <option value="customurl" selected="">Custom URL/ Youtube URL/ Vimeo URL</option>
-            @else
-             <option value="customurl">Custom URL/ Youtube URL/ Vimeo URL</option>
-          @endif
-           {{-- @if($video_link['upload_video']!='')
-            <option value="uploadvideo" selected="">Upload Video</option>
-            @else
-               <option value="uploadvideo">Upload Video</option>
-          @endif --}}
 
-          <option {{ $video_link['ready_url'] =='' ? "selected" : "" }} value="multiqcustom">Multi Quality Custom URL</option>
-
-        </select>
-        <small class="text-danger">{{ $errors->first('selecturl') }}</small>
-      </div>
-
-
-
-            <div id="ifbox" style="{{$video_link['iframeurl']!='' ? '' : "display: none" }}" class="form-group">
-              <label for="iframeurl">IFRAME URL: </label> <a data-toggle="modal" data-target="#embdedexamp"><i class="fa fa-question-circle-o"> </i></a>
-              <input  type="text" value="{{$video_link['iframeurl']}}" class="form-control" name="iframeurl" placeholder="">
-            </div>
-
-             <div style="{{ $video_link['ready_url'] != '' ? "" : "display:none" }}" id="custom_url">
-                
-                <p style="color: red" class="inline info">Upload videos not support wmv and mkv video format !</p>
-                <br>
-                <p class="inline info">Openload, Google drive and other url add here!</p>
-                <br><br>
-                <div class="row">
-                  <div class="col-md-8">
-                     <div class="form-group{{ $errors->has('url_360') ? ' has-error' : '' }}">
-                        {!! Form::label('url_360', 'Video Url for 360 Quality') !!}
-                        <p class="inline info"> - Please enter your video url</p>
-                        {!! Form::text('url_360', $video_link['url_360'], ['class' => 'form-control']) !!}
-                        <small class="text-danger">{{ $errors->first('url_360') }}</small>
-                     </div>
+                  <div class="form-group{{ $errors->has('episode_no') ? ' has-error' : '' }}">
+                    {!! Form::label('episode_no', 'Episode No.') !!}
+                    <p class="inline info"> - (must fill by tmdb)</p>
+                    {!! Form::number('episode_no', null, ['class' => 'form-control', 'min' => '1']) !!}
+                    <small class="text-danger">{{ $errors->first('episode_no') }}</small>
                   </div>
-                  <div class="col-md-4">
-                    {!! Form::label('upload_video', 'Upload Video in 360p') !!} - <p class="inline info">Choose A Video</p>
-                    {!! Form::file('upload_video_360', ['class' => 'input-file', 'id'=>'upload_video_360']) !!}
-                    <label for="upload_video_360" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 360p Quality">
-                      <i class="icon fa fa-check"></i>
-                      <span class="js-fileName">Choose a File</span>
-                    </label>
-                    <small class="text-danger">{{ $errors->first('upload_video') }}</small>
+
+                  <div class="form-group{{ $errors->has('duration') ? ' has-error' : '' }}">
+                    {!! Form::label('duration', 'Duration') !!} <p class="inline info">- in minutes (exa. 60)</p>
+                    {!! Form::text('duration', null, ['class' => 'form-control']) !!}
+                    <small class="text-danger">{{ $errors->first('duration') }}</small>
                   </div>
-                </div>
-                <div class="form-group{{ $errors->has('url_480') ? ' has-error' : '' }}">
-                  <div class="row">
-                    <div class="col-md-8">
-                      {!! Form::label('url_480', 'Video Url for 480 Quality') !!}
-                      <p class="inline info"> - Please enter your video url</p>
-                      {!! Form::text('url_480', $video_link['url_480'], ['class' => 'form-control']) !!}
-                      <small class="text-danger">{{ $errors->first('url_480') }}</small>
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="col-xs-6">
+                        {!! Form::label('', 'Choose custom thumbnail & poster') !!}
+                      </div>
+                      <div class="col-xs-5 pad-0">
+                        <label class="switch for-custom-image">
+                          {!! Form::checkbox('', 1, 0, ['class' => 'checkbox-switch']) !!}
+                          <span class="slider round"></span>
+                        </label>
+                      </div>
                     </div>
-                    <div class="col-md-4">
-                       
+                  </div>
+                  <div class="upload-image-main-block" style="display: none;">
+                    <div class="row">
+                      <div class="form-group{{ $errors->has('thumbnail') ? ' has-error' : '' }} input-file-block">
+                        {!! Form::label('thumbnail', 'Thumbnail') !!} - <p class="info">Help block text</p>
+                        {!! Form::file('thumbnail', ['class' => 'input-file', 'id'=>'thumbnail']) !!}
+                        <label for="thumbnail" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Thumbnail">
+                          <i class="icon fa fa-check"></i>
+                          <span class="js-fileName">Choose a File</span>
+                        </label>
+                        <p class="info">Choose custom thumbnail</p>
+                        <small class="text-danger">{{ $errors->first('thumbnail') }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group{{ $errors->has('a_language') ? ' has-error' : '' }}">
+                      {!! Form::label('a_language', 'Audio Languages') !!}
+                      <p class="inline info"> - Please select audio language</p>
+                      <div class="input-group">
+                        {!! Form::select('a_language[]', $a_lans, null, ['class' => 'form-control select2', 'multiple']) !!}
+                        <a href="#" data-toggle="modal" data-target="#AddLangModal" class="input-group-addon"><i class="material-icons left">add</i></a>
+                      </div>
+                      <small class="text-danger">{{ $errors->first('a_language') }}</small>
+                  </div>
+                               {{-- select to upload code start from here --}}
+                  <div class="form-group{{ $errors->has('selecturl') ? ' has-error' : '' }}">
+                    {!! Form::label('selecturls', 'Add Video') !!}
+                    <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please select one of the options to add Video/Movie"></i>
+                      <select class="form-control select2" id="selecturl" name="selecturl">
+                        <option></option>
+                        @if($video_link['iframeurl']!='')
+                        <option value="iframeurl" selected="">IFrame URL</option>
+                        @else
+                          <option value="iframeurl">IFrame URL</option>
+                        @endif
+                        
+                        <option value="youtubeapi">Youtube Api</option>
+                         <option value="vimeoapi">Vimeo Api</option>
+                         @if($video_link['ready_url']!='')
+                         <option value="customurl" selected="">Custom URL/ Youtube URL/ Vimeo URL</option>
+                          @else
+                           <option value="customurl">Custom URL/ Youtube URL/ Vimeo URL</option>
+                      @endif
+                        @if($video_link['url_360'] || $video_link['url_480']|| $video_link['url_720'] || $video_link['url_1080'] !='')
+                         <option  selected=""  value="multiqcustom">Multi Quality Custom URL</option>
+                         @else
+                          <option value="multiqcustom">Multi Quality Custom URL</option>
+                        @endif
+                      </select>
+                    <small class="text-danger">{{ $errors->first('selecturl') }}</small>
+                  </div>
+                  <div id="ifbox" style="{{$video_link['iframeurl']!='' ? '' : "display: none" }}" class="form-group">
+                    <label for="iframeurl">IFRAME URL: </label> <a data-toggle="modal" data-target="#embdedexamp"><i class="fa fa-question-circle-o"> </i></a>
+                    <input  type="text" value="{{$video_link['iframeurl']}}" class="form-control" name="iframeurl" placeholder="">
+                  </div>
+
+                  <div style="{{ $video_link['url_360'] || $video_link['url_480']|| $video_link['url_720'] || $video_link['url_1080'] != '' ? "" : "display:none" }}" id="custom_url">
+                    
+                    <p style="color: red" class="inline info">Upload videos not support wmv and mkv video format !</p>
+                    <br>
+                    <p class="inline info">Openload, Google drive and other url add here!</p>
+                    <br><br>
+                    <div class="row">
+                      <div class="col-md-8">
+                         <div class="form-group{{ $errors->has('url_360') ? ' has-error' : '' }}">
+                            {!! Form::label('url_360', 'Video Url for 360 Quality') !!}
+                            <p class="inline info"> - Please enter your video url</p>
+                            {!! Form::text('url_360', $video_link['url_360'], ['class' => 'form-control']) !!}
+                            <small class="text-danger">{{ $errors->first('url_360') }}</small>
+                         </div>
+                      </div>
+                      <div class="col-md-4">
+                        {!! Form::label('upload_video', 'Upload Video in 360p') !!} - <p class="inline info">Choose A Video</p>
+                        {!! Form::file('upload_video_360', ['class' => 'input-file', 'id'=>'upload_video_360']) !!}
+                        <label for="upload_video_360" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 360p Quality">
+                          <i class="icon fa fa-check"></i>
+                          <span class="js-fileName">Choose a File</span>
+                        </label>
+                        <small class="text-danger">{{ $errors->first('upload_video') }}</small>
+                      </div>
+                    </div>
+                    <div class="form-group{{ $errors->has('url_480') ? ' has-error' : '' }}">
+                      <div class="row">
+                        <div class="col-md-8">
+                          {!! Form::label('url_480', 'Video Url for 480 Quality') !!}
+                          <p class="inline info"> - Please enter your video url</p>
+                          {!! Form::text('url_480', $video_link['url_480'], ['class' => 'form-control']) !!}
+                          <small class="text-danger">{{ $errors->first('url_480') }}</small>
+                        </div>
+                        <div class="col-md-4">
                           {!! Form::label('upload_video', 'Upload Video in 480p') !!} - <p class="inline info">Choose A Video</p>
                           {!! Form::file('upload_video_480', ['class' => 'input-file', 'id'=>'upload_video_480']) !!}
                           <label for="upload_video_480" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 480p Quality">
-                            <i class="icon fa fa-check"></i>
-                            <span class="js-fileName">Choose a File</span>
+                              <i class="icon fa fa-check"></i>
+                              <span class="js-fileName">Choose a File</span>
                           </label>
-                          <small class="text-danger">{{ $errors->first('upload_video') }}</small>
-                        
-                    </div>
-                  </div>
-                    
-                </div>
-                <div class="form-group{{ $errors->has('url_720') ? ' has-error' : '' }}">
-                    
-                    
-                    <div class="row">
-
-                      <div class="col-md-8">
-                        {!! Form::label('url_720', 'Video Url for 720 Quality') !!}
-                        <p class="inline info"> - Please enter your video url</p>
-                        {!! Form::text('url_720', $video_link['url_720'], ['class' => 'form-control']) !!}
-                        <small class="text-danger">{{ $errors->first('url_720') }}</small>
-                      </div>
-
-                      <div class="col-md-4">
-                         {!! Form::label('upload_video', 'Upload Video in 720p') !!} - <p class="inline info">Choose A Video</p>
-                          {!! Form::file('upload_video_720', ['class' => 'input-file', 'id'=>'upload_video_720']) !!}
-                          <label for="upload_video_720" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 720p Quality">
-                            <i class="icon fa fa-check"></i>
-                            <span class="js-fileName">Choose a File</span>
-                          </label>
-                          <small class="text-danger">{{ $errors->first('upload_video') }}</small>
+                            <small class="text-danger">{{ $errors->first('upload_video') }}</small>
+                        </div>
                       </div>
                     </div>
+                    <div class="form-group{{ $errors->has('url_720') ? ' has-error' : '' }}">
+                      <div class="row">
+                        <div class="col-md-8">
+                          {!! Form::label('url_720', 'Video Url for 720 Quality') !!}
+                          <p class="inline info"> - Please enter your video url</p>
+                          {!! Form::text('url_720', $video_link['url_720'], ['class' => 'form-control']) !!}
+                          <small class="text-danger">{{ $errors->first('url_720') }}</small>
+                        </div>
 
-                </div>
-                <div class="form-group{{ $errors->has('url_1080') ? ' has-error' : '' }}">
-                   
-                   <div class="row">
-                     <div class="col-md-8">
-                        {!! Form::label('url_1080', 'Video Url for 1080 Quality') !!}
-                        <p class="inline info"> - Please enter your video url</p>
-                        {!! Form::text('url_1080', $video_link['url_1080'], ['class' => 'form-control']) !!}
-                        <small class="text-danger">{{ $errors->first('url_1080') }}</small>
-                     </div>
+                        <div class="col-md-4">
+                           {!! Form::label('upload_video', 'Upload Video in 720p') !!} - <p class="inline info">Choose A Video</p>
+                            {!! Form::file('upload_video_720', ['class' => 'input-file', 'id'=>'upload_video_720']) !!}
+                            <label for="upload_video_720" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 720p Quality">
+                              <i class="icon fa fa-check"></i>
+                              <span class="js-fileName">Choose a File</span>
+                            </label>
+                            <small class="text-danger">{{ $errors->first('upload_video') }}</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group{{ $errors->has('url_1080') ? ' has-error' : '' }}">
+                     <div class="row">
+                       <div class="col-md-8">
+                          {!! Form::label('url_1080', 'Video Url for 1080 Quality') !!}
+                          <p class="inline info"> - Please enter your video url</p>
+                          {!! Form::text('url_1080', $video_link['url_1080'], ['class' => 'form-control']) !!}
+                          <small class="text-danger">{{ $errors->first('url_1080') }}</small>
+                       </div>
 
-                     <div class="col-md-4">
-                      {!! Form::label('upload_video', 'Upload Video in 1080p') !!} - <p class="inline info">Choose A Video</p>
+                        <div class="col-md-4">
+                          {!! Form::label('upload_video', 'Upload Video in 1080p') !!} - <p class="inline info">Choose A Video</p>
                           {!! Form::file('upload_video_1080', ['class' => 'input-file', 'id'=>'upload_video_1080']) !!}
                           <label for="upload_video_1080" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video in 1080p Quality">
                             <i class="icon fa fa-check"></i>
                             <span class="js-fileName">Choose a File</span>
                           </label>
                           <small class="text-danger">{{ $errors->first('upload_video') }}</small>
+                        </div>
+
+                      </div>
                     </div>
+                  </div>
 
-                   </div>
-    
-                </div>
-             </div>
+                  <div class="modal fade" id="embdedexamp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                          <h6 class="modal-title" id="myModalLabel">Embded URL Examples: </h6>
+                        </div>
+                        <div class="modal-body">
+                          <p style="font-size: 15px;"><b>Youtube:</b> https://www.youtube.com/embed/videoID </p>
 
-          
-          
-          <div class="modal fade" id="embdedexamp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h6 class="modal-title" id="myModalLabel">Embded URL Examples: </h6>
-                </div>
-                <div class="modal-body">
-                  <p style="font-size: 15px;"><b>Youtube:</b> https://www.youtube.com/embed/videoID </p>
+                          <p style="font-size: 15px;"><b>Google Drive:</b> https://drive.google.com/file/d/videoID/preview </p>
 
-                  <p style="font-size: 15px;"><b>Google Drive:</b> https://drive.google.com/file/d/videoID/preview </p>
+                          <p style="font-size: 15px;"><b>Openload:</b> https://openload.co/embed/videoID </p>
 
-                  <p style="font-size: 15px;"><b>Openload:</b> https://openload.co/embed/videoID </p>
+                          <p style="font-size: 15px;"><b>Note:</b> Do not include &lt;iframe&gt; tag before URL</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                  <p style="font-size: 15px;"><b>Note:</b> Do not include &lt;iframe&gt; tag before URL</p>
-                </div>
+                  {{-- youtube and vimeo url --}}
+                  <div id="ready_url" style="{{$video_link['ready_url']!='' ? '' : "display: none" }}"  class="form-group{{ $errors->has('ready_url') ? ' has-error' : '' }}">
+                    <label id="ready_url_text"></label>
+                      <p class="inline info"> - Please enter your video url</p>
+                     {!! Form::text('ready_url', $video_link['ready_url'], ['class' => 'form-control','id'=>'apiUrl']) !!}
+                    <small class="text-danger">{{ $errors->first('ready_url') }}</small>
+                  </div>
+
+                 {{-- upload video --}}
                 
-              </div>
-            </div>
-          </div>
+                  {{-- select to upload or add links code ends here --}}
 
-      {{-- youtube and vimeo url --}}
-              <div id="ready_url" style="{{$video_link['ready_url']!='' ? '' : "display: none" }}"  class="form-group{{ $errors->has('ready_url') ? ' has-error' : '' }}">
-               <label id="ready_url_text"></label>
-               <p class="inline info"> - Please enter your video url</p>
-               {!! Form::text('ready_url', null, ['class' => 'form-control','id'=>'apiUrl']) !!}
-               <small class="text-danger">{{ $errors->first('ready_url') }}</small>
-             </div>
-          
-
-           {{-- upload video --}}
-              <div id="uploadvideo" style="{{$video_link['upload_video']!='' ? '' : "display: none" }}" class="form-group{{ $errors->has('upload_video') ? ' has-error' : '' }} input-file-block">
-                  <label>File Name: <span>{{$video_link['upload_video']}}</span></label>
-              {!! Form::label('upload_video', 'Upload Video') !!} - <p class="inline info">Choose A Video</p>
-              {!! Form::file('upload_video', ['class' => 'input-file', 'id'=>'upload_video']) !!}
-              <label for="upload_video" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video">
-                <i class="icon fa fa-check"></i>
-                <span class="js-fileName">Choose a File</span>
-              </label>
-              <p class="info">Choose Video</p>
-              <small class="text-danger">{{ $errors->first('upload_video') }}</small>
-               <label for="">Upload To AWS </label>
-        <br>
-        <label class="switch">
-         <input type="checkbox" name="upload_aws" class="checkbox-switch" id="upload_aws">
-         <span class="slider round"></span>
-
-       </label>
-            </div>
-            {{-- select to upload or add links code ends here --}}
-          
-
-            
-  <div class="pad_plus_border" id="subtitle_section">
-                <div class="form-group{{ $errors->has('subtitle') ? ' has-error' : '' }}">
-                  <div class="row">
-                    <div class="col-xs-6">
-                      {!! Form::label('subtitle', 'Subtitle') !!}
+                  <div class="pad_plus_border" id="subtitle_section">
+                    <div class="form-group{{ $errors->has('subtitle') ? ' has-error' : '' }}">
+                      <div class="row">
+                        <div class="col-xs-6">
+                          {!! Form::label('subtitle', 'Subtitle') !!}
+                        </div>
+                        <div class="col-xs-5 pad-0">
+                          <label class="switch">
+                            <input {{ $episode->subtitle == 1 ? "checked" : "" }} type="checkbox" id="subtitle_check" name="subtitle">
+                            <span class="slider round"></span>
+                          </label>
+                        </div>
+                      </div>
+                      <div class="col-xs-12">
+                        <small class="text-danger">{{ $errors->first('subtitle') }}</small>
+                      </div>
                     </div>
-                    <div class="col-xs-5 pad-0">
-                      <label class="switch">
-                        {!! Form::checkbox('subtitle', 1, 0, ['class' => 'checkbox-switch']) !!}
-                        <span class="slider round"></span>
-                      </label>
+                   
+                    <div>
+                      <div class="subtitle-box" style="{{ $episode->subtitle == 1 ? "" : "display: none" }}">
+                        <label>Subtitle:</label>
+                        <table class="table table-bordered" id="dynamic_field">  
+                          <tr> 
+                              <td>
+                                 <div class="form-group{{ $errors->has('sub_t') ? ' has-error' : '' }} input-file-block">
+                                  <input type="file" name="sub_t[]"/>
+                                  <p class="info">Choose subtitle file ex. subtitle.srt, or. txt</p>
+                                  <small class="text-danger">{{ $errors->first('sub_t') }}</small>
+                                </div>
+                              </td>
+
+                              <td>
+                                <input type="text" name="sub_lang[]" placeholder="Subtitle Language" class="form-control name_list" />
+                              </td>  
+                              <td><button type="button" name="add" id="add" class="btn btn-xs btn-success">
+                                <i class="fa fa-plus"></i>
+                              </button></td>  
+                          </tr>  
+                        </table>
+                      </div>
                     </div>
                   </div>
-                  <div class="col-xs-12">
-                    <small class="text-danger">{{ $errors->first('subtitle') }}</small>
+
+                  <div class="switch-field">
+                    <div class="switch-title">Want TMDB Data And More Or Custom?</div>
+                    <input type="radio" id="switch_left" class="imdb_btn" name="tmdb" value="Y" {{$episode->tmdb == 'Y' ? 'checked' : ''}}/>
+                    <label for="switch_left">TMDB</label>
+                    <input type="radio" id="switch_right" class="custom_btn" name="tmdb" value="N" {{$episode->tmdb == 'N' ? 'checked' : ''}} />
+                    <label for="switch_right">Custom</label>
                   </div>
-                </div>
-                <div class="form-group{{ $errors->has('subtitle_list') ? ' has-error' : '' }} subtitle_list">
-                    {!! Form::label('subtitle_list', 'Subtitles List') !!}
-                    <div class="input-group">
-                      {!! Form::select('subtitle_list[]', $a_lans, null, ['class' => 'form-control select2', 'multiple']) !!}
-                      <a href="#" data-toggle="modal" data-target="#AddLangModal" class="input-group-addon"><i class="material-icons left">add</i></a>
+
+                  <div id="custom_dtl" class="custom-dtl">
+                    <div class="form-group{{ $errors->has('released') ? ' has-error' : '' }}">
+                      {!! Form::label('released', 'Released') !!} <p class="inline info">- release date</p>
+                      {!! Form::date('released', null, ['class' => 'form-control']) !!}
+                      <small class="text-danger">{{ $errors->first('released') }}</small>
                     </div>
-                    <small class="text-danger">{{ $errors->first('subtitle_list') }}</small>
-                </div>
-                 <div>
-               <label>Subtitle:</label>
-             <table class="table table-bordered" id="dynamic_field">  
-                    <tr> 
-                        <td>
-                           <div class="form-group{{ $errors->has('sub_t') ? ' has-error' : '' }} input-file-block">
-                            <input type="file" name="sub_t[]"/>
-                            <p class="info">Choose subtitle file ex. subtitle.srt, or. txt</p>
-                            <small class="text-danger">{{ $errors->first('sub_t') }}</small>
-                          </div>
-                        </td>
+                    <div class="form-group{{ $errors->has('detail') ? ' has-error' : '' }}">
+                      {!! Form::label('detail', 'Description') !!}
+                      {!! Form::textarea('detail', null, ['class' => 'form-control materialize-textarea', 'rows' => '5']) !!}
+                      <small class="text-danger">{{ $errors->first('detail') }}</small>
+                    </div>
+                  </div>
 
-                        <td>
-                          <input type="text" name="sub_lang[]" placeholder="Subtitle Language" class="form-control name_list" />
-                        </td>  
-                        <td><button type="button" name="add" id="add" class="btn btn-xs btn-success">
-                          <i class="fa fa-plus"></i>
-                        </button></td>  
-                    </tr>  
-            </table>
-            </div>
-              </div>
-              
-    
-              
-
-
-              <div class="switch-field">
-                <div class="switch-title">Want TMDB Data And More Or Custom?</div>
-                <input type="radio" id="switch_left" class="imdb_btn" name="tmdb" value="Y" checked/>
-                <label for="switch_left">TMDB</label>
-                <input type="radio" id="switch_right" class="custom_btn" name="tmdb" value="N" />
-                <label for="switch_right">Custom</label>
-              </div>
-              <div id="custom_dtl" class="custom-dtl">
-                <div class="form-group{{ $errors->has('released') ? ' has-error' : '' }}">
-                  {!! Form::label('released', 'Released') !!} <p class="inline info">- release date</p>
-                  {!! Form::date('released', null, ['class' => 'form-control']) !!}
-                  <small class="text-danger">{{ $errors->first('released') }}</small>
-                </div>
-                <div class="form-group{{ $errors->has('detail') ? ' has-error' : '' }}">
-                  {!! Form::label('detail', 'Description') !!}
-                  {!! Form::textarea('detail', null, ['class' => 'form-control materialize-textarea', 'rows' => '5']) !!}
-                  <small class="text-danger">{{ $errors->first('detail') }}</small>
-                </div>
-              </div>
-
-
-              {!! Form::hidden('seasons_id', $season->id) !!}
-              {!! Form::hidden('tv_series_id', $season->tvseries->id) !!}
-              <div class="btn-group pull-right">
-                <button type="reset" class="btn btn-info"><i class="material-icons left">toys</i> Reset</button>
-                <button type="submit" class="btn btn-success"><i class="material-icons left">add_to_photos</i> Update</button>
-              </div>
-              <div class="clear-both"></div>
-                {!! Form::close() !!}
-              </div>
-           
+                  {!! Form::hidden('seasons_id', $season->id) !!}
+                  {!! Form::hidden('tv_series_id', $season->tvseries->id) !!}
+                  <div class="btn-group pull-right">
+                    <button type="reset" class="btn btn-info"><i class="material-icons left">toys</i> Reset</button>
+                    <button type="submit" class="btn btn-success"><i class="material-icons left">add_to_photos</i> Update</button>
+                  </div>
+                  <div class="clear-both"></div>
+                    {!! Form::close() !!}
+              </div>       
           @endif
         </div>
       </div>
       
-    </div>
-  </div>
+  
 
   <!-- Add Language Modal -->
-  <div id="AddLangModal" class="modal fade" role="dialog">
-    <div class="modal-dialog modal-sm">
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h5 class="modal-title">Add Language</h5>
-        </div>
-        {!! Form::open(['method' => 'POST', 'action' => 'AudioLanguageController@store']) !!}
-        <div class="modal-body">
-          <div class="form-group{{ $errors->has('language') ? ' has-error' : '' }}">
-            {!! Form::label('language', 'Language') !!}
-            {!! Form::text('language', null, ['class' => 'form-control', 'required' => 'required']) !!}
-            <small class="text-danger">{{ $errors->first('language') }}</small>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <div class="btn-group pull-right">
-            <button type="reset" class="btn btn-info">Reset</button>
-            <button type="submit" class="btn btn-success">Create</button>
-          </div>
-        </div>
-        {!! Form::close() !!}
-      </div>
-
-
-
-</div>
-</div>
- <div class="col-md-6" style="background: white;">
-  <div class="admin-form-block z-depth-1">
-   {{--  <a data-target="#submodal" data-toggle="modal"  class="btn btn-success pull-right">Add Subtitle</a> --}}
-    <h5>Subtitles</h5>
-
-    <hr>
-
-    <table class="table table-borderd">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Subtitle Language</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        @foreach($episode->subtitles as $key=> $subtitle)
-        <tr>
-          <td>{{ $key+1 }}</td>
-          <td>{{ $subtitle->sub_lang }}</td>
-          <td>
-           <button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#{{$subtitle->id}}deleteModal"><i class="material-icons">delete</i> </button></td>
-         </tr>
-
-         <div id="{{$subtitle->id}}deleteModal" class="delete-modal modal fade" role="dialog">
-          <div class="modal-dialog modal-sm">
-            <!-- Modal content-->
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <div class="delete-icon"></div>
-              </div>
-              <div class="modal-body text-center">
-                <h4 class="modal-heading">Are You Sure ?</h4>
-                <p>Do you really want to delete these subtitle? This process cannot be undone.</p>
-              </div>
-              <div class="modal-footer">
-                {!! Form::open(['method' => 'POST', 'action' => ['SubtitleController@delete', $subtitle->id]]) !!}
-                <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">No</button>
-                <button type="submit" class="btn btn-danger">Yes</button>
-                {!! Form::close() !!}
+      <div id="AddLangModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h5 class="modal-title">Add Language</h5>
+            </div>
+            {!! Form::open(['method' => 'POST', 'action' => 'AudioLanguageController@store']) !!}
+            <div class="modal-body">
+              <div class="form-group{{ $errors->has('language') ? ' has-error' : '' }}">
+                {!! Form::label('language', 'Language') !!}
+                {!! Form::text('language', null, ['class' => 'form-control', 'required' => 'required']) !!}
+                <small class="text-danger">{{ $errors->first('language') }}</small>
               </div>
             </div>
+            <div class="modal-footer">
+              <div class="btn-group pull-right">
+                <button type="reset" class="btn btn-info">Reset</button>
+                <button type="submit" class="btn btn-success">Update</button>
+              </div>
+            </div>
+            {!! Form::close() !!}
           </div>
         </div>
-        @endforeach
-      </tbody>
-    </table>
-  </div>
-   
-  </div>
+      </div>
+      <div class="col-md-6">
+        <div class="admin-form-block z-depth-1">
+         {{--  <a data-target="#submodal" data-toggle="modal"  class="btn btn-success pull-right">Add Subtitle</a> --}}
+          <h5>Subtitles</h5>
 
+          <hr>
+
+          <table class="table table-borderd">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Subtitle Language</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @foreach($episode->subtitles as $key=> $subtitle)
+              <tr>
+                <td>{{ $key+1 }}</td>
+                <td>{{ $subtitle->sub_lang }}</td>
+                <td>
+                 <button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#{{$subtitle->id}}deleteModal"><i class="material-icons">delete</i> </button></td>
+               </tr>
+
+               <div id="{{$subtitle->id}}deleteModal" class="delete-modal modal fade" role="dialog">
+                <div class="modal-dialog modal-sm">
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <div class="delete-icon"></div>
+                    </div>
+                    <div class="modal-body text-center">
+                      <h4 class="modal-heading">Are You Sure ?</h4>
+                      <p>Do you really want to delete these subtitle? This process cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                      {!! Form::open(['method' => 'POST', 'action' => ['SubtitleController@delete', $subtitle->id]]) !!}
+                      <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">No</button>
+                      <button type="submit" class="btn btn-danger">Yes</button>
+                      {!! Form::close() !!}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('custom-script')
 
-
-<script>
-     $(document).ready(function() {
-  var SITEURL = '{{URL::to('')}}';
-
- 
-        $.ajax({
-            type: "GET",
-            url: SITEURL + "/admin/tvshow/upload_video/converting",
-            success: function (data) {
-           console.log('Success:',data);
-            },
-            error: function (data) {
-                console.log('Error:', data);
-            }
-        });
-
-    
-     });
-</script>
   <script>
       $('.for-custom-image input').click(function(){
     if($(this).prop("checked") == true){
@@ -619,37 +544,24 @@
     }
   });
     $(document).ready(function(){
-    
-     $("#selecturl").select2({
-        placeholder: "Add Video Through...",
-       
-    });
+   
 
     $('#selecturl').change(function(){  
      selecturl = document.getElementById("selecturl").value;
        if (selecturl == 'iframeurl') {
     $('#ifbox').show();
      $('#subtitle_section').show();
-     $('#uploadvideo').hide();
      $('#ready_url').hide();
      $('#custom_url').hide();
 
-   }else if (selecturl == 'uploadvideo') {
-     $('#uploadvideo').show();
-     $('#ready_url').hide();
-      $('#subtitle_section').show();
-       $('#ifbox').hide();
-       $('#custom_url').hide();
    }else if (selecturl=='customurl') {
     $('#custom_url').hide();
       $('#ready_url_text').text('Enter Custom URL or Vimeo or Youtube URL');
      $('#ready_url').show();
        $('#ifbox').hide();
         $('#subtitle_section').show();
-     $('#uploadvideo').hide();
    }
     else if (selecturl == 'youtubeapi') {
-   $('#uploadvideo').hide();
     $('#subtitle_section').show();
    $('#ready_url').show();
  $('#custom_url').hide();
@@ -658,7 +570,6 @@
 
  }else if(selecturl=='vimeoapi'){
    $('#ifbox').hide();
-   $('#uploadvideo').hide();
     $('#subtitle_section').show();
    $('#ready_url').show();
    $('#custom_url').hide();
@@ -666,13 +577,13 @@
  }
  else if(selecturl=='multiqcustom'){
    $('#ifbox').hide();
-   $('#uploadvideo').hide();
    $('#ready_url').hide();
    $('#subtitle_section').show();
    $('#custom_url').show();
  }
 
- });  });
+ }); 
+  });
 </script>
 
      
@@ -758,6 +669,17 @@ function youtubeApiCall(){
 }
     </script>
 <script type="text/javascript">
+  var i= 1;
+      $('#add').click(function(){  
+           i++;  
+           $('#dynamic_field').append('<tr id="row'+i+'" class="dynamic-added"><td><input type="file" name="sub_t[]"/></td><td><input type="text" name="sub_lang[]" placeholder="Subtitle Language" class="form-control name_list" /></td><td><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn-sm btn_remove">X</button></td></tr>');  
+      });
+
+      $(document).on('click', '.btn_remove', function(){  
+           var button_id = $(this).attr("id");   
+           $('#row'+button_id+'').remove();  
+      });  
+      
   function setVideoURl(videourls){
     console.log(videourls);
   $('#apiUrl').val(videourls); 
@@ -894,5 +816,16 @@ function vimeoApiCall(){
         }
     });
 });
+</script>
+<script>
+  $('#subtitle_check').on('change',function(){
+
+    if($('#subtitle_check').is(':checked')){
+      $('.subtitle-box').show('fast');
+    }else{
+       $('.subtitle-box').hide('fast');
+    }
+
+  });
 </script>
 @endsection

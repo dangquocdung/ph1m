@@ -3,381 +3,377 @@
 var FWDUVPATB = function(
 		controller
 		){
-		var self = this;
+		var _s = this;
 		var prototype = FWDUVPATB.prototype;
 
-		self.useHEXColorsForSkin_bl = controller.useHEXColorsForSkin_bl;
-		self.main = controller.parent;
-		self.timeBackgroundColor = controller.data.atbTimeBackgroundColor;
-		self.timeTextColorNormal = controller.data.atbTimeTextColorNormal;
-		self.timeTextColorSelected = controller.data.atbTimeTextColorSelected;
-		self.buttonTextNormalColor = controller.data.atbButtonTextNormalColor;
-		self.buttonTextSelectedColor = controller.data.atbButtonTextSelectedColor;
-		self.buttonBackgroundNormalColor = controller.data.atbButtonBackgroundNormalColor;
-		self.buttonBackgroundSelectedColor = controller.data.atbButtonBackgroundSelectedColor;
-		this.isMobile_bl = FWDUVPUtils.isMobile;
-		self.pa = 0;
-		self.pb = 1;
+		_s.useHEX = controller.useHEX;
+		_s.main = controller.prt;
+		_s.timeBackgroundColor = controller._d.atbTimeBackgroundColor;
+		_s.timeTextColorNormal = controller._d.atbTimeTextColorNormal;
+		_s.timeTextColorSelected = controller._d.atbTimeTextColorSelected;
+		_s.buttonTextNormalColor = controller._d.atbButtonTextNormalColor;
+		_s.buttonTextSelectedColor = controller._d.atbButtonTextSelectedColor;
+		_s.buttonBackgroundNormalColor = controller._d.atbButtonBackgroundNormalColor;
+		_s.buttonBackgroundSelectedColor = controller._d.atbButtonBackgroundSelectedColor;
+		_s.isMbl = FWDUVPUtils.isMobile;
+		_s.pa = 0;
+		_s.pb = 1;
 	
 		//##########################################//
-		/* initialize self */
+		/* initialize _s */
 		//##########################################//
-		self.init = function(){
-			self.setOverflow("visible");
-			self.mainHolder_do = new FWDUVPDisplayObject("div");
-			self.addChild(self.mainHolder_do);
+		_s.init = function(){
+			_s.setOverflow("visible");
+			_s.mainHld = new FWDUVPDisplayObject("div");
+			_s.addChild(_s.mainHld);
 			if(controller.repeatBackground_bl){
-				self.mainHolder_do.getStyle().background = "url('" + controller.controllerBkPath_str +  "')";
+				_s.mainHld.getStyle().background = "url('" + controller.controllerBkPath_str +  "')";
 			}else{
-				self.bk_do = new FWDUVPDisplayObject("img");
+				_s.bk_do = new FWDUVPDisplayObject("img");
 				var img = new Image();
 				img.src = controller.controllerBkPath_str;
-				self.bk_do.setScreen(img);
-				self.mainHolder_do.addChild(self.bk_do);
+				_s.bk_do.setScreen(img);
+				_s.mainHld.addChild(_s.bk_do);
 			}
-			self.setupLeftAndRight();
-			self.setupMainScrubber();
+			_s.setupLeftAndRight();
+			_s.setupMainScrubber();
 		};
 
-		self.resize = function(){
-			self.setWidth(controller.stageWidth);
-			self.setHeight(controller.stageHeight);
-			self.mainHolder_do.setWidth(controller.stageWidth);
-			self.mainHolder_do.setHeight(controller.stageHeight);
+		_s.resize = function(){
+			_s.setWidth(controller.sW);
+			_s.setHeight(controller.sH);
+			_s.mainHld.setWidth(controller.sW);
+			_s.mainHld.setHeight(controller.sH);
 
-			if(self.bk_do){
-				self.bk_do.setWidth(controller.stageWidth);
-				self.bk_do.setHeight(controller.stageHeight);
+			if(_s.bk_do){
+				_s.bk_do.setWidth(controller.sW);
+				_s.bk_do.setHeight(controller.sH);
 			}
-			if(self.isShowed_bl){
+			if(_s.isShowed_bl){
 				var offset = 0;
 				if(controller.isMainScrubberOnTop_bl) offset += controller.mainScrubber_do.h - controller.mainScrubberOffestTop - 1;
-				self.mainHolder_do.setY(-self.h - 1 - offset);
+				_s.mainHld.setY(-_s.h - 1 - offset);
 			}
 			
-			self.positionText();
-			self.positionButtons();
-			self.resizeProgress();
-			self.resizeMainScrubber();
+			_s.positionText();
+			_s.positionButtons();
+			_s.resizeProgress();
+			_s.resizeMainScrubber();
 		}
 
-		self.setupLeftAndRight = function(){
+		_s.setupLeftAndRight = function(){
 
-			self.leftText_do = new FWDUVPDisplayObject("div");
-			self.leftText_do.hasTransform3d_bl = false;
-			self.leftText_do.hasTransform2d_bl = false;
-			self.leftText_do.setBackfaceVisibility();
-			self.leftText_do.getStyle().fontFamily = "Arial";
-			self.leftText_do.getStyle().fontSize= "12px";
-			self.leftText_do.getStyle().whiteSpace= "nowrap";
-			self.leftText_do.getStyle().textAlign = "center";
-			self.leftText_do.getStyle().padding = "4px";
-			self.leftText_do.getStyle().paddingLeft = "4px";
-			self.leftText_do.getStyle().paddingRIght = "4px";
-			self.leftText_do.getStyle().color = self.timeTextColorNormal;
-			self.leftText_do.getStyle().backgroundColor = self.timeBackgroundColor;
-			self.leftText_do.getStyle().fontSmoothing = "antialiased";
-			self.leftText_do.getStyle().webkitFontSmoothing = "antialiased";
-			self.leftText_do.getStyle().textRendering = "optimizeLegibility";
-			self.leftText_do.setInnerHTML("00:00");
-			self.mainHolder_do.addChild(self.leftText_do);
+			_s.leftTxt = new FWDUVPDisplayObject("div");
+			_s.leftTxt.hasTransform3d_bl = false;
+			_s.leftTxt.hasTransform2d_bl = false;
+			_s.leftTxt.setBackfaceVisibility();
+			_s.leftTxt.getStyle().fontFamily = "Arial";
+			_s.leftTxt.getStyle().fontSize= "12px";
+			_s.leftTxt.getStyle().whiteSpace= "nowrap";
+			_s.leftTxt.getStyle().textAlign = "center";
+			_s.leftTxt.getStyle().padding = "4px";
+			_s.leftTxt.getStyle().paddingLeft = "4px";
+			_s.leftTxt.getStyle().paddingRIght = "4px";
+			_s.leftTxt.getStyle().color = _s.timeTextColorNormal;
+			_s.leftTxt.getStyle().backgroundColor = _s.timeBackgroundColor;
+			_s.leftTxt.getStyle().fontSmoothing = "antialiased";
+			_s.leftTxt.getStyle().webkitFontSmoothing = "antialiased";
+			_s.leftTxt.getStyle().textRendering = "optimizeLegibility";
+			_s.leftTxt.setInnerHTML("00:00");
+			_s.mainHld.addChild(_s.leftTxt);
 
-			self.rightText_do = new FWDUVPDisplayObject("div");
-			self.rightText_do.hasTransform3d_bl = false;
-			self.rightText_do.hasTransform2d_bl = false;
-			self.rightText_do.setBackfaceVisibility();
-			self.rightText_do.getStyle().fontFamily = "Arial";
-			self.rightText_do.getStyle().fontSize= "12px";
-			self.rightText_do.getStyle().whiteSpace= "nowrap";
-			self.rightText_do.getStyle().textAlign = "center";
-			self.rightText_do.getStyle().padding = "4px";
-			self.rightText_do.getStyle().paddingLeft = "6px";
-			self.rightText_do.getStyle().paddingRIght = "6px";
-			self.rightText_do.getStyle().color = self.timeTextColorNormal;
-			self.rightText_do.getStyle().backgroundColor = self.timeBackgroundColor;
-			self.rightText_do.getStyle().fontSmoothing = "antialiased";
-			self.rightText_do.getStyle().webkitFontSmoothing = "antialiased";
-			self.rightText_do.getStyle().textRendering = "optimizeLegibility";
-			self.rightText_do.setInnerHTML("00:00");
-			self.mainHolder_do.addChild(self.rightText_do);
+			_s.rightTxt = new FWDUVPDisplayObject("div");
+			_s.rightTxt.hasTransform3d_bl = false;
+			_s.rightTxt.hasTransform2d_bl = false;
+			_s.rightTxt.setBackfaceVisibility();
+			_s.rightTxt.getStyle().fontFamily = "Arial";
+			_s.rightTxt.getStyle().fontSize= "12px";
+			_s.rightTxt.getStyle().whiteSpace= "nowrap";
+			_s.rightTxt.getStyle().textAlign = "center";
+			_s.rightTxt.getStyle().padding = "4px";
+			_s.rightTxt.getStyle().paddingLeft = "6px";
+			_s.rightTxt.getStyle().paddingRIght = "6px";
+			_s.rightTxt.getStyle().color = _s.timeTextColorNormal;
+			_s.rightTxt.getStyle().backgroundColor = _s.timeBackgroundColor;
+			_s.rightTxt.getStyle().fontSmoothing = "antialiased";
+			_s.rightTxt.getStyle().webkitFontSmoothing = "antialiased";
+			_s.rightTxt.getStyle().textRendering = "optimizeLegibility";
+			_s.rightTxt.setInnerHTML("00:00");
+			_s.mainHld.addChild(_s.rightTxt);
 		}
 		
 
-		self.setLeftLabel = function(label){
-			self.leftText_do.setInnerHTML(label);
+		_s.setLeftLabel = function(label){
+			_s.leftTxt.setInnerHTML(label);
 		}
 
-		self.setRightLabel = function(label){
-			self.rightText_do.setInnerHTML(label);
+		_s.setRightLabel = function(label){
+			_s.rightTxt.setInnerHTML(label);
 		}
 
-		self.setupInitLabels = function(){
-			self.pa = 0;
-			self.pb = 1;
-			self.updateTime();
-			self.positionText();
-			setTimeout(self.positionText, 300);
+		_s.setupInitLabels = function(){
+			_s.pa = 0;
+			_s.pb = 1;
+			_s.updateTime();
+			_s.positionText();
+			setTimeout(_s.positionText, 300);
 		}
 
-		self.updateTime = function(){
-			var hasHours = FWDUVPUtils.formatTime(self.duration).length > 5;
-			var totalTime = FWDUVPUtils.formatTime(self.duration);
-			self.rightTime = FWDUVPUtils.formatTime(self.duration * self.pb);
-			self.leftTime = FWDUVPUtils.formatTime(self.duration * self.pa);
-			if(self.rightTime.length < 6 && hasHours) self.rightTime = "00:" + self.rightTime; 
+		_s.updateTime = function(){
+			var hasHours = FWDUVPUtils.formatTime(_s.duration).length > 5;
+			var totalTime = FWDUVPUtils.formatTime(_s.duration);
+			_s.rightTime = FWDUVPUtils.formatTime(_s.duration * _s.pb);
+			_s.leftTime = FWDUVPUtils.formatTime(_s.duration * _s.pa);
+			if(_s.rightTime.length < 6 && hasHours) _s.rightTime = "00:" + _s.rightTime; 
 
-			if(self.rightTime.length > 5 && self.leftTime.length < 6) self.leftTime = "00:" + self.leftTime;
-			self.setLeftLabel(self.leftTime);
-			self.setRightLabel(self.rightTime);
+			if(_s.rightTime.length > 5 && _s.leftTime.length < 6) _s.leftTime = "00:" + _s.leftTime;
+			_s.setLeftLabel(_s.leftTime);
+			_s.setRightLabel(_s.rightTime);
 		}
 
-		self.positionText = function(){
-			self.leftText_do.setX(controller.startSpaceBetweenButtons);
-			self.leftText_do.setY(Math.round((controller.stageHeight - self.leftText_do.getHeight())/2));
-			self.rightText_do.setX(controller.stageWidth - controller.startSpaceBetweenButtons - self.rightText_do.getWidth());
-			self.rightText_do.setY(Math.round((controller.stageHeight - self.rightText_do.getHeight())/2));
+		_s.positionText = function(){
+			_s.leftTxt.setX(controller.startSpaceBetweenButtons);
+			_s.leftTxt.setY(Math.round((controller.sH - _s.leftTxt.getHeight())/2));
+			_s.rightTxt.setX(controller.sW - controller.startSpaceBetweenButtons - _s.rightTxt.getWidth());
+			_s.rightTxt.setY(Math.round((controller.sH - _s.rightTxt.getHeight())/2));
 		}
 
 		//################################################//
 		/* Setup main scrubber */
 		//################################################//
-		this.setupMainScrubber = function(){
+		_s.setupMainScrubber = function(){
 			//setup background bar
-			self.mainScrubber_do = new FWDUVPDisplayObject("div");
-			self.mainScrubber_do.setOverflow('visible');
-			self.mainScrubber_do.setY(parseInt((controller.stageHeight - controller.mainScrubberHeight)/2));
-			self.mainScrubber_do.setHeight(controller.mainScrubberHeight);
+			_s.mainScrubber_do = new FWDUVPDisplayObject("div");
+			_s.mainScrubber_do.setOverflow('visible');
+			_s.mainScrubber_do.setY(parseInt((controller.sH - controller.mainScrbH)/2));
+			_s.mainScrubber_do.setHeight(controller.mainScrbH);
 		
 			var mainScrubberBkLeft_img = new Image();
 			mainScrubberBkLeft_img.src = controller.mainScrubberBkLeft_img.src;
 			mainScrubberBkLeft_img.width = controller.mainScrubberBkLeft_img.width;
 			mainScrubberBkLeft_img.height = controller.mainScrubberBkLeft_img.height;
-			self.mainScrubberBkleftText_do = new FWDUVPDisplayObject("img");
-			self.mainScrubberBkleftText_do.setScreen(mainScrubberBkLeft_img);
+			_s.mainScrubberBkLeft_do = new FWDUVPDisplayObject("img");
+			_s.mainScrubberBkLeft_do.setScreen(mainScrubberBkLeft_img);
 
 			var rightImage = new Image();
-			rightImage.src = controller.data.mainScrubberBkRightPath_str;
-			self.mainScrubberBkrightText_do = new FWDUVPDisplayObject("img");
-			self.mainScrubberBkrightText_do.setScreen(rightImage);
-			self.mainScrubberBkrightText_do.setWidth(self.mainScrubberBkleftText_do.w);
-			self.mainScrubberBkrightText_do.setHeight(self.mainScrubberBkleftText_do.h);
+			rightImage.src = controller._d.mainScrubberBkRightPath_str;
+			_s.mainScrubberBkRight_do = new FWDUVPDisplayObject("img");
+			_s.mainScrubberBkRight_do.setScreen(rightImage);
+			_s.mainScrubberBkRight_do.setWidth(_s.mainScrubberBkLeft_do.w);
+			_s.mainScrubberBkRight_do.setHeight(_s.mainScrubberBkLeft_do.h);
 			
 			var middleImage = new Image();
 			middleImage.src = controller.mainScrubberBkMiddlePath_str;
-			if(self.isMobile_bl){
-				self.mainScrubberBkMiddle_do = new FWDUVPDisplayObject("div");	
-				self.mainScrubberBkMiddle_do.getStyle().background = "url('" + controller.mainScrubberBkMiddlePath_str + "') repeat-x";
-			}else{
-				self.mainScrubberBkMiddle_do = new FWDUVPDisplayObject("img");
-				self.mainScrubberBkMiddle_do.setScreen(middleImage);
-			}
-				
-			self.mainScrubberBkMiddle_do.setHeight(controller.mainScrubberHeight);
-			self.mainScrubberBkMiddle_do.setX(controller.scrubbersBkLeftAndRightWidth);
+			
+			_s.mainScrubberBkMiddle_do = new FWDUVPDisplayObject("div");	
+			_s.mainScrubberBkMiddle_do.getStyle().background = "url('" + controller.mainScrubberBkMiddlePath_str + "') repeat-x";
+			
+			_s.mainScrubberBkMiddle_do.setHeight(controller.mainScrbH);
+			_s.mainScrubberBkMiddle_do.setX(controller.scrbsBkLARW);
 
-			self.mainScrubber_do.addChild(self.mainScrubberBkleftText_do);
-			self.mainScrubber_do.addChild(self.mainScrubberBkMiddle_do);
-			self.mainScrubber_do.addChild(self.mainScrubberBkrightText_do);
-			self.mainHolder_do.addChild(self.mainScrubber_do);
+			_s.mainScrubber_do.addChild(_s.mainScrubberBkLeft_do);
+			_s.mainScrubber_do.addChild(_s.mainScrubberBkMiddle_do);
+			_s.mainScrubber_do.addChild(_s.mainScrubberBkRight_do);
+			_s.mainHld.addChild(_s.mainScrubber_do);
 
 			//setup progress bar
-			self.mainScrubberDrag_do = new FWDUVPDisplayObject("div");
-			self.mainScrubberDrag_do.setHeight(controller.mainScrubberHeight);
+			_s.mainScrubberDrag_do = new FWDUVPDisplayObject("div");
+			_s.mainScrubberDrag_do.setHeight(controller.mainScrbH);
 			
-			self.mainScrubberMiddleImage = new Image();
-			self.mainScrubberMiddleImage.src = controller.mainScrubberDragMiddlePath_str;
+			_s.mainScrubberMiddleImage = new Image();
+			_s.mainScrubberMiddleImage.src = controller.mainScrubberDragMiddlePath_str;
 			
-			if(self.useHEXColorsForSkin_bl){
-				self.mainScrubberDragMiddle_do = new FWDUVPDisplayObject("div");
-				self.mainScrubberMiddleImage.onload = function(){
-					var testCanvas = FWDUVPUtils.getCanvasWithModifiedColor(self.mainScrubberMiddleImage, controller.normalButtonsColor_str, true);
-					self.mainSCrubberMiddleCanvas = testCanvas.canvas;
-					self.mainSCrubberDragMiddleImageBackground = testCanvas.image;
-					self.mainScrubberDragMiddle_do.getStyle().background = "url('" + self.mainSCrubberDragMiddleImageBackground.src + "') repeat-x";
+			if(_s.useHEX){
+				_s.mainScrubberDragMiddle_do = new FWDUVPDisplayObject("div");
+				_s.mainScrubberMiddleImage.onload = function(){
+					var testCanvas = FWDUVPUtils.getCanvasWithModifiedColor(_s.mainScrubberMiddleImage, controller.nBC, true);
+					_s.mainSCrubberMiddleCanvas = testCanvas.canvas;
+					_s.mainSCrubberDragMiddleImageBackground = testCanvas.image;
+					_s.mainScrubberDragMiddle_do.getStyle().background = "url('" + _s.mainSCrubberDragMiddleImageBackground.src + "') repeat-x";
 				}
 			}else{
-				self.mainScrubberDragMiddle_do = new FWDUVPDisplayObject("div");	
-				self.mainScrubberDragMiddle_do.getStyle().background = "url('" + controller.mainScrubberDragMiddlePath_str + "') repeat-x";
+				_s.mainScrubberDragMiddle_do = new FWDUVPDisplayObject("div");	
+				_s.mainScrubberDragMiddle_do.getStyle().background = "url('" + controller.mainScrubberDragMiddlePath_str + "') repeat-x";
 			}
 		
-			self.mainScrubberDragMiddle_do.setHeight(controller.mainScrubberHeight);
-			self.mainScrubber_do.addChild(self.mainScrubberDragMiddle_do);
+			_s.mainScrubberDragMiddle_do.setHeight(controller.mainScrbH);
+			_s.mainScrubber_do.addChild(_s.mainScrubberDragMiddle_do);
 			
 
 			// Setup a to b loop buttons
 			FWDUVPTextButton.setPrototype();
-			self.left_do = new FWDUVPTextButton(
+			_s.left_do = new FWDUVPTextButton(
 				'A',
-				 self.buttonTextNormalColor,
-				 self.buttonTextSelectedColor,
-				 self.buttonBackgroundNormalColor,
-				 self.buttonBackgroundSelectedColor,
-				 controller.data.handPath_str,
-				 controller.data.grabPath_str
+				 _s.buttonTextNormalColor,
+				 _s.buttonTextSelectedColor,
+				 _s.buttonBackgroundNormalColor,
+				 _s.buttonBackgroundSelectedColor,
+				 controller._d.handPath_str,
+				 controller._d.grabPath_str
 				 );
-			self.mainScrubber_do.addChild(self.left_do);
-			self.left_do.addListener(FWDUVPTextButton.MOUSE_DOWN, self.aDown);
-			self.left_do.addListener(FWDUVPTextButton.MOUSE_UP, self.aUp);
+			_s.mainScrubber_do.addChild(_s.left_do);
+			_s.left_do.addListener(FWDUVPTextButton.MOUSE_DOWN, _s.aDown);
+			_s.left_do.addListener(FWDUVPTextButton.MOUSE_UP, _s.aUp);
 
 			FWDUVPTextButton.setPrototype();
-			self.right_do = new FWDUVPTextButton(
+			_s.right_do = new FWDUVPTextButton(
 				'B',
-				 self.buttonTextNormalColor,
-				 self.buttonTextSelectedColor,
-				 self.buttonBackgroundNormalColor,
-				 self.buttonBackgroundSelectedColor,
-				 controller.data.handPath_str,
-				 controller.data.grabPath_str
+				 _s.buttonTextNormalColor,
+				 _s.buttonTextSelectedColor,
+				 _s.buttonBackgroundNormalColor,
+				 _s.buttonBackgroundSelectedColor,
+				 controller._d.handPath_str,
+				 controller._d.grabPath_str
 				 );
-			self.mainScrubber_do.addChild(self.right_do);
-			self.right_do.addListener(FWDUVPTextButton.MOUSE_DOWN, self.bDown);
-			self.right_do.addListener(FWDUVPTextButton.MOUSE_UP, self.bUp);
+			_s.mainScrubber_do.addChild(_s.right_do);
+			_s.right_do.addListener(FWDUVPTextButton.MOUSE_DOWN, _s.bDown);
+			_s.right_do.addListener(FWDUVPTextButton.MOUSE_UP, _s.bUp);
 		}
 
-		self.bDown = function(e){
-			self.scrub = true
+		_s.bDown = function(e){
+			_s.scrub = true
 			var vc = FWDUVPUtils.getViewportMouseCoordinates(e.e);	
-			self.lastPresedX = vc.screenX;
-			self.leftXPositionOnPress = self.right_do.getX();
-			if(self.isMobile_bl){
-				window.addEventListener("touchmove", self.bMoveHandler);
+			_s.lastPresedX = vc.screenX;
+			_s.leftXPositionOnPress = _s.right_do.getX();
+			if(_s.isMbl){
+				window.addEventListener("touchmove", _s.bMoveHandler);
 			}else{
-				window.addEventListener("mousemove", self.bMoveHandler);
+				window.addEventListener("mousemove", _s.bMoveHandler);
 			}
-			FWDAnimation.to(self.rightText_do.screen, .8, {css:{color:self.timeTextColorSelected}, ease:Expo.easeOut});
-			self.dispatchEvent(FWDUVPATB.START_TO_SCRUB);
+			FWDAnimation.to(_s.rightTxt.screen, .8, {css:{color:_s.timeTextColorSelected}, ease:Expo.easeOut});
+			_s.dispatchEvent(FWDUVPATB.START_TO_SCRUB);
 		}
 
-		self.bUp = function(e){
-			self.scrub = false;
-			if(self.isMobile_bl){
-				window.removeEventListener("touchmove", self.bMoveHandler);
+		_s.bUp = function(e){
+			_s.scrub = false;
+			if(_s.isMbl){
+				window.removeEventListener("touchmove", _s.bMoveHandler);
 			}else{
-				window.removeEventListener("mousemove", self.bMoveHandler);
+				window.removeEventListener("mousemove", _s.bMoveHandler);
 			}
-			FWDAnimation.to(self.rightText_do.screen, .8, {css:{color:self.timeTextColorNormal}, ease:Expo.easeOut});
-			self.dispatchEvent(FWDUVPATB.STOP_TO_SCRUB);
+			FWDAnimation.to(_s.rightTxt.screen, .8, {css:{color:_s.timeTextColorNormal}, ease:Expo.easeOut});
+			_s.dispatchEvent(FWDUVPATB.STOP_TO_SCRUB);
 		}
 
-		self.bMoveHandler = function(e){
+		_s.bMoveHandler = function(e){
 			if(e.preventDefault) e.preventDefault();
 			var vc = FWDUVPUtils.getViewportMouseCoordinates(e);	
-			self.finalHandlerX = Math.round(self.leftXPositionOnPress + vc.screenX - self.lastPresedX);
-			if(self.finalHandlerX <= Math.round(self.left_do.x + self.left_do.getWidth() + 2)){
-				self.finalHandlerX = Math.round(self.left_do.x + self.left_do.getWidth() + 2);
-			}else if(self.finalHandlerX > self.mainScrubber_do.w - self.right_do.getWidth()){
-				self.finalHandlerX = self.mainScrubber_do.w - self.right_do.getWidth();
+			_s.finalHandlerX = Math.round(_s.leftXPositionOnPress + vc.screenX - _s.lastPresedX);
+			if(_s.finalHandlerX <= Math.round(_s.left_do.x + _s.left_do.getWidth() + 2)){
+				_s.finalHandlerX = Math.round(_s.left_do.x + _s.left_do.getWidth() + 2);
+			}else if(_s.finalHandlerX > _s.mainScrubber_do.w - _s.right_do.getWidth()){
+				_s.finalHandlerX = _s.mainScrubber_do.w - _s.right_do.getWidth();
 			}
-			self.right_do.setX(self.finalHandlerX);
-			self.pb = self.right_do.x/(self.mainScrubber_do.w - self.right_do.getWidth());
-			self.updateTime();
-			self.resizeProgress();
+			_s.right_do.setX(_s.finalHandlerX);
+			_s.pb = _s.right_do.x/(_s.mainScrubber_do.w - _s.right_do.getWidth());
+			_s.updateTime();
+			_s.resizeProgress();
 		}
 
-		self.aDown = function(e){
-			self.scrub = true;
+		_s.aDown = function(e){
+			_s.scrub = true;
 			var vc = FWDUVPUtils.getViewportMouseCoordinates(e.e);	
-			self.lastPresedX = vc.screenX;
-			self.leftXPositionOnPress = self.left_do.getX();
-			if(self.isMobile_bl){
-				window.addEventListener("touchmove", self.aMoveHandler);
+			_s.lastPresedX = vc.screenX;
+			_s.leftXPositionOnPress = _s.left_do.getX();
+			if(_s.isMbl){
+				window.addEventListener("touchmove", _s.aMoveHandler);
 			}else{
-				window.addEventListener("mousemove", self.aMoveHandler);
+				window.addEventListener("mousemove", _s.aMoveHandler);
 			}
-			FWDAnimation.to(self.leftText_do.screen, .8, {css:{color:self.timeTextColorSelected}, ease:Expo.easeOut});
-			self.dispatchEvent(FWDUVPATB.START_TO_SCRUB);
+			FWDAnimation.to(_s.leftTxt.screen, .8, {css:{color:_s.timeTextColorSelected}, ease:Expo.easeOut});
+			_s.dispatchEvent(FWDUVPATB.START_TO_SCRUB);
 		}
 
-		self.aUp = function(e){
-			self.scrub = false;
-			if(self.isMobile_bl){
-				window.removeEventListener("touchmove", self.aMoveHandler);
+		_s.aUp = function(e){
+			_s.scrub = false;
+			if(_s.isMbl){
+				window.removeEventListener("touchmove", _s.aMoveHandler);
 			}else{
-				window.removeEventListener("mousemove", self.aMoveHandler);
+				window.removeEventListener("mousemove", _s.aMoveHandler);
 			}
-			FWDAnimation.to(self.leftText_do.screen, .8, {css:{color:self.timeTextColorNormal}, ease:Expo.easeOut});
-			self.dispatchEvent(FWDUVPATB.STOP_TO_SCRUB);
+			FWDAnimation.to(_s.leftTxt.screen, .8, {css:{color:_s.timeTextColorNormal}, ease:Expo.easeOut});
+			_s.dispatchEvent(FWDUVPATB.STOP_TO_SCRUB);
 		}
 
-		self.aMoveHandler = function(e){
+		_s.aMoveHandler = function(e){
 			if(e.preventDefault) e.preventDefault();
 			var vc = FWDUVPUtils.getViewportMouseCoordinates(e);	
-			self.finalHandlerX = Math.round(self.leftXPositionOnPress + vc.screenX - self.lastPresedX);
-			if(self.finalHandlerX <= 0){
-				self.finalHandlerX = 0;
-			}else if(self.finalHandlerX > Math.round(self.right_do.x - self.left_do.getWidth() - 2)){
-				self.finalHandlerX = Math.round(self.right_do.x - self.left_do.getWidth() - 2);
+			_s.finalHandlerX = Math.round(_s.leftXPositionOnPress + vc.screenX - _s.lastPresedX);
+			if(_s.finalHandlerX <= 0){
+				_s.finalHandlerX = 0;
+			}else if(_s.finalHandlerX > Math.round(_s.right_do.x - _s.left_do.getWidth() - 2)){
+				_s.finalHandlerX = Math.round(_s.right_do.x - _s.left_do.getWidth() - 2);
 			}
-			self.left_do.setX(self.finalHandlerX);
-			self.pa = self.left_do.x/self.mainScrubber_do.w;
-			self.updateTime();
-			self.resizeProgress();
+			_s.left_do.setX(_s.finalHandlerX);
+			_s.pa = _s.left_do.x/_s.mainScrubber_do.w;
+			_s.updateTime();
+			_s.resizeProgress();
 		}
 
-		this.resizeMainScrubber = function(){
-			self.mainScrubberWidth = controller.stageWidth - controller.startSpaceBetweenButtons * 6 - self.leftText_do.getWidth() - self.rightText_do.getWidth();
-			self.mainScrubber_do.setWidth(self.mainScrubberWidth);
-			self.mainScrubber_do.setX(self.leftText_do.getWidth() + controller.startSpaceBetweenButtons * 3);
-			self.mainScrubber_do.setY(parseInt((controller.stageHeight - controller.mainScrubberHeight)/2));
-			self.mainScrubberBkMiddle_do.setWidth(self.mainScrubberWidth - controller.scrubbersBkLeftAndRightWidth * 2);
-			self.mainScrubberBkrightText_do.setX(self.mainScrubberWidth - controller.scrubbersBkLeftAndRightWidth);
+		_s.resizeMainScrubber = function(){
+			_s.maiScrbW = controller.sW - controller.startSpaceBetweenButtons * 6 - _s.leftTxt.getWidth() - _s.rightTxt.getWidth();
+			_s.mainScrubber_do.setWidth(_s.maiScrbW);
+			_s.mainScrubber_do.setX(_s.leftTxt.getWidth() + controller.startSpaceBetweenButtons * 3);
+			_s.mainScrubber_do.setY(parseInt((controller.sH - controller.mainScrbH)/2));
+			_s.mainScrubberBkMiddle_do.setWidth(_s.maiScrbW - controller.scrbsBkLARW * 2);
+			_s.mainScrubberBkRight_do.setX(_s.maiScrbW - controller.scrbsBkLARW);
 		}
 
-		self.positionButtons = function(){
-			self.left_do.setX(self.pa * self.mainScrubber_do.w);
-			self.right_do.setX(self.pb * (self.mainScrubber_do.w - self.right_do.getWidth()));
+		_s.positionButtons = function(){
+			_s.left_do.setX(_s.pa * _s.mainScrubber_do.w);
+			_s.right_do.setX(_s.pb * (_s.mainScrubber_do.w - _s.right_do.getWidth()));
 		}
 
-		self.resizeProgress = function(){
-			self.mainScrubberDragMiddle_do.setX(self.left_do.x + self.left_do.getWidth() + 1);
-			self.mainScrubberDragMiddle_do.setWidth(self.right_do.x - (self.left_do.x + self.left_do.getWidth() + 2));
+		_s.resizeProgress = function(){
+			_s.mainScrubberDragMiddle_do.setX(_s.left_do.x + _s.left_do.getWidth() + 1);
+			_s.mainScrubberDragMiddle_do.setWidth(_s.right_do.x - (_s.left_do.x + _s.left_do.getWidth() + 2));
 		}
 
 		//################################################//
 		/* Hide and show */
 		//################################################//
-		this.show = function(animate){
-			if(self.isShowed_bl) return;
-			self.duration = self.main.totalTimeInSeconds;
-			self.setupInitLabels();
+		_s.show = function(animate){
+			if(_s.isShowed_bl) return;
+			_s.duration = _s.main.totalTimeInSeconds;
+			_s.setupInitLabels();
 			
-			self.positionText();
-			self.positionButtons();
-			self.resizeProgress();
-			self.resizeMainScrubber();
+			_s.positionText();
+			_s.positionButtons();
+			_s.resizeProgress();
+			_s.resizeMainScrubber();
 			setTimeout(function(){
-				self.positionText();
-				self.positionButtons();
-				self.resizeProgress();
-				self.resizeMainScrubber();
+				_s.positionText();
+				_s.positionButtons();
+				_s.resizeProgress();
+				_s.resizeMainScrubber();
 			}, 300);
-			self.isShowed_bl = true;
+			_s.isShowed_bl = true;
 			var offset = 0;
 			if(controller.isMainScrubberOnTop_bl) offset += controller.mainScrubber_do.h - controller.mainScrubberOffestTop - 1;
 			if(animate){
-				FWDAnimation.to(self.mainHolder_do, .8, {y:-self.h - 1 - offset, ease:Expo.easeInOut});
+				FWDAnimation.to(_s.mainHld, .8, {y:-_s.h - 1 - offset, ease:Expo.easeInOut});
 			}else{
-				FWDAnimation.killTweensOf(self.mainHolder_do);
-				self.mainHolder_do.setY(-self.h - 1);
+				FWDAnimation.killTweensOf(_s.mainHld);
+				_s.mainHld.setY(-_s.h - 1);
 			}
-			setTimeout(self.positionButtons, 200);
+			setTimeout(_s.positionButtons, 200);
 			
 		};
 
-		this.hide = function(animate){
-			if(!self.isShowed_bl) return;
-			self.isShowed_bl = false;
+		_s.hide = function(animate){
+			if(!_s.isShowed_bl) return;
+			_s.isShowed_bl = false;
 			if(animate){
-				FWDAnimation.to(self.mainHolder_do, .8, {y:0, ease:Expo.easeInOut});
+				FWDAnimation.to(_s.mainHld, .8, {y:0, ease:Expo.easeInOut});
 			}else{
-				FWDAnimation.killTweensOf(self.mainHolder_do);
-				self.mainHolder_do.setY(0);
+				FWDAnimation.killTweensOf(_s.mainHld);
+				_s.mainHld.setY(0);
 			}
-			setTimeout(self.positionButtons, 200);
+			setTimeout(_s.positionButtons, 200);
 		};
 	
 		
-		self.init();
+		_s.init();
 	};
 	
 	/* set prototype */
@@ -406,148 +402,148 @@ var FWDUVPTextButton = function(
 		cursor2
 		){
 		
-		var self = this;
+		var _s = this;
 		var prototype = FWDUVPTextButton.prototype;
 		
-		this.nImg_img = null;
-		this.sImg_img = null;
+		_s.nImg_img = null;
+		_s.sImg_img = null;
 		
-		this.dumy_do = null;
-		this.cursor = cursor;
-		this.cursor2 = cursor2;
+		_s.dumy_do = null;
+		_s.cursor = cursor;
+		_s.cursor2 = cursor2;
 	
-		this.label_str = label;
-		this.colorN_str = colorN;	
-		this.colorS_str = colorS;
-		this.bkColorN_str = bkColorN;
-		this.bkColorS_str = bkColorS;
+		_s.label_str = label;
+		_s.colorN = colorN;	
+		_s.colorS = colorS;
+		_s.bkColorN = bkColorN;
+		_s.bkColorS = bkColorS;
 	
-		this.isDisabled_bl = false;
-		this.isMobile_bl = FWDUVPUtils.isMobile;
+		_s.isDisabled_bl = false;
+		_s.isMbl = FWDUVPUtils.isMobile;
 		
 		//##########################################//
-		/* initialize this */
+		/* initialize _s */
 		//##########################################//
-		this.init = function(){
-			self.setupMainContainers();
+		_s.init = function(){
+			_s.setupMainContainers();
 			
 		};
 		
 		//##########################################//
 		/* setup main containers */
 		//##########################################//
-		this.setupMainContainers = function(){
+		_s.setupMainContainers = function(){
 			
-			self.hasTransform3d_bl = false;
-			self.hasTransform2d_bl = false;
-			self.setBackfaceVisibility();
-			self.getStyle().display = "inline-block";
-			self.getStyle().clear = "both";
-			self.getStyle().fontFamily = "Arial";
-			self.getStyle().fontSize= "12px";
-			self.getStyle().whiteSpace= "nowrap";
-			self.getStyle().padding = "3px 4px";
-			self.getStyle().color = self.colorN_str;
-			self.getStyle().backgroundColor = self.bkColorN_str;
-			self.getStyle().fontSmoothing = "antialiased";
-			self.getStyle().webkitFontSmoothing = "antialiased";
-			self.getStyle().textRendering = "optimizeLegibility";	
-			self.setInnerHTML(self.label_str);
+			_s.hasTransform3d_bl = false;
+			_s.hasTransform2d_bl = false;
+			_s.setBackfaceVisibility();
+			_s.getStyle().display = "inline-block";
+			_s.getStyle().clear = "both";
+			_s.getStyle().fontFamily = "Arial";
+			_s.getStyle().fontSize= "12px";
+			_s.getStyle().whiteSpace= "nowrap";
+			_s.getStyle().padding = "3px 4px";
+			_s.getStyle().color = _s.colorN;
+			_s.getStyle().backgroundColor = _s.bkColorN;
+			_s.getStyle().fontSmoothing = "antialiased";
+			_s.getStyle().webkitFontSmoothing = "antialiased";
+			_s.getStyle().textRendering = "optimizeLegibility";	
+			_s.setInnerHTML(_s.label_str);
 			
-			self.dumy_do = new FWDUVPDisplayObject("div");
+			_s.dumy_do = new FWDUVPDisplayObject("div");
 			if(FWDUVPUtils.isIE){
-				self.dumy_do.setBkColor("#00FF00");
-				self.dumy_do.setAlpha(0.0001);
+				_s.dumy_do.setBkColor("#00FF00");
+				_s.dumy_do.setAlpha(0.0001);
 			}
-			self.dumy_do.getStyle().cursor = 'grab';
-			self.dumy_do.getStyle().width = "100%";
-			self.dumy_do.getStyle().height = "50px";
-			self.addChild(self.dumy_do);
+			_s.dumy_do.getStyle().cursor = 'grab';
+			_s.dumy_do.getStyle().width = "100%";
+			_s.dumy_do.getStyle().height = "50px";
+			_s.addChild(_s.dumy_do);
 			
-			if(self.hasPointerEvent_bl){
-				self.screen.addEventListener("pointerup", self.onMouseUp);
-				self.screen.addEventListener("pointerover", self.onMouseOver);
-				self.screen.addEventListener("pointerout", self.onMouseOut);
-			}else if(self.screen.addEventListener){	
-				if(!self.isMobile_bl){
-					self.screen.addEventListener("mouseover", self.onMouseOver);
-					self.screen.addEventListener("mouseout", self.onMouseOut);
-					self.screen.addEventListener("mousedown", self.onMouseDown);
+			if(_s.hasPointerEvent_bl){
+				_s.screen.addEventListener("pointerup", _s.onMouseUp);
+				_s.screen.addEventListener("pointerover", _s.onMouseOver);
+				_s.screen.addEventListener("pointerout", _s.onMouseOut);
+			}else if(_s.screen.addEventListener){	
+				if(!_s.isMbl){
+					_s.screen.addEventListener("mouseover", _s.onMouseOver);
+					_s.screen.addEventListener("mouseout", _s.onMouseOut);
+					_s.screen.addEventListener("mousedown", _s.onMouseDown);
 				}
-				self.screen.addEventListener("touchstart", self.onMouseDown);
+				_s.screen.addEventListener("touchstart", _s.onMouseDown);
 			}
 		};
 		
-		this.onMouseOver = function(e){
-			if(self.isDisabled_bl) return;
-			self.setSelectedState();
+		_s.onMouseOver = function(e){
+			if(_s.isDisabled_bl) return;
+			_s.setSelectedState();
 		};
 			
-		this.onMouseOut = function(e){
-			if(self.isDisabled_bl || self.grabed) return;
-			self.setNormalState();
+		_s.onMouseOut = function(e){
+			if(_s.isDisabled_bl || _s.grabed) return;
+			_s.setNormalState();
 		};
 
 
-		this.onMouseDown = function(e){
-			if(self.isDisabled_bl) return;
+		_s.onMouseDown = function(e){
+			if(_s.isDisabled_bl) return;
 		
-			self.grabed = true;
-			if(!self.isMobile_bl){
-				window.addEventListener('mouseup', self.checkUp)
+			_s.grabed = true;
+			if(!_s.isMbl){
+				window.addEventListener('mouseup', _s.checkUp)
 			}else{
-				window.addEventListener('touchend', self.checkUp)
+				window.addEventListener('touchend', _s.checkUp)
 			}
-			self.dumy_do.getStyle().cursor = 'grabbing';
+			_s.dumy_do.getStyle().cursor = 'grabbing';
 			document.getElementsByTagName("body")[0].style.cursor = 'grabbing';
 
-			self.dispatchEvent(FWDUVPTextButton.MOUSE_DOWN, {e:e});
+			_s.dispatchEvent(FWDUVPTextButton.MOUSE_DOWN, {e:e});
 		};
 
-		this.checkUp = function(e){
+		_s.checkUp = function(e){
 			var vc = FWDUVPUtils.getViewportMouseCoordinates(e);	
-			if(!FWDUVPUtils.hitTest(self.screen, vc.screenX, vc.screenY)){
-				self.setNormalState();	
-				if(!self.isMobile_bl){
-					window.removeEventListener('mouseup', self.checkUp);
+			if(!FWDUVPUtils.hitTest(_s.screen, vc.screenX, vc.screenY)){
+				_s.setNormalState();	
+				if(!_s.isMbl){
+					window.removeEventListener('mouseup', _s.checkUp);
 				}else{
-					window.addEventListener('touchend', self.checkUp);
+					window.addEventListener('touchend', _s.checkUp);
 				}
 			}
-			self.grabed = false;
-			self.dumy_do.getStyle().cursor = 'grab';
+			_s.grabed = false;
+			_s.dumy_do.getStyle().cursor = 'grab';
 			document.getElementsByTagName("body")[0].style.cursor = 'auto';
-			self.dispatchEvent(FWDUVPTextButton.MOUSE_UP);
+			_s.dispatchEvent(FWDUVPTextButton.MOUSE_UP);
 		}
 
 		//####################################//
 		/* Set normal / selected state */
 		//####################################//
-		this.setNormalState = function(animate){
-			FWDAnimation.to(self.screen, .8, {css:{color:self.colorN_str, backgroundColor:self.bkColorN_str}, ease:Expo.easeOut});
+		_s.setNormalState = function(animate){
+			FWDAnimation.to(_s.screen, .8, {css:{color:_s.colorN, backgroundColor:_s.bkColorN}, ease:Expo.easeOut});
 		};
 		
-		this.setSelectedState = function(animate){
-			FWDAnimation.to(self.screen, .8, {css:{color:self.colorS_str, backgroundColor:self.bkColorS_str}, ease:Expo.easeOut});
+		_s.setSelectedState = function(animate){
+			FWDAnimation.to(_s.screen, .8, {css:{color:_s.colorS, backgroundColor:_s.bkColorS}, ease:Expo.easeOut});
 		};
 
-		this.disable = function(){
-			this.onMouseOver();
-			this.dumy_do.setButtonMode(false);
-			FWDAnimation.to(self, .8, {alpha:.4, ease:Expo.easeOut});
-			this.isDisabled_bl = true;
+		_s.disable = function(){
+			_s.onMouseOver();
+			_s.dumy_do.setButtonMode(false);
+			FWDAnimation.to(_s, .8, {alpha:.4, ease:Expo.easeOut});
+			_s.isDisabled_bl = true;
 		}
 		
-		this.enable = function(){
-			this.isDisabled_bl = false;
-			this.onMouseOut();
-			this.dumy_do.setButtonMode(true);
-			FWDAnimation.to(self, .8, {alpha:1, ease:Expo.easeOut});
+		_s.enable = function(){
+			_s.isDisabled_bl = false;
+			_s.onMouseOut();
+			_s.dumy_do.setButtonMode(true);
+			FWDAnimation.to(_s, .8, {alpha:1, ease:Expo.easeOut});
 			
 		}
 		
 	
-		self.init();
+		_s.init();
 	};
 	
 	/* set prototype */

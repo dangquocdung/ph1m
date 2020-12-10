@@ -1,9 +1,7 @@
-
-
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<title>Watch  - {{ $season['tvseries']['title'] }}</title>
+	<title>{{__('staticwords.watch')}}  - {{ $season['tvseries']['title'] }}</title>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="initial-scale=1, maximum-scale=1 user-scalable=no" />
@@ -39,7 +37,9 @@
 					initializeOnlyWhenVisible:"no",
 					useVectorIcons:"no",
 					fillEntireVideoScreen:"no",
+					@if(!isset($season->password) && $season->password == NULL)
 					privateVideoPassword:"428c841430ea18a70f7b06525d4b748a",
+					@endif
 					useHEXColorsForSkin:"no",
 					normalHEXButtonsColor:"#FF0000",
 					selectedHEXButtonsColor:"#000000",
@@ -88,7 +88,11 @@
 					logoPosition:"topRight",
 					logoLink:"{{ config('app.url') }}",
 					logoMargins:5,
+					@if($cpy->chromecast ==1)
 					showChromecastButton:"yes",
+					@else
+					showChromecastButton:"no",
+					@endif
 					//playlists/categories settings
 					showPlaylistsSearchInput:"yes",
 					usePlaylistsSelectBox:"yes",
@@ -96,13 +100,14 @@
 					showPlaylistsByDefault:"no",
 					thumbnailSelectedType:"opacity",
 
-					buttonsMargins:0,
+					buttonsMargins:15,
 					thumbnailMaxWidth:350, 
 					thumbnailMaxHeight:350,
 					horizontalSpaceBetweenThumbnails:40,
 					verticalSpaceBetweenThumbnails:40,
 					inputBackgroundColor:"#333333",
 					inputColor:"#999999",
+					
 					//playlist settings
 					showPlaylistButtonAndPlaylist:"yes",
 					playlistPosition:"right",
@@ -255,7 +260,24 @@
 					atbButtonTextNormalColor:"#888888",
 					atbButtonTextSelectedColor:"#FFFFFF",
 					atbButtonBackgroundNormalColor:"#FFFFFF",
-					atbButtonBackgroundSelectedColor:"#000000"
+					atbButtonBackgroundSelectedColor:"#000000",
+					// context menu
+                    showContextmenu:'yes',
+                    showScriptDeveloper:"no",
+                    contextMenuBackgroundColor:"#1F1F1F",
+                    contextMenuBorderColor:"#1F1F1F",
+                    contextMenuSpacerColor:"#333",
+                    contextMenuItemNormalColor:"#888888",
+                    contextMenuItemSelectedColor:"#FFFFFF",
+                    contextMenuItemDisabledColor:"#333",
+//thumbnails preview
+                    thumbnailsPreviewWidth:196,
+                    thumbnailsPreviewHeight:110,
+                    thumbnailsPreviewBackgroundColor:"#000000",
+                    thumbnailsPreviewBorderColor:"#666",
+                    thumbnailsPreviewLabelBackgroundColor:"#666",
+                    thumbnailsPreviewLabelFontColor:"#FFF",
+                    rewindTime:10
 				});
 });
 </script>
@@ -270,8 +292,8 @@
 	<ul id="playlists" style="display:none;">
 		
 		<li data-source="tvshow" data-playlist-name="{{ $season['tvseries']['title'] }}" data-thumbnail-path="{{asset('images/tvseries/thumbnails/'.$season['tvseries']['thumbnail'])}}">
-			<p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">Title: {{ $season['tvseries']['title'] }}</span></p>
-			<p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">Description: </span>{{ $season['tvseries']['detail'] }}</p>
+			<p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">{{__('staticwords.title')}}: {{ $season['tvseries']['title'] }}</span></p>
+			<p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">{{__('staticwords.description')}}: </span>{{ $season['tvseries']['detail'] }}</p>
 		</li>
 
 
@@ -301,7 +323,8 @@
 		$episod=$epi->id;
 		$tv_id = $season['tvseries']['id'];
 
-		$checkmovie=Session::get('time_'.$tv_id.$episod) ;
+		$checkmovie=Session::get('time_'.$tv_id.$episod);
+		//dd($checkmovie);
 		if (!is_null($checkmovie)) {
 			$mid=$checkmovie['episode_id'];
 			if ($mid==$tv_id) {
@@ -330,12 +353,12 @@
 			@foreach($epi->subtitles as $sub)
 			{source:'{{ url('subtitles/'.$sub->sub_t) }}', label:'{{ $sub->sub_lang }}'},
 			@endforeach
-			]"> 
+			]" @if(isset($pass) && $pass !=NULL) data-is-private="yes" data-private-video-password="{{ $pass }}" @endif> 
 
 			<div data-video-short-description="">
-				<p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">Title: </span>{{ $epi->title }}</p>
+				<p class="minimalDarkCategoriesTitle"><span class="minimialDarkBold">{{__('staticwords.title')}}: </span>{{ $epi->title }}</p>
 				
-				<p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">Description: </span>{{ $epi->detail }}</p>
+				<p class="minimalDarkCategoriesDescription"><span class="minimialDarkBold">{{__('staticwords.description')}}: </span>{{ $epi->detail }}</p>
 			</div>
 
 			@php
@@ -362,7 +385,7 @@
 
 					data-source="{{ asset('adv_upload/video/'.$skipad->ad_video) }}" 
 					@else
-					data-source="{{ $skipad->ad_url }}" @endif data-time-start="{{ $skipad->time }}" data-time-to-hold-ads={{ $skipad->ad_hold }} data-thumbnail-source="{{asset('images/tvseries/thumbnails/'.$season['tvseries']['thumbnail'])}}" data-link="{{ $skipad->ad_target }}" data-target="_blank"></li>
+					data-source="{{ $skipad->ad_url }}" @endif data-time-start="{{ $skipad->time }}" data-time-to-hold-ads="{{ $skipad->ad_hold }}" data-thumbnail-source="{{asset('images/tvseries/thumbnails/'.$season['tvseries']['thumbnail'])}}" data-link="{{ $skipad->ad_target }}" data-target="_blank"></li>
 				</ul>
 				@endif
 

@@ -8,6 +8,21 @@ use Socialite;
 use Auth;
 use App\User;
 
+use App\PaypalSubscription;
+use App\Package;
+use App\Menu;
+use App\Config;
+use App\Multiplescreen;
+
+use Notification;
+use App\Notifications\MyNotification;
+
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str as Str;
+
+
+
 class AuthController extends Controller
 {
    /**
@@ -32,9 +47,17 @@ class AuthController extends Controller
      */
     public function handleProviderCallback($provider)
     {
-        $user = Socialite::driver($provider)->user();
+        dd('x');
+        try{
+            $user = Socialite::driver($provider)->user();
 
+        }
+        catch(\Exception $e){
+            $user = Socialite::driver($provider)->stateless()->user();
+        }
+        
         $authUser = $this->findOrCreateUser($user, $provider);
+        
         Auth::login($authUser, true);
         return redirect()->intended('/');
     }
@@ -48,7 +71,7 @@ class AuthController extends Controller
      */
     public function findOrCreateUser($user, $provider)
     {
-        if($user->email == Null){
+        if($user->email == NULL){
             $user->email = $user->id.'@facebook.com';
         }
         $authUser = User::where('email', $user->email)->first();
@@ -64,10 +87,48 @@ class AuthController extends Controller
                 return $authUser;
             }
         }
-        return User::create([
+        $auth_user = User::create([
             'name'     => $user->name,
             'email'    => $user->email,
+            'status' => 1,  
             $providerField => $user->id,
         ]);
+
+         $config=Config::first();
+        if ($config->free_sub==1) {
+        $ps=PaypalSubscription::where('user_id',$auth_user->id)->first();
+        if ($auth->is_admin!=1) {          
+          if (!isset($ps) ) {
+           
+            $config=Config::first();
+            $start=Carbon::now();
+            $end=$start->addDays($config->free_days);
+            $payment_id=mt_rand(10000000000000, 99999999999999);
+            $subscribed = 1;
+            return $created_subscription = PaypalSubscription::create([
+              'user_id' => $auth_user->id,
+              'payment_id' => $payment_id,
+              'user_name' => $auth_user->name,
+              'package_id' => 0,
+              'price' => 0,
+              'status' => 1,
+              'method' => 'free',
+              'subscription_from' => Carbon::now(),
+              'subscription_to' => $end
+            ]);
+            $to= Str::substr($ps['subscription_to'],0, 10);
+            $from= Str::substr($ps['subscription_from'],0, 10);
+            $desc=__('staticwords.freetrialtext').' '.$from.' to '.$to;
+            $title=$config->free_days.' Days '.__('staticwords.freetrial');
+          
+            $movie_id=NULL;
+            $tvid=NULL;
+            $user=$auth_user->id;
+            User::findOrFail($auth_user->id)->notify(new MyNotification($title,$desc,$movie_id,$tvid,$user));
+          }
+        }
+      }
+
+      return $auth_user;
     }
 }

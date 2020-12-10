@@ -18,7 +18,7 @@ class Blog extends Model
 
     public function users()
     {
-      return $this->belongsTo('App\User');
+      return $this->belongsTo('App\User','user_id','id');
     }
     public function comments(){
 
@@ -29,4 +29,10 @@ class Blog extends Model
 
       return $this->hasMany('App\Subcomment');
     }
+
+    public function blog_m()
+   {
+    return $this->hasmany('App\BlogMenu','blog_id');
+   }
+
 }

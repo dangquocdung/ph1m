@@ -52,7 +52,7 @@
 </style>
 @section('content')
 <div class="admin-form-main-block">
-  <h4 class="admin-form-text"><a href="{{url('admin/movies')}}" data-toggle="tooltip" data-original-title="Go back" class="btn-floating"><i class="material-icons">reply</i></a> Edit Movie</h4>
+  <h4 class="admin-form-text"><a href="{{url('admin/livetv')}}" data-toggle="tooltip" data-original-title="Go back" class="btn-floating"><i class="material-icons">reply</i></a> Edit Movie</h4>
   <div class="row">
     <div class="col-md-6">
      <div class="admin-form-block z-depth-1">
@@ -162,6 +162,13 @@
         <small class="text-danger">{{ $errors->first('title') }}</small>
       </div>
 
+      <div id="movie_slug" class="form-group{{ $errors->has('slug') ? ' has-error' : '' }}">
+        {!! Form::label('slug', 'LiveTv Slug') !!}
+        <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter livetv title"></i>
+        <input type="text" class="form-control" name="slug" value="{{ $movie->title }}">
+        <small class="text-danger">{{ $errors->first('slug') }}</small>
+      </div>
+
 
 
       <div class="form-group">
@@ -183,26 +190,22 @@
         {!! Form::label('selecturls', 'Add Video') !!}
         <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please select one of the options to add Video/Movie"></i>
         <select class="form-control select2" id="selecturl" name="selecturl">
-          <option></option>
+         
           @if($video_link['iframeurl']!='')
           <option value="iframeurl" selected="">IFrame URL</option>
           @else
             <option value="iframeurl">IFrame URL</option>
           @endif
           
-          <option value="youtubeapi">Youtube Api</option>
-           <option value="vimeoapi">Vimeo Api</option>
+         
            @if($video_link['ready_url']!='')
            <option value="customurl" selected="">Custom URL/ Youtube URL/ Vimeo URL</option>
             @else
              <option value="customurl">Custom URL/ Youtube URL/ Vimeo URL</option>
           @endif
-           @if($video_link['upload_video']!='')
-            <option value="uploadvideo" selected="">Upload Video</option>
-            @else
-               <option value="uploadvideo">Upload Video</option>
-          @endif
-           
+          
+
+         
         </select>
        
         <small class="text-danger">{{ $errors->first('selecturl') }}</small>
@@ -259,6 +262,9 @@
 
      </label>
    </div>
+
+  
+
    {{-- select to upload or add links code ends here --}}
 
    <div class="form-group{{ $errors->has('a_language') ? ' has-error' : '' }}">
@@ -399,6 +405,46 @@
               </div>
               <div class="col-xs-12">
                 <small class="text-danger">{{ $errors->first('featured') }}</small>
+              </div>
+            </div>
+
+            <div class="form-group{{ $errors->has('is_protect') ? ' has-error' : '' }}">
+              <div class="row">
+                <div class="col-xs-6">
+                  {!! Form::label('is_protect', 'Protected Video ?') !!}
+                </div>
+                <div class="col-xs-5 pad-0">
+                  <label class="switch">
+                    <input type="checkbox" name="is_protect" class="checkbox-switch" id="is_protect" {{ $movie->is_protect == 1 ? 'checked' : '' }}>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-xs-12">
+                <small class="text-danger">{{ $errors->first('is_protect') }}</small>
+              </div>
+            </div>
+             <div class="search form-group{{ $errors->has('password') ? ' has-error' : '' }} is_protect" style="{{ $movie->is_protect == 1 ? '' : 'display:none' }}" >
+              {!! Form::label('password', 'Protected Password For Video') !!}
+              <input type="password" id="password" name="password" value="{{ $movie->password }}" class="form-control">
+              <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+              <small class="text-danger">{{ $errors->first('password') }}</small>
+            </div>
+
+            <div class="form-group{{ $errors->has('livetvicon') ? ' has-error' : '' }}">
+              <div class="row">
+                <div class="col-xs-6">
+                  {!! Form::label('livetvicon', 'LiveTv Icon Show') !!}
+                </div>
+                <div class="col-xs-5 pad-0">
+                  <label class="switch">                
+                    {!! Form::checkbox('livetvicon', 1, $movie->livetvicon, ['class' => 'checkbox-switch']) !!}
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-xs-12">
+                <small class="text-danger">{{ $errors->first('livetvicon') }}</small>
               </div>
             </div>
             <div class="menu-block">
@@ -713,10 +759,7 @@
 @section('custom-script')
 <script>
   $(document).ready(function(){
-    $("#selecturl").select2({
-      placeholder: "Add Video Through...",
-
-    });
+   
     $('#selecturl').change(function(){  
      selecturl = document.getElementById("selecturl").value;
      if (selecturl == 'iframeurl') {
@@ -724,6 +767,7 @@
        $('#subtitle_section').hide();
     $('#uploadvideo').hide();
     $('#ready_url').hide();
+    
 
 
   }else if (selecturl == 'uploadvideo') {
@@ -731,12 +775,14 @@
       $('#subtitle_section').show();
    $('#ready_url').hide();
    $('#ifbox').hide();
+   
 
  }else if(selecturl=='customurl'){
        $('#ifbox').hide();
        $('#uploadvideo').hide();
        $('#ready_url').show();
           $('#subtitle_section').hide();
+          
        $('#ready_url_text').text('Enter Custom URL or Vimeo or Youtube URL');
    }
     else if (selecturl == 'youtubeapi') {
@@ -754,8 +800,8 @@
       $('#subtitle_section').hide();
   
    $('#ready_url_text').text('Import From Vimeo API');
- }
 
+ }
 
 });
     var i= 1;
@@ -788,6 +834,14 @@
      else if($(this).prop("checked") == false){
       $('.subtitle_list').fadeOut();
       $('#subtitle-file').fadeOut();
+    }
+  });
+  $('input[name="is_protect"]').click(function(){
+    if($(this).prop("checked") == true){
+      $('.is_protect').fadeIn();
+    }
+    else if($(this).prop("checked") == false){
+      $('.is_protect').fadeOut();
     }
   });
    
@@ -1016,6 +1070,18 @@ function youtubeApiCall(){
             $('#myvimeoModal').modal("show"); //Open Modal
         }
     });
+});
+</script>
+<script type="text/javascript">
+    $(".toggle-password").click(function() {
+
+  $(this).toggleClass("fa-eye fa-eye-slash");
+  var input = $($(this).attr("toggle"));
+  if (input.attr("type") == "password") {
+    input.attr("type", "text");
+  } else {
+    input.attr("type", "password");
+  }
 });
 </script>
 @endsection

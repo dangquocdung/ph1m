@@ -14,18 +14,16 @@ class SeoController extends Controller
      */
     public function index()
     {
-         $seo = Seo::whereId(1)->first();
+        $seo = Seo::whereId(1)->first();
         return view('admin.seo', compact('seo'));
     }
 
-    
     public function update(Request $request, $id)
     {
-         $seo = Seo::findOrFail($id);
-         $input = $request->all();
-         $seo->update($input);
-         return back()->with('updated', 'seo has been updated');
+        $seo = Seo::findOrFail($id);
+        $input = $request->all();
+        $seo->update($input);
+        return back()->with('updated', 'seo has been updated');
     }
 
-    
 }

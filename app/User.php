@@ -5,12 +5,11 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Spatie\Permission\Traits\HasRoles;
 use Laravel\Cashier\Billable;
 
 class User extends Authenticatable
 {
-    use Notifiable, HasRoles, Billable, HasApiTokens;
+    use Notifiable, Billable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -19,7 +18,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'image', 'email', 'password', 'is_admin', 'stripe_id', 'card_brand', 'card_last_four', 'trial_ends_at','google_id','facebook_id','gitlab_id','verifyToken','dob','age','is_blocked','code','dob','mobile','status',
-        'braintree_id','is_assistant'
+        'braintree_id','is_assistant','amazon_id'
     ];
 
     /**

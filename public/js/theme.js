@@ -1,4 +1,4 @@
-	/**
+    /**
  * Next Hour - Movie Tv Show & Video Subscription Portal Cms Web and Mobile App
  *
  * This file contains all template JS functions
@@ -108,134 +108,47 @@
   }
 
   // Home Slider
-    $("#home-slider-one").owlCarousel({
-      loop: false, // repetation off then loop: false;
-      items: 1,
-      dots: true,
-      nav: true,
-      autoHeight: true,
-      touchDrag: true,
-      mouseDrag: true,
-      margin: 0,
-      autoplay: true,
-      autoplayTimeout: 7000,
-      slideSpeed: 10000,
-      smartSpeed: 1400,
-      navText: ['<i class="fa fa-angle-left" aria-hidden="true"></i>', '<i class="fa fa-angle-right" aria-hidden="true"></i>'],
-      responsive: {
-        0: {
-            items: 1,
-            nav: false,
-            dots: false,
-        },
-        600: {
-            items: 1,
-            nav: false,
-            dots: false,
-        },
-        768: {
-            items: 1,
-            nav: false,
-        },
-        1100: {
-            items: 1,
-            nav: true,
-            dots: true,
-        }
-      }
-    });
 
-  // Genre Custom Slider 
-    $(".genre-main-slider").owlCarousel({
-      loop: false, // repetation off then loop: false;
-      items: 4,
-      dots: true,
-      nav: false,
-      autoHeight: true,
-      touchDrag: true,
-      mouseDrag: true,
-      margin: 25,
-      autoplay: false,
-      autoplayTimeout: 15000,
-      slideSpeed: 10000,
-      smartSpeed: 1400,
-      navText: ['<i class="fa fa-angle-left" aria-hidden="true"></i>', '<i class="fa fa-angle-right" aria-hidden="true"></i>'],
-      responsive: {
-        0: {
-            items: 1,
-            nav: false,
-            dots: false,
-        },
-        500: {
-            items: 2,
-            nav: false,
-            dots: false,
-        },
-        992: {
-            items: 3,
-            nav: false,
-        },
-        1100: {
-            items: 4,
-            nav: false,
-            dots: true,
-        },
-        1800: {
-            items: 5,
-            nav: false,
-            dots: true,
-        }
-      }
-    });
 
-  // Genre Custom Slider 2
-    $(".genre-prime-slider").owlCarousel({
-      loop: true, // repetation off then loop: false;
-      items: 6,
-      dots: false,
-      nav: true,
-      autoHeight: true,
-      touchDrag: true,
-      mouseDrag: true,
-      margin: 5,
-      autoWidth:true,
-      autoplay: false,
-      autoplayTimeout: 12000,
-      slideSpeed: 10000,
-      smartSpeed: 1400,
-      navText: ['<i class="fa fa-angle-left" aria-hidden="true"></i>', '<i class="fa fa-angle-right" aria-hidden="true"></i>'],
-      responsive: {
-        0: {
-            items: 1,
-            nav: false,
-            dots: false
-        },
-        768: {
-            items: 1,
-            nav: false,
-            dots: false
-        },
-        992: {
-            items: 3,
-            nav: true
-        },
-        1100: {
-            items: 6,
-            nav: true,
-            dots: false
-        },
-        1800: {
-            items: 8,
-            nav: true,
-            dots: false
-        }
-      }
+  // side humburger
+$(document).ready(function () {
+  var trigger = $('.hamburger'),
+      overlay = $('.overlay'),
+     isClosed = false;
+    trigger.click(function () {
+      hamburger_cross();
     });
-
-// Preloader   
-    $(window).on('load', function(){  
-      setTimeout(function(){
-        $('.loading').fadeOut('slow');
-      }, 350);
-    });     
+    function hamburger_cross() {
+      if (isClosed == true) {
+        overlay.hide();
+        trigger.removeClass('is-open');
+        trigger.addClass('is-closed');
+        isClosed = false;
+      } else {
+        overlay.show();
+        trigger.removeClass('is-closed');
+        trigger.addClass('is-open');
+        isClosed = true;
+      }
+  }
+  $('[data-toggle="offcanvas"]').click(function () {
+        $('#wrapper').toggleClass('toggled');
+  });
+});
+    
+// screen Search
+$(function () {
+    $('a[href="#find"]').on('click', function(event) {
+        event.preventDefault();
+        $('#find').addClass('open');
+        $('#find > form > input[type="find"]').focus();
+    });
+    $('#find, #find button.close').on('click keyup', function(event) {
+        if (event.target == this || event.target.className == 'close' || event.keyCode == 27) {
+            $(this).removeClass('open');
+        }
+    });
+});
+     
 })(jQuery);
+

@@ -12,6 +12,7 @@ class Comment extends Model
       'email',
       'comment',
       'blog_id',
+      'user_id'
       	
     ];
 

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\AudioLanguage;
+use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use DB; Use Carbon\Carbon;
+
 class AudioLanguageController extends Controller
 {
     /**
@@ -15,44 +17,40 @@ class AudioLanguageController extends Controller
      */
     public function index(Request $request)
     {
-         $audio_languages = \DB::table('audio_languages')->select('id','language','created_at','updated_at')->get();
+        $audio_languages = \DB::table('audio_languages')->select('id', 'language', 'created_at', 'updated_at')->get();
 
-        if($request->ajax()){
-             return \Datatables::of($audio_languages)
-              ->addIndexColumn()
-              ->addColumn('checkbox',function($row){
-                $html = '<div class="inline">
-                    <input type="checkbox" form="bulk_delete_form" class="filled-in material-checkbox-input" name="checked[]" value="'.$row->id.'" id="checkbox'.$row->id.'">
-                    <label for="checkbox'.$row->id.'" class="material-checkbox"></label>
+        if ($request->ajax()) {
+            return \Datatables::of($audio_languages)
+                ->addIndexColumn()
+                ->addColumn('checkbox', function ($row) {
+                    $html = '<div class="inline">
+                    <input type="checkbox" form="bulk_delete_form" class="filled-in material-checkbox-input" name="checked[]" value="' . $row->id . '" id="checkbox' . $row->id . '">
+                    <label for="checkbox' . $row->id . '" class="material-checkbox"></label>
                   </div>';
 
-                  return $html;
-              })
-               ->addColumn('name',function($row){
-                   
-                   return substr($row->language, 7,-2);
-                    
+                    return $html;
                 })
-            
-               ->addColumn('created_at',function($row){
-                  $datetime = Carbon::parse($row->created_at);
-                    return $datetime->diffForHumans();
-                 
-              })
-                ->addColumn('updated_at',function($row){
-                  $datetime = Carbon::parse($row->updated_at);
-                    return $datetime->diffForHumans();
-                 
-              })
-                 
-              ->addColumn('action',function($row){
-                $btn = ' <div class="admin-table-action-block">
-                  
-                    <a href="'.route('audio_language.edit', $row->id).'" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a><button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#deleteModal'.$row->id.'"><i class="material-icons">delete</i> </button></div>';
-                   
-                   
+                ->addColumn('name', function ($row) {
 
-                   $btn.='<div id="deleteModal'.$row->id.'" class="delete-modal modal fade" role="dialog">
+                    return substr($row->language, 7, -2);
+
+                })
+
+                ->addColumn('created_at', function ($row) {
+                    return date('F d, Y',strtotime($row->created_at));
+
+                })
+                ->addColumn('updated_at', function ($row) {
+                    return date('F d, Y',strtotime($row->updated_at));
+
+                })
+
+                ->addColumn('action', function ($row) {
+                    $btn = ' <div class="admin-table-action-block">
+
+                    <a href="' . route('audio_language.edit', $row->id) . '" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a><button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#deleteModal' . $row->id . '"><i class="material-icons">delete</i> </button></div>';
+
+                    $btn .= '<div id="deleteModal' . $row->id . '" class="delete-modal modal fade" role="dialog">
                 <div class="modal-dialog modal-sm">
                   <!-- Modal content-->
                   <div class="modal-content">
@@ -65,9 +63,9 @@ class AudioLanguageController extends Controller
                       <p>Do you really want to delete these records? This process cannot be undone.</p>
                     </div>
                     <div class="modal-footer">
-                      <form method="POST" action="'.route("audio_language.destroy",$row->id).'">
-                        '.method_field("DELETE").'
-                        '.csrf_field().'
+                      <form method="POST" action="' . route("audio_language.destroy", $row->id) . '">
+                        ' . method_field("DELETE") . '
+                        ' . csrf_field() . '
                           <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">No</button>
                           <button type="submit" class="btn btn-danger">Yes</button>
                       </form>
@@ -75,11 +73,11 @@ class AudioLanguageController extends Controller
                   </div>
                 </div>
               </div>';
-                    
-                return $btn;
-              })
-              ->rawColumns(['checkbox','name','created_at','action','updated_at'])
-              ->make(true);
+
+                    return $btn;
+                })
+                ->rawColumns(['checkbox', 'name', 'created_at', 'action', 'updated_at'])
+                ->make(true);
         }
 
         $a_lans = AudioLanguage::all();
@@ -105,7 +103,7 @@ class AudioLanguageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'language' => 'required'
+            'language' => 'required',
         ]);
         $input = $request->all();
         AudioLanguage::create($input);
@@ -145,7 +143,7 @@ class AudioLanguageController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-           'language' => 'required'
+            'language' => 'required',
         ]);
         $a_lan = AudioLanguage::findOrFail($id);
         $input = $request->all();
@@ -181,6 +179,6 @@ class AudioLanguageController extends Controller
             AudioLanguage::destroy($checked);
         }
 
-        return back()->with('deleted', 'Audio Languages has been deleted');   
+        return back()->with('deleted', 'Audio Languages has been deleted');
     }
 }

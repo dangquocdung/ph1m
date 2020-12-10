@@ -59,11 +59,11 @@
     <div class="modal-content">
       <div class="modal-header text-danger">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Age Restricted Video</h4>
+        <h4 class="modal-title">{{ __('staticwords.agerestrictedvideo') }}</h4>
       </div>
        {!! Form::open(['method' => 'POST', 'action' => 'UsersController@update_age']) !!}
       <div class="modal-body">
-        <h6 style="color: #e74c3c">This is an Age Restricted Video. Please Provide Your Date of Birth</h6><br>
+        <h6 style="color: #e74c3c">{{ __('staticwords.foragerestricttext')}}</h6><br>
   
               
            <div class="search form-group{{ $errors->has('dob') ? ' has-error' : '' }}">
@@ -94,10 +94,10 @@
     <div class="modal-content">
       <div class="modal-header text-danger">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Age Restricted Video</h4>
+        <h4 class="modal-title">{{ __('staticwords.agerestrictedvideo') }}</h4>
       </div>
       <div class="modal-body">
-        <h5 style="color: #c0392b">Sorry! This is Age Restricted Video. You are Not Allowed to Wactch</h5>
+        <h5 style="color: #c0392b">{{__('staticwords.warringforagerestricttext')}}</h5>
       </div>
       </div>
       <div class="modal-footer">

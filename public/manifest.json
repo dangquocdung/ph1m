@@ -45,7 +45,7 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/?launcher=true",
+  "start_url": "/public/?launcher=true",
   "display": "standalone",
   "background_color": "#000",
   "theme_color": "#111"

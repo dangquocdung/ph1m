@@ -363,30 +363,13 @@
              </div>
         
 
-           {{-- upload video --}}
-              <div id="uploadvideo" style="display: none;" class="form-group{{ $errors->has('upload_video') ? ' has-error' : '' }} input-file-block">
-              {!! Form::label('upload_video', 'Upload Video') !!} - <p class="inline info">Choose A Video</p>
-              {!! Form::file('upload_video', ['class' => 'input-file', 'id'=>'upload_video']) !!}
-              <label for="upload_video" class="btn btn-danger js-labelFile" data-toggle="tooltip" data-original-title="Upload Video">
-                <i class="icon fa fa-check"></i>
-                <span class="js-fileName">Choose a File</span>
-              </label>
-              <p class="info">Choose Video</p>
-              <small class="text-danger">{{ $errors->first('upload_video') }}</small>
-               <label for="">Upload To AWS </label>
-        <br>
-        <label class="switch">
-         <input type="checkbox" name="upload_aws" class="checkbox-switch" id="upload_aws">
-         <span class="slider round"></span>
-
-       </label>
-            </div>
+           
             {{-- select to upload or add links code ends here --}}
           
 
             
 
-               <div style="display: none;" id="subtitle_section">
+               
                  <div class="pad_plus_border">
               <div class="form-group{{ $errors->has('subtitle') ? ' has-error' : '' }}">
                 <div class="row">
@@ -395,7 +378,7 @@
                   </div>
                   <div class="col-xs-5 pad-0">
                     <label class="switch">
-                      {!! Form::checkbox('subtitle', 1, 0, ['class' => 'checkbox-switch']) !!}
+                      <input type="checkbox" id="subtitle_check" name="subtitle">
                       <span class="slider round"></span>
                     </label>
                   </div>
@@ -404,15 +387,9 @@
                   <small class="text-danger">{{ $errors->first('subtitle') }}</small>
                 </div>
               </div>
-              <div class="form-group{{ $errors->has('subtitle_list') ? ' has-error' : '' }} subtitle_list">
-                  {!! Form::label('subtitle_list', 'Subtitles List') !!}
-                  <div class="input-group">
-                    {!! Form::select('subtitle_list[]', $a_lans, null, ['class' => 'form-control select2', 'multiple']) !!}
-                    <a href="#" data-toggle="modal" data-target="#AddLangModal" class="input-group-addon"><i class="material-icons left">add</i></a>
-                  </div>
-                  <small class="text-danger">{{ $errors->first('subtitle_list') }}</small>
-              </div>
+           
             </div>
+            <div style="display: none;" class="subtitle-box">
                <label>Subtitle:</label>
              <table class="table table-bordered" id="dynamic_field">  
                     <tr> 
@@ -502,6 +479,7 @@
                   <td>{{$episode->duration}} mins</td>
                   <td>
                     <div class="admin-table-action-block side-table-action">
+                       <a href="{{route('episode.link', $episode->id)}} " data-toggle="tooltip" data-original-title="links"  class="btn-success btn-floating"><i class="material-icons">link</i></a>
                       <a href="{{route('edit_episodes',['id'=>$season->id,'ep_id'=>$episode->id])}}" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a>
                       <button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#{{$episode->id}}deleteModal"><i class="material-icons">delete</i> </button>
                     </div>
@@ -569,25 +547,7 @@
 
 @section('custom-script')
 
-<script>
-     $(document).ready(function() {
-  var SITEURL = '{{URL::to('')}}';
 
- 
-        $.ajax({
-            type: "GET",
-            url: SITEURL + "/admin/tvshow/upload_video/converting",
-            success: function (data) {
-           console.log('Success:',data);
-            },
-            error: function (data) {
-                console.log('Error:', data);
-            }
-        });
-
-    
-     });
-</script>
   <script>
 
      $('.for-custom-image input').click(function(){
@@ -610,17 +570,9 @@
      selecturl = document.getElementById("selecturl").value;
      if (selecturl == 'iframeurl') {
     $('#ifbox').show();
-    $('#uploadvideo').hide();
     $('#subtitle_section').show();
     $('#ready_url').hide();
     $('#custom_url').hide();
-
-   }else if (selecturl == 'uploadvideo') {
-    $('#custom_url').hide();
-    $('#uploadvideo').show();
-    $('#ready_url').hide();
-    $('#subtitle_section').show();
-    $('#ifbox').hide();
 
    }else if (selecturl=='customurl') {
     $('#custom_url').hide();
@@ -628,10 +580,8 @@
     $('#ready_url').show();
     $('#ifbox').hide();
     $('#subtitle_section').show();
-    $('#uploadvideo').hide();
    }
     else if (selecturl == 'youtubeapi') {
-   $('#uploadvideo').hide();
    $('#ready_url').show();
  
    $('#ifbox').hide();
@@ -640,7 +590,6 @@
 $('#custom_url').hide();
  }else if(selecturl=='vimeoapi'){
    $('#ifbox').hide();
-   $('#uploadvideo').hide();
    $('#ready_url').show();
      $('#subtitle_section').show();
  $('#custom_url').hide();
@@ -648,7 +597,6 @@ $('#custom_url').hide();
  }
  else if(selecturl=='multiqcustom'){
    $('#ifbox').hide();
-   $('#uploadvideo').hide();
    $('#ready_url').hide();
    $('#subtitle_section').show();
    $('#custom_url').show();
@@ -999,5 +947,16 @@ function vimeoApiCall(){
         }
     });
 });
+</script>
+<script>
+  $('#subtitle_check').on('change',function(){
+
+    if($('#subtitle_check').is(':checked')){
+      $('.subtitle-box').show('fast');
+    }else{
+       $('.subtitle-box').hide('fast');
+    }
+
+  });
 </script>
 @endsection

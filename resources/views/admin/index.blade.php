@@ -1,18 +1,18 @@
 @extends('layouts.admin')
 @section('title','Dashboard')
 @section('stylesheet')
-   {!! Charts::assets() !!}
-@endsection
+
 @section('content')
   <div class="content-main-block mrg-t-40">
     <h4 class="admin-form-text">Dashboard</h4>
+    <br/>
     <div class="row">
       <div class="col-lg-3 col-xs-6">
         <!-- small box -->
         <a href="{{url('admin/users')}}" class="small-box z-depth-1 hoverable bg-aqua default-color">
           <div class="inner">
             <h3>{{$users_count}}</h3>
-            <p>Total Registered Users</p>
+            <p>Total Users</p>
           </div>
           <div class="icon">
            <i class="fa fa-users" aria-hidden="true"></i>
@@ -57,6 +57,20 @@
           </div>
         </a>
       </div>
+
+      <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <a href="{{url('admin/livetv')}}" class="small-box z-depth-1 hoverable bg-yellow pink darken-4">
+          <div class="inner">
+            <h3>{{$livetv_count}}</h3>
+            <p>Total LiveTv</p>
+          </div>
+          <div class="icon">
+            <i class="fa fa-tv" aria-hidden="true"></i>
+          </div>
+        </a>
+      </div>
+
       <div class="col-lg-3 col-xs-6">
         <!-- small box -->
         <a href="{{url('admin/packages')}}" class="small-box z-depth-1 hoverable bg-yellow secondary-color">
@@ -81,18 +95,7 @@
           </div>
         </a>
       </div>
-      <div class="col-lg-3 col-xs-6">
-        <!-- small box -->
-        <a href="{{url('admin/faqs')}}" class="small-box z-depth-1 hoverable bg-yellow pink darken-4">
-          <div class="inner">
-            <h3>{{$faq_count}}</h3>
-            <p>Total Faqs</p>
-          </div>
-          <div class="icon">
-            <i class="fa fa-question-circle-o" aria-hidden="true"></i>
-          </div>
-        </a>
-      </div>
+     
       <div class="col-lg-3 col-xs-6">
         <!-- small box -->
         <a href="{{url('admin/genres')}}" class="small-box z-depth-1 hoverable bg-aqua  grey darken-2">
@@ -105,29 +108,37 @@
           </div>
         </a>
       </div>
-
-    {{--   <div class="col-lg-3 col-xs-6">
-        <!-- small box -->
-        <a href="{{url('admin/report/revenue')}}" class="small-box z-depth-1 hoverable bg-blue darken-2">
-          <div class="inner">
-            <h3> <i class="{{ $currency_symbol }}" aria-hidden="true"></i> {{$totalrevnue}}</h3>
-            <p>Total Revenue</p>
-          </div>
-          <div class="icon">
-            <i class="{{ $currency_symbol }}" aria-hidden="true"></i>
-          </div>
-        </a>
-      </div> --}}
-
-      
     </div>
     <div class="row">
-      <div class="col-md-6">
-        {!! $chart->render() !!}
+      <div class="col-md-7">
+        <div class="box box-solid">
+          <div class="box-body">
+            {!! $activesubsriber->container() !!}
+          </div>
+        </div>
       </div>
-
-      <div class="col-md-6">
-        {!! $chart2->render() !!}
+      <div class="col-md-5">
+        <div class="box box-solid">
+          <div class="box-body">
+            {!! $piechart->container() !!}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-5">
+        <div class="box box-solid">
+         <div class="box-body">
+          {!! $doughnutchart->container() !!}
+         </div>
+       </div>
+      </div>
+      <div class="col-md-7">
+       <div class="box box-solid">
+         <div class="box-body">
+           {!! $userchart->container() !!}
+         </div>
+       </div>
       </div>
     </div>
     <br>
@@ -146,7 +157,7 @@
                   
                 </div>
                 <div class="widget-user-image">
-                  <img class="img-circle" src="{{ url('images/default.jpg') }}" alt="User Avatar">
+                  <img class="{{ $user->name }}" src="{{ Avatar::create( $user->name )->toBase64() }}" alt="User Avatar">
                 </div>
                 <div class="box-footer">
                   <div class="row">
@@ -172,5 +183,14 @@
 
     </div>
   </div>
+@endsection
+@section('custom-script')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/6.0.6/highcharts.js" charset="utf-8"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js" charset="utf-8"></script>
+{!! $userchart->script() !!}
+{!! $activesubsriber->script() !!}
+{!! $piechart->script() !!}
+{!! $doughnutchart->script() !!}
 @endsection
 

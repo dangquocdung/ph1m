@@ -63,17 +63,23 @@
               <td>{{$home_slide->movie ? $home_slide->movie->title : '-'}}</td>
               <td>{{$home_slide->tvseries ? $home_slide->tvseries->title : '-'}}</td>
               <td>
-                @if($home_slide->movie)
-                  @if ($home_slide->slide_image != null)
-                    <img src="{{asset('images/home_slider/movies/'. $home_slide->slide_image)}}" class="img-responsive" alt="slider-image">
-                  @elseif ($home_slide->movie->poster != null)
-                    <img src="{{asset('images/movies/posters/'. $home_slide->movie->poster)}}" class="img-responsive" alt="slider-image">
-                  @endif
-                @else
-                  @if ($home_slide->slide_image != null)
-                    <img src="{{asset('images/home_slider/shows/'. $home_slide->slide_image)}}" class="img-responsive" alt="slider-image">
-                  @elseif ($home_slide->tvseries->poster != null)
-                    <img src="{{asset('images/tvseries/posters/'. $home_slide->tvseries->poster)}}" class="img-responsive" alt="slider-image">
+                @if(isset($home_slide->slide_image))
+                  @if(isset($home_slide->movie))
+                    @if ($home_slide->slide_image != null)
+                      <img src="{{asset('images/home_slider/movies/'. $home_slide->slide_image)}}" class="img-responsive" alt="slider-image">
+                    @elseif ($home_slide->movie->poster != null)
+                      <img src="{{asset('images/movies/posters/'. $home_slide->movie->poster)}}" class="img-responsive" alt="slider-image">
+                    @endif
+                  @elseif(isset($home_slide->tvseries))
+                    @if ($home_slide->slide_image != null)
+                      <img src="{{asset('images/home_slider/shows/'. $home_slide->slide_image)}}" class="img-responsive" alt="slider-image">
+                    @elseif ($home_slide->tvseries['poster'] != null)
+                      <img src="{{asset('images/tvseries/posters/'. $home_slide->tvseries['poster'])}}" class="img-responsive" alt="slider-image">
+                    @endif
+                  @else
+                    @if ($home_slide->slide_image != null)
+                      <img src="{{asset('images/home_slider/'. $home_slide->slide_image)}}" class="img-responsive" alt="slider-image">
+                    @endif
                   @endif
                 @endif
               </td>

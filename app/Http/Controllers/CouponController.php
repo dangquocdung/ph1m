@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Config;
 use App\CouponCode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use \Stripe\Coupon;
 use \Stripe\Stripe;
-use App\Config;
 
 class CouponController extends Controller
 {
@@ -41,60 +41,60 @@ class CouponController extends Controller
      */
     public function store(Request $request)
     {
-      $stripe_payment = Config::findOrFail(1)->stripe_payment;
-      if ($stripe_payment==1) {
-          Stripe::setApiKey(config('services.stripe.secret'));
-        $request->validate([
-          'coupon_code' => 'required',
-          'duration' => 'required',
-          'max_redemptions' => 'required|integer|min:0'
-        ]);
+        $stripe_payment = Config::findOrFail(1)->stripe_payment;
+        if ($stripe_payment == 1) {
+            Stripe::setApiKey(config('services.stripe.secret'));
+            $request->validate([
+                'coupon_code' => 'required',
+                'duration' => 'required',
+                'max_redemptions' => 'required|integer|min:0',
+            ]);
 
-        $input = $request->all();
-        $redeem_by = Carbon::parse($input['redeem_by']);
-        $redeem_by = strtotime($redeem_by->format('Y/m/d H:i'));
+            $input = $request->all();
+            $redeem_by = Carbon::parse($input['redeem_by']);
+            $redeem_by = strtotime($redeem_by->format('Y/m/d H:i'));
 
-        if (!isset($input['percent_check']))
-        {
-            $input['amount_off'] = $input['amount'];
-            $input['percent_off'] = null;
-        } elseif ($input['percent_check'] == 1) {
-            $input['percent_off'] = $input['amount'];
-            $input['amount_off'] = null;
+            if (!isset($input['percent_check'])) {
+                $input['amount_off'] = $input['amount'];
+                $input['percent_off'] = null;
+            } elseif ($input['percent_check'] == 1) {
+                $input['percent_off'] = $input['amount'];
+                $input['amount_off'] = null;
+            }
+
+            try {
+                $coupon = $coupon_generate = Coupon::create(array(
+                    "percent_off" => $input['percent_off'],
+                    "duration" => $input['duration'],
+                    "duration_in_months" => $input['duration_in_months'],
+                    "id" => $input['coupon_code'],
+                    "currency" => $input['currency'],
+                    "amount_off" => $input['amount_off'],
+                    "max_redemptions" => $input['max_redemptions'],
+                    "redeem_by" => $redeem_by,
+                )
+                );
+
+                CouponCode::create([
+                    "percent_off" => $input['percent_off'],
+                    "duration" => $input['duration'],
+                    "duration_in_months" => $input['duration_in_months'],
+                    "coupon_code" => $input['coupon_code'],
+                    "currency" => $input['currency'],
+                    "amount_off" => $input['amount_off'],
+                    "max_redemptions" => $input['max_redemptions'],
+                    "redeem_by" => $redeem_by,
+                ]);
+                return back()->with('added', 'Coupon has been added.');
+            } catch (\Stripe\Error\InvalidRequest $e) {
+                return back()->with('deleted', 'Coupon code id already exists on stripe');
+            }
+            return back()->with('added', 'Coupon has been added.');
+
+        } else {
+            return back()->with('deleted', 'Please Enable Stripe Payment Method');
         }
 
-        try {
-          $coupon = $coupon_generate = Coupon::create(array(
-              "percent_off" => $input['percent_off'],
-              "duration" => $input['duration'],
-              "duration_in_months" => $input['duration_in_months'],
-              "id" => $input['coupon_code'],
-              "currency" => $input['currency'],
-              "amount_off" => $input['amount_off'],
-              "max_redemptions" => $input['max_redemptions'],
-              "redeem_by" => $redeem_by
-            )
-          );
-
-          CouponCode::create([
-              "percent_off" => $input['percent_off'],
-              "duration" => $input['duration'],
-              "duration_in_months" => $input['duration_in_months'],
-              "coupon_code" => $input['coupon_code'],
-              "currency" => $input['currency'],
-              "amount_off" => $input['amount_off'],
-              "max_redemptions" => $input['max_redemptions'],
-              "redeem_by" => $redeem_by
-          ]);
-        } catch (\Stripe\Error\InvalidRequest $e) {
-          return back()->with('deleted', 'Coupon code id already exists ion stripe');
-        }
-
-       
-      }else{
-         return back()->with('deleted', 'Please Enable Stripe Payment Method');
-      }
-       
     }
 
     /**
@@ -116,7 +116,7 @@ class CouponController extends Controller
      */
     public function edit($id)
     {
-			
+
     }
 
     /**
@@ -139,17 +139,17 @@ class CouponController extends Controller
      */
     public function destroy($id)
     {
-			Stripe::setApiKey(config('services.stripe.secret'));
-			$coupon = CouponCode::findORFail($id);
+        Stripe::setApiKey(config('services.stripe.secret'));
+        $coupon = CouponCode::findORFail($id);
 
-      try {
-        $stripe_coupon = Coupon::retrieve($coupon->coupon_code);
-        $stripe_coupon->delete();
-      } catch (\Stripe\Error\InvalidRequest $e) {
+        try {
+            $stripe_coupon = Coupon::retrieve($coupon->coupon_code);
+            $stripe_coupon->delete();
+        } catch (\Stripe\Error\InvalidRequest $e) {
 
-      }
-      $coupon->delete();
-			return back()->with('deleted', 'Coupon has been deleted');
+        }
+        $coupon->delete();
+        return back()->with('deleted', 'Coupon has been deleted');
     }
 
     public function bulk_delete(Request $request)
@@ -164,17 +164,17 @@ class CouponController extends Controller
         }
 
         foreach ($request->checked as $checked) {
-          $coupon = CouponCode::findORFail($checked);
+            $coupon = CouponCode::findORFail($checked);
 
-          try {
-            $stripe_coupon = Coupon::retrieve($coupon->coupon_code);
-            $stripe_coupon->delete();
-          } catch (\Stripe\Error\InvalidRequest $e) {
+            try {
+                $stripe_coupon = Coupon::retrieve($coupon->coupon_code);
+                $stripe_coupon->delete();
+            } catch (\Stripe\Error\InvalidRequest $e) {
 
-          }
-          $coupon->delete();
+            }
+            $coupon->delete();
         }
 
-        return back()->with('deleted', 'Coupons has been deleted');   
+        return back()->with('deleted', 'Coupons has been deleted');
     }
 }

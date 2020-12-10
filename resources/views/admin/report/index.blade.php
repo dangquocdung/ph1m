@@ -23,7 +23,7 @@
             @foreach ($all_reports->data as $key => $report)
               @php
                 \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-                $date = date("d/m/Y", $report->start);
+               
                 $customer_id = \Stripe\Customer::retrieve($report->customer);
                 $user = Illuminate\Support\Facades\DB::table('users')->where('email', '=', $customer_id->email)->first();
                 $sell = $sell + (($report->plan->amount/100));
@@ -33,7 +33,7 @@
                   {{$key+1}}
                 </td>
                 <td>
-                  {{$date}}
+                  {{date('d/m/Y',$report->items->data[0]->created)}}
                 </td>
                 <td>
                   {{$report->items->data[0]->plan->id}}
@@ -55,10 +55,12 @@
             @endforeach
           @endif
           @if (isset($paypal_subscriptions) && count($paypal_subscriptions) > 0)
-            @foreach ($paypal_subscriptions as $item)
+            @foreach ($paypal_subscriptions as $key => $item)
               @php
+                $sell = 0;
                 $date = $item->created_at->toDateString();
-                $sell = $sell + $item->price;
+                //$sells = $sell + $item->price; 
+
               @endphp
               <tr>
                 <td>
@@ -84,8 +86,10 @@
           @endif
         </tbody>
       </table>
+      <br/>
+      <br/>
       <div class="total-sell" style="margin-top: 20px">
-        <h5>Total Sells <i class="{{$currency_symbol}}"></i>{{isset($sell) ? $sell : ''}}</h5>
+        <h5>Total Sells <i class="{{$currency_symbol}}"></i>{{isset($sells) ? $sells : ''}}</h5>
       </div>
     </div>
   </div>

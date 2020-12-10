@@ -19,6 +19,7 @@ use Braintree_ClientToken;
 use App\PaypalSubscription;
 use Validator;
 use Stripe\Subscription;
+use Auth;
 use App\Multiplescreen;
 use App\Mail\SendInvoiceMailable;
 
@@ -52,42 +53,31 @@ class PaymentController extends Controller
       'subscription_to' => Carbon::createFromTimestamp($txn->current_period_end)
     ]);
     if ($created_subscription) {
-      $screen = $plan->screens;
-      if($screen > 0){
-        $multiplescreen = Multiplescreen::where('user_id',$auth->id)->first();
-         if(isset($multiplescreen)){
-            $multiplescreen->update([
-              'pkg_id' => $plan->id,
-              'user_id' => $auth->id,
-              'screen1' => $screen >= 1 ? $auth->name :  null,
-              'screen2' => $screen >= 2 ? 'NH2-User' :  null,
-              'screen3' => $screen >= 3 ? 'NH3-User' :  null,
-              'screen4' => $screen >= 4 ? 'NH4-User' :  null,
-              'screen5' => $screen >= 5 ? 'NH5-User' :  null,
-              'screen6' => $screen >= 6 ? 'NH6-User' :  null,
-              'screen7' => $screen >= 7 ? 'NH7-User' :  null,
-              'screen8' => $screen >= 8 ? 'NH8-User' :  null,
-              'screen9' => $screen >= 9 ? 'NH9-User' :  null,
-              'screen10' => $screen >= 10 ? 'NH10-User' :  null,
-            ]);
-        }
-        else{
-            $multiplescreen = Multiplescreen::create([
-              'pkg_id' => $plan->id,
-              'user_id' => $auth->id,
-              'screen1' => $screen >= 1 ? $auth->name :  null,
-              'screen2' => $screen >= 2 ? 'NH2-User' :  null,
-              'screen3' => $screen >= 3 ? 'NH3-User' :  null,
-              'screen4' => $screen >= 4 ? 'NH4-User' :  null,
-              'screen5' => $screen >= 5 ? 'NH5-User' :  null,
-              'screen6' => $screen >= 6 ? 'NH6-User' :  null,
-              'screen7' => $screen >= 7 ? 'NH7-User' :  null,
-              'screen8' => $screen >= 8 ? 'NH8-User' :  null,
-              'screen9' => $screen >= 9 ? 'NH9-User' :  null,
-              'screen10' => $screen >= 10 ? 'NH10-User' :  null,
-            ]);
-         }
-      }
+      $auth = Auth::user();
+                $screen = $plan->screens;
+              if($screen > 0){
+                $multiplescreen = Multiplescreen::where('user_id',$auth->id)->first();
+                 if(isset($multiplescreen)){
+                    $multiplescreen->update([
+                      'pkg_id' => $plan->id,
+                      'user_id' => $auth->id,
+                      'screen1' => $screen >= 1 ? $auth->name :  null,
+                      'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                      'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                      'screen4' => $screen >= 4 ? 'Screen4' :  null
+                    ]);
+                }
+                else{
+                    $multiplescreen = Multiplescreen::create([
+                      'pkg_id' => $plan->id,
+                      'user_id' => $auth->id,
+                      'screen1' => $screen >= 1 ? $auth->name :  null,
+                      'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                      'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                      'screen4' => $screen >= 4 ? 'Screen4' :  null
+                    ]);
+                 }
+              }
       try{
         Mail::to($auth->email)->send(new SendInvoiceMailable());
       }

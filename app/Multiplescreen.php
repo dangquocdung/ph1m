@@ -12,4 +12,9 @@ class Multiplescreen extends Model
     public function users(){
     	return $this->hasMany('App\User','id');
     }
+
+    
+    public function package(){
+      return $this->belongsTo('App\Package','pkg_id','id');
+    }
 }

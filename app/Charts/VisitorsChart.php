@@ -2,7 +2,7 @@
 
 namespace App\Charts;
 
-use ConsoleTVs\Charts\Classes\Chartjs\Chart;
+use ConsoleTVs\Charts\Classes\Highcharts\Chart;
 
 class VisitorsChart extends Chart
 {
@@ -14,6 +14,6 @@ class VisitorsChart extends Chart
     public function __construct()
     {
         parent::__construct();
-        $this->options(['legend' => [ 'display' => false ], 'gridLines' => [ 'display' => 'false']]);
+       
     }
 }

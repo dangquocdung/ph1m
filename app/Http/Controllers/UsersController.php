@@ -1,18 +1,19 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Config;
+use App\Mail\WelcomeUser;
+use App\Multiplescreen;
 use App\Package;
 use App\PaypalSubscription;
+use App\User;
+use Auth;
+use Carbon\Carbon;
+use DataTables;
+use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-use Auth;
 use Mail;
-use App\Mail\WelcomeUser;
-use Hash;
-use App\Config;
-use DataTables;
 use Response;
 
 class UsersController extends Controller
@@ -37,49 +38,35 @@ class UsersController extends Controller
         $users = \DB::table('users')->select('id', 'name', 'is_admin', 'email', 'created_at', 'updated_at', 'is_blocked')
             ->where('id', '!=', $auth_id)->get();
 
-        if ($request->ajax())
-        {
-            return \Datatables::of($users)->addIndexColumn()->addColumn('checkbox', function ($user)
-            {
+        if ($request->ajax()) {
+            return \Datatables::of($users)->addIndexColumn()->addColumn('checkbox', function ($user) {
                 $html = '<div class="inline">
                     <input type="checkbox" form="bulk_delete_form" class="filled-in material-checkbox-input" name="checked[]" value="' . $user->id . '" id="checkbox' . $user->id . '">
                     <label for="checkbox' . $user->id . '" class="material-checkbox"></label>
                   </div>';
 
                 return $html;
-            })->addColumn('created_at', function ($user)
-            {
-                $datetime = Carbon::parse($user->created_at);
-                return $datetime->diffForHumans();
+            })->addColumn('created_at', function ($user) {
+                return date('F d, Y',strtotime($user->created_at));
 
-            })->addColumn('updated_at', function ($user)
-            {
+            })->addColumn('updated_at', function ($user) {
 
-                $datetime = Carbon::parse($user->updated_at);
-                return $datetime->diffForHumans();
-            })->editColumn('status', function ($user)
-            {
-                if ($user->is_blocked == 0)
-                {
+               return date('F d, Y',strtotime($user->updated_at));
+            })->editColumn('status', function ($user) {
+                if ($user->is_blocked == 0) {
                     return '<button class="btn btn-danger btn-sm status" data-id="' . $user->id . '">Block</button>';
-                }
-                else
-                {
+                } else {
                     return '<button class="btn btn-success btn-sm status" data-id="' . $user->id . '">Unblock</button>';
                 }
 
-            })->addColumn('action', function ($user)
-            {
+            })->addColumn('action', function ($user) {
                 $btn = ' <div class="admin-table-action-block">
                     <a href="' . route('change_subscription_show', $user->id) . '" data-toggle="tooltip" data-original-title="Change Subscription" class="btn-default btn-floating"><i class="material-icons">compare_arrows</i></a>
                     <a href="' . route('users.edit', $user->id) . '" data-toggle="tooltip" data-original-title="Edit" class="btn-info btn-floating"><i class="material-icons">mode_edit</i></a>';
 
-                if ($user->is_admin == 1)
-                {
+                if ($user->is_admin == 1) {
                     $btn .= '<a type="button" class="btn-danger btn-floating disabled" disabled="disabled" data-toggle="tooltip" data-original-title="You can not delete admin!"><i class="material-icons">delete</i> </a></div>';
-                }
-                else
-                {
+                } else {
                     $btn .= '<button type="button" class="btn-danger btn-floating" data-toggle="modal" data-target="#deleteModal' . $user->id . '"><i class="material-icons">delete</i> </button></div>';
                 }
 
@@ -119,12 +106,9 @@ class UsersController extends Controller
     public function changestatus($id)
     {
         $user = User::findOrFail($id);
-        if ($user->is_blocked == 0)
-        {
+        if ($user->is_blocked == 0) {
             $user->is_blocked = 1;
-        }
-        else
-        {
+        } else {
             $user->is_blocked = 0;
         }
         $user->update();
@@ -148,7 +132,7 @@ class UsersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    { 
+    {
 
         $request->validate(['name' => 'required', 'image' => 'nullable|image|mimes:jpeg,png,jpg', 'email' => 'required|email|unique:users', 'password' => 'required', 'confirm_password' => 'required|same:password']);
 
@@ -156,10 +140,9 @@ class UsersController extends Controller
 
         $dateOfBirth = $request->dob;
 
-        if (isset($request->dob))
-        {
+        if (isset($request->dob)) {
             $today = date("Y-m-d");
-            $diff = date_diff(date_create($dateOfBirth) , date_create($today));
+            $diff = date_diff(date_create($dateOfBirth), date_create($today));
             $age = $diff->format('%y');
             $input['age'] = $age;
 
@@ -167,38 +150,30 @@ class UsersController extends Controller
 
         $input['password'] = bcrypt($request->password);
 
-        if (!isset($input['is_admin']))
-        {
+        if (!isset($input['is_admin'])) {
             $input['is_admin'] = 0;
-        }
-        else
-        {
+        } else {
             $input['is_admin'] = 1;
         }
 
-        if (!isset($input['is_assistant']))
-        {
+        if (!isset($input['is_assistant'])) {
             $input['is_assistant'] = 0;
-        }
-        else
-        {
+        } else {
             $input['is_assistant'] = 1;
         }
 
-        if ($file = $request->file('image'))
-        {
+        if ($file = $request->file('image')) {
             $name = 'user_' . $file->getClientOriginalName();
             $file->move('images/users', $name);
             $input['image'] = $name;
         }
         $input['status'] = '1';
-       
+
         $user = User::create($input);
 
         $config = Config::first();
 
-        if ($config->wel_eml == 1)
-        {
+        if ($config->wel_eml == 1) {
             Mail::to($input['email'])->send(new WelcomeUser($user));
         }
         return back()->with('added', 'User has been created');
@@ -213,7 +188,7 @@ class UsersController extends Controller
     public function show($id)
     {
         //
-        
+
     }
 
     /**
@@ -243,19 +218,17 @@ class UsersController extends Controller
 
         $dateOfBirth = $request->dob;
 
-        if (isset($request->dob))
-        {
+        if (isset($request->dob)) {
             $user->dob = $request->dob;
             $today = date("Y-m-d");
-            $diff = date_diff(date_create($dateOfBirth) , date_create($today));
+            $diff = date_diff(date_create($dateOfBirth), date_create($today));
             $age = $diff->format('%y');
             $user->age = $age;
 
         }
         $user->mobile = $request->mobile;
         $user->save();
-        return back()
-            ->with('added', 'Your Age Has Been Updated');
+        return back()->with('added', 'Your Age Has Been Updated');
     }
 
     public function update(Request $request, $id)
@@ -268,47 +241,35 @@ class UsersController extends Controller
         $user->email = $request->email;
         // $user->is = $request->is_admin;
         $dateOfBirth = $request->dob;
-        if (isset($dateOfBirth))
-        {
+        if (isset($dateOfBirth)) {
             $today = date("Y-m-d");
-            $diff = date_diff(date_create($dateOfBirth) , date_create($today));
+            $diff = date_diff(date_create($dateOfBirth), date_create($today));
             $age = $diff->format('%y');
             $user->age = $age;
             $user->dob = $request->dob;
         }
 
-        if ($request->password == "")
-        {
+        if ($request->password == "") {
             $user->password = $user->password;
-        }
-        else
-        {
+        } else {
             $user->password = Hash::make($request->password);
         }
 
-        if (!isset($request->is_admin))
-        {
+        if (!isset($request->is_admin)) {
             $user->is_admin = 0;
-        }
-        else
-        {
+        } else {
             $user->is_admin = 1;
         }
 
-        if (!isset($request->is_assistant))
-        {
+        if (!isset($request->is_assistant)) {
             $user->is_assistant = 0;
-        }
-        else
-        {
+        } else {
             $user->is_assistant = 1;
         }
 
-        if ($file = $request->file('image'))
-        {
+        if ($file = $request->file('image')) {
             $name = 'user_' . $file->getClientOriginalName();
-            if ($user->image != '')
-            {
+            if ($user->image != '') {
                 unlink(public_path() . '/images/users/' . $user->image);
             }
             $file->move('images/users', $name);
@@ -330,9 +291,13 @@ class UsersController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if ($user->image)
-        {
+        if ($user->image) {
             unlink(public_path() . 'images/users/' . $user->image);
+        }
+        if (isset($user->paypal_subscriptions)) {
+            foreach ($user->paypal_subscriptions as $subscribe_user) {
+                $subscribe_user->delete();
+            }
         }
 
         $user->delete();
@@ -342,19 +307,23 @@ class UsersController extends Controller
 
     public function bulk_delete(Request $request)
     {
-        $validator = Validator::make($request->all() , ['checked' => 'required', ]);
+        $validator = Validator::make($request->all(), ['checked' => 'required']);
 
-        if ($validator->fails())
-        {
+        if ($validator->fails()) {
 
             return back()
                 ->with('deleted', 'Please select one of them to delete');
         }
 
-        foreach ($request->checked as $checked)
-        {
+        foreach ($request->checked as $checked) {
 
             $user = User::findOrFail($checked);
+
+            if (isset($user->paypal_subscriptions)) {
+                foreach ($user->paypal_subscriptions as $subscribe_user) {
+                    $subscribe_user->delete();
+                }
+            }
 
             User::destroy($checked);
         }
@@ -368,24 +337,18 @@ class UsersController extends Controller
 
         $plans = Package::all();
         //$plan_list = Package::pluck('name', 'id')->all();
-        
 
         $user_stripe_plan = null;
         $last_payment = null;
-        if (isset($plans))
-        {
-            if ($user->stripe_id != null)
-            {
-                foreach ($plans as $plan)
-                {
-                    if ($user->subscribed($plan->plan_id))
-                    {
+        if (isset($plans)) {
+            if ($user->stripe_id != null) {
+                foreach ($plans as $plan) {
+                    if ($user->subscribed($plan->plan_id)) {
                         $user_stripe_plan = $plan;
                     }
                 }
             }
-            if (isset($user->paypal_subscriptions) && count($user->paypal_subscriptions) > 0)
-            {
+            if (isset($user->paypal_subscriptions) && count($user->paypal_subscriptions) > 0) {
                 //Check Paypal Subscription of user
                 $last_payment = $user
                     ->paypal_subscriptions
@@ -403,38 +366,27 @@ class UsersController extends Controller
 
         $user = User::findOrFail($request->user_id);
         $change_plan = Package::findOrFail($request->plan_id);
+        $multiplescreen = Multiplescreen::where('user_id', $request->user_id)->first();
 
-        if ($request->user_stripe_plan_id != null)
-        {
+        if ($request->user_stripe_plan_id != null) {
 
             $user_stripe_plan = Package::findOrFail($request->user_stripe_plan_id);
-            $user->subscription($user_stripe_plan->plan_id)
-                ->swap($change_plan->plan_id);
-            return back()
-                ->with('added', 'User subscription has been changed!');
+            $user->subscription($user_stripe_plan->plan_id)->swap($change_plan->plan_id);
+            return back()->with('added', 'User subscription has been changed!');
 
-        }
-        else if ($request->last_payment_id != null)
-        {
+        } else if ($request->last_payment_id != null) {
 
             $last_payment = PaypalSubscription::findOrFail($request->last_payment_id);
             $current_date = Carbon::now();
             $end_date = null;
 
-            if ($change_plan->interval == 'month')
-            {
+            if ($change_plan->interval == 'month') {
                 $end_date = Carbon::now()->addMonths($change_plan->interval_count);
-            }
-            else if ($change_plan->interval == 'year')
-            {
+            } else if ($change_plan->interval == 'year') {
                 $end_date = Carbon::now()->addYears($change_plan->interval_count);
-            }
-            else if ($change_plan->interval == 'week')
-            {
+            } else if ($change_plan->interval == 'week') {
                 $end_date = Carbon::now()->addWeeks($change_plan->interval_count);
-            }
-            else if ($change_plan->interval == 'day')
-            {
+            } else if ($change_plan->interval == 'day') {
                 $end_date = Carbon::now()->addDays($change_plan->interval_count);
             }
 
@@ -446,41 +398,195 @@ class UsersController extends Controller
             $last_payment->subscription_to = $end_date;
             $last_payment->save();
 
-            return back()
-                ->with('added', 'User subscription has been changed!');
+            if (isset($multiplescreen)) {
 
-        }
-        else if ($request->user_stripe_plan_id == null && $request->last_payment_id == null)
-        {
+                $multiplescreen->delete();
+                $muser = new Multiplescreen;
+
+                $muser->user_id = $user->id;
+
+                if ($change_plan->screens == 1) {
+                    $muser->screen1 = $user->name;
+
+                } elseif ($change_plan->screens == 2) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen1";
+                } elseif ($change_plan->screens == 3) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen2";
+                    $muser->screen3 = "Screen3";
+                } elseif ($change_plan->screens == 4) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen2";
+                    $muser->screen3 = "Screen3";
+                    $muser->screen4 = "Screen4";
+                }
+
+                $muser->pkg_id = $change_plan->id;
+                $muser->save();
+
+            } else {
+
+                $muser = new Multiplescreen;
+
+                $muser->user_id = $user->id;
+                $muser->pkg_id = $change_plan->id;
+
+                if ($change_plan->screens == 1) {
+                    $muser->screen1 = $user->name;
+
+                } elseif ($change_plan->screens == 2) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen1";
+                } elseif ($change_plan->screens == 3) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen2";
+                    $muser->screen3 = "Screen3";
+                } elseif ($change_plan->screens == 4) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen2";
+                    $muser->screen3 = "Screen3";
+                    $muser->screen4 = "Screen4";
+                }
+
+                $muser->save();
+            }
+
+            return back()->with('added', 'User subscription has been changed!');
+
+        } else if ($request->user_stripe_plan_id != null && $request->last_payment_id != null) {
 
             $current_date = Carbon::now();
             $end_date = null;
 
-            if ($change_plan->interval == 'month')
-            {
+            if ($change_plan->interval == 'month') {
                 $end_date = Carbon::now()->addMonths($change_plan->interval_count);
-            }
-            else if ($change_plan->interval == 'year')
-            {
+            } else if ($change_plan->interval == 'year') {
                 $end_date = Carbon::now()->addYears($change_plan->interval_count);
-            }
-            else if ($change_plan->interval == 'week')
-            {
+            } else if ($change_plan->interval == 'week') {
                 $end_date = Carbon::now()->addWeeks($change_plan->interval_count);
-            }
-            else if ($change_plan->interval == 'day')
-            {
+            } else if ($change_plan->interval == 'day') {
                 $end_date = Carbon::now()->addDays($change_plan->interval_count);
+            }
+
+            $muser = new Multiplescreen;
+            $exist = Multiplescreen::where('user_id', $user->id)->first();
+
+            $getpkgid;
+            $screen;
+            if (!isset($exist)) {
+
+                foreach ($user->paypal_subscriptions as $value) {
+
+                    if ($value->status == 1) {
+
+                        $getpkgid = $value->package_id;
+
+                        $pkg = Package::where('id', $value->package_id)->first();
+
+                        if (isset($pkg)) {
+                            $screen = $pkg->screens;
+                            $muser->pkg_id = $pkg->id;
+
+                            $muser->user_id = $user->id;
+
+                            if ($screen == 1) {
+                                $muser->screen1 = $user->name;
+
+                            } elseif ($screen == 2) {
+                                $muser->screen1 = $user->name;
+                                $muser->screen2 = "Screen2";
+                            } elseif ($screen == 3) {
+                                $muser->screen1 = $user->name;
+                                $muser->screen2 = "Screen2";
+                                $muser->screen3 = "Screen3";
+                            } elseif ($screen == 4) {
+                                $muser->screen1 = $user->name;
+                                $muser->screen2 = "Screen2";
+                                $muser->screen3 = "Screen3";
+                                $muser->screen4 = "Screen4";
+                            }
+
+                            $muser->save();
+
+                        }
+                    }
+                }
+
+            } else {
+
+                $exist->delete();
+                $screen = $pkg->screens;
+                $muser->pkg_id = $pkg->id;
+
+                $muser->user_id = $user->id;
+
+                if ($screen == 1) {
+                    $muser->screen1 = $user->name;
+
+                } elseif ($screen == 2) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen2";
+                } elseif ($screen == 3) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen2";
+                    $muser->screen3 = "Screen3";
+                } elseif ($screen == 4) {
+                    $muser->screen1 = $user->name;
+                    $muser->screen2 = "Screen2";
+                    $muser->screen3 = "Screen3";
+                    $muser->screen4 = "Screen4";
+                }
+
+                $muser->save();
             }
 
             $created_subscription = PaypalSubscription::create(['user_id' => $user->id, 'payment_id' => 'by admin', 'user_name' => $user->name, 'package_id' => $change_plan->id, 'price' => $change_plan->amount, 'status' => 1, 'method' => 'by Admin', 'subscription_from' => $current_date, 'subscription_to' => $end_date]);
 
             return back()->with('added', 'User subscription has been changed!');
+        } else {
+
+            $muser = new Multiplescreen;
+
+            $muser->user_id = $user->id;
+            $muser->pkg_id = $change_plan->id;
+
+            if ($change_plan->screens == 1) {
+                $muser->screen1 = $user->name;
+
+            } elseif ($change_plan->screens == 2) {
+                $muser->screen1 = $user->name;
+                $muser->screen2 = "Screen1";
+            } elseif ($change_plan->screens == 3) {
+                $muser->screen1 = $user->name;
+                $muser->screen2 = "Screen2";
+                $muser->screen3 = "Screen3";
+            } elseif ($change_plan->screens == 4) {
+                $muser->screen1 = $user->name;
+                $muser->screen2 = "Screen2";
+                $muser->screen3 = "Screen3";
+                $muser->screen4 = "Screen4";
+            }
+
+            $muser->save();
+
+            $current_date = Carbon::now();
+            $end_date = null;
+
+            if ($change_plan->interval == 'month') {
+                $end_date = Carbon::now()->addMonths($change_plan->interval_count);
+            } else if ($change_plan->interval == 'year') {
+                $end_date = Carbon::now()->addYears($change_plan->interval_count);
+            } else if ($change_plan->interval == 'week') {
+                $end_date = Carbon::now()->addWeeks($change_plan->interval_count);
+            } else if ($change_plan->interval == 'day') {
+                $end_date = Carbon::now()->addDays($change_plan->interval_count);
+            }
+            $created_subscription = PaypalSubscription::create(['user_id' => $user->id, 'payment_id' => 'by admin', 'user_name' => $user->name, 'package_id' => $change_plan->id, 'price' => $change_plan->amount, 'status' => 1, 'method' => 'by Admin', 'subscription_from' => $current_date, 'subscription_to' => $end_date]);
+            return back()->with('added', 'User subscription has been changed!');
         }
-        return back()
-            ->with('error', 'Some issue to change this user subscription');
+        return back()->with('error', 'Some issue to change this user subscription');
 
     }
 
 }
-

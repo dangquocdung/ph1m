@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AdminLTE 2 | Invoice</title>
+  <title> Invoice</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
@@ -17,14 +17,15 @@
 <body class="hold-transition skin-blue sidebar-mini">
 <div class="wrapper">
 <!-- Main content -->
+{{-- {{$invoice}} --}}
 @if (isset($invoice) && $invoice != null)
 <section class="invoice">
   <!-- title row -->
   <div class="row">
     <div class="col-xs-12">
       <h2 class="page-header">
-        <i class="fa fa-globe"></i> {{$company_name}}
-        <small class="pull-right">{{date("d/m/Y", $invoice->date)}}</small>
+        <i class="fa fa-globe"></i> {{$w_title}}
+        <small class="pull-right">{{date("d/m/Y", $invoice->created)}}</small>
       </h2>
     </div>
     <!-- /.col -->
@@ -34,7 +35,7 @@
     <div class="col-sm-4 invoice-col">
       From
       <address>
-        <strong>{{$company_name}}</strong><br>
+        <strong>{{$w_title}}</strong><br>
         {{$invoice_add}}
         Email: {{$w_email}}
       </address>
@@ -51,8 +52,8 @@
     <div class="col-sm-4 invoice-col">
       <b>Invoice #{{$invoice->id}}</b><br>
       <br>
-      <b>Order ID:</b> {{$invoice->data[0]->number}}<br>
-      <b>Payment Due:{{$invoice->data[0]->paid == true ? 'N/A' : 'DUE'}}</b><br>
+      <b>Order ID:</b> {{$invoice->number}}<br>
+      <b>Payment Due:{{$invoice->paid == true ? 'N/A' : 'DUE'}}</b><br>
     </div>
     <!-- /.col -->
   </div>
@@ -75,9 +76,13 @@
         <tr>
           <td>1</td>
           <td>{{auth()->user()->name}}</td>
-          <td>{{$invoice->data[0]->lines->data[0]->plan->name}}</td>
+          <td>
+            @php
+              $plan = App\Package::where('plan_id',$invoice->lines->data[0]->plan->id)->first();
+            @endphp
+            {{ucfirst($plan->name)}}</td>
           <td>Stripe</td>
-          <td>{{strtoupper($currency_code)}} {{$invoice->data[0]->lines->data[0]->plan->amount/100}}</td>
+          <td>{{strtoupper($currency_code)}} {{$invoice->lines->data[0]->plan->amount/100}}</td>
         </tr>
         </tbody>
       </table>
@@ -103,7 +108,7 @@
     <!-- /.col -->
     <div class="col-xs-6">
       <div class="table-responsive">
-        <h2 style="margin-top: 100px"> Total Amount: {{strtoupper($currency_code)}} {{$invoice->data[0]->lines->data[0]->plan->amount/100}}</h2>
+        <h2 style="margin-top: 100px"> Total Amount: {{strtoupper($currency_code)}} {{$invoice->lines->data[0]->plan->amount/100}}</h2>
       </div>
     </div>
     <!-- /.col -->

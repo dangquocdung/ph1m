@@ -29,7 +29,7 @@ class Genre extends Model
 
 
     protected $fillable = [
-      'name'
+      'name','position','image'
     ];
 
     public function movie(){

@@ -42,7 +42,9 @@ class Package extends Model
       'interval',
       'interval_count',
       'trial_period_days',
-      'screen',
+      'screens',
+      'download',
+      'downloadlimit',
       'status'
     ];
 
@@ -50,4 +52,6 @@ class Package extends Model
   {
     return $this->hasOne('App\PricingText','package_id');
   }
+ 
+
 }

@@ -11,10 +11,10 @@ class Videolink extends Model
     	'episode_id',
     	'iframeurl',
     	'ready_url',
-    	'upload_video',
+    	'type',
     	'url_360',
-'url_480',
-'url_720',
-'url_1080'
+		'url_480',
+		'url_720',
+		'url_1080'
     ];
 }

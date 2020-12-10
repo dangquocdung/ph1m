@@ -13,31 +13,37 @@ use App\User;
 use App\Config;
 use Mail;
 use Stripe\Stripe;
-
+use Hash;
 class LoginController extends Controller
 {
 
     use IssueTokenTrait;
 
-	private $client;
+    private $client;
 
-	public function __construct(){
-		$this->client = Client::find(2);
-	}
+    public function __construct(){
+        $this->client = Client::find(2);
+    }
 
     public function login(Request $request){
 
-    	$this->validate($request, [
-    		'email' => 'required',
-    		'password' => 'required'
-    	]);
+        $this->validate($request, [
+            'email' => 'required',
+            'password' => 'required'
+        ]);
         
         $authUser = User::where('email', $request->email)->first();
         if(isset($authUser) && $authUser->is_blocked == 1){
             return response()->json('Blocked User', 401); 
         }
         else{
-            return $this->issueToken($request, 'password');
+            if($authUser->status == 0){
+               return response()->json('Please Verify your mail !', 201);
+            }
+            else{
+                return $this->issueToken($request, 'password');
+            }
+            
         }
 
     }
@@ -46,9 +52,9 @@ class LoginController extends Controller
 
         $this->validate($request, [
             'email' => 'required',
-            'password' => '',
             'name' => 'required',
-            'code' => 'required'
+            'code' => 'required',
+            'password' => ''
         ]);
         $authUser = User::where('email', $request->email)->first();
         if($authUser){
@@ -58,28 +64,91 @@ class LoginController extends Controller
             if(isset($authUser) &&  $authUser->is_blocked == 1){
                 return response()->json('Blocked User', 401); 
             }
-            else{
-                return $this->issueToken($request, 'password');
+             else{
+               if (Hash::check('password', $authUser->password)) {
+
+                    return $response = $this->issueToken($request,'password');
+
+            } else {
+                $response = ["message" => "Password mismatch"];
+                return response($response, 422);
+            }
+
             }
         }
         else{
             $user = User::create([
                 'name' =>  request('name'),
                 'email' => request('email'),
-                'password' => bcrypt(request('password')),
+                'password' => Hash::make($request->password !='' ? $request->password : 'password'),
                 'facebook_id' => request('code'),
                 'is_blocked' => '0',
+                'status'=>'1'
             ]);
+            
             return $this->issueToken($request, 'password');
         }
     }
 
-    public function refresh(Request $request){
-    	$this->validate($request, [
-    		'refresh_token' => 'required'
-    	]);
+    public function googlelogin(Request $request){
 
-    	return $this->issueToken($request, 'refresh_token');
+
+        $this->validate($request, [
+            'email' => 'required',
+            'name' => 'required',
+            'uid' => 'required',
+            'password' => ''
+        ]);
+        $authUser = User::where('email', $request->email)->first();
+
+        if($authUser){
+
+            $authUser->google_id = $request->uid;
+            $authUser->name = $request->name;
+            $authUser->save();
+
+            if(isset($authUser) &&  $authUser->is_blocked == 1){
+                return response()->json('Blocked User', 401); 
+            }
+
+            else{
+               if (Hash::check('password', $authUser->password)) {
+
+                    return $response = $this->issueToken($request,'password');
+
+            } else {
+                $response = ["message" => "Password mismatch"];
+                return response($response, 422);
+            }
+
+            }
+        }
+        else{
+
+
+            $user = User::create([
+                'name' =>  request('name'),
+                'email' => request('email'),
+                'password' => Hash::make($request->password !='' ? $request->password : 'password'),
+                'google_id' => request('uid'),
+                'is_blocked' => '0',
+                'status'=>'1'
+            ]);
+           
+            return $response = $this->issueToken($request, 'password');
+                
+            
+        }
+    }
+
+
+
+    public function refresh(Request $request){
+        $this->validate($request, [
+            'refresh_token' => 'required'
+        ]);
+
+        return $this->issueToken($request, 'refresh_token');
     }
     
     public function forgotApi(Request $request)

@@ -39,6 +39,10 @@ use App\AuthCustomize;
 use Reminder;
 use App\WatchHistory;
 use App\Multiplescreen;
+use App\HomeBlock;
+use App\SplashScreen;
+use App\AppSlider;
+use App\AppConfig;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 
 class MainController extends Controller
@@ -46,13 +50,38 @@ class MainController extends Controller
   use SendsPasswordResetEmails;
 
   public function home(){
+    $app_config = AppConfig::find(1);
     $plans = Package::with('pricing_texts')->get()->toArray();
-    $blogs = Blog::with('comments','comments.subcomments')->get()->toArray();
+    $blog = Blog::with(['comments','comments.subcomments'])->get();
+    
+    $blogs = [];
+   
+    foreach($blog as $result){
+       $blogs[] = array(
+          'id'=>$result->id,
+          'title' => $result->title,
+                    'detail' => strip_tags($result->detail),
+                    'slug' => $result->slug,
+                    'image' => $result->image,
+                    'user_id'=>$result->user_id,
+                    'is_active' => $result->is_active,
+                    'images' => $result->image,
+                    'created_at' => $result->created_at,
+                    'updated_at'=>$result->updated_at,
+                    'comments' => $result->comments
+      );
+
+
+    }
+   
+ 
     $blocks = LandingPage::orderBy('position', 'asc')->get()->toArray();
     $config = Config::findOrFail(1);
     $auth_customize = AuthCustomize::first()->toArray();
     $adsense = Adsense::first()->toArray();
-    return response()->json(array('login_img'=>$auth_customize, 'config'=>$config,'plans' =>$plans,'blocks'=>$blocks, 'adsense' => $adsense,'blogs' => $blogs), 200); 
+     
+  
+    return response()->json(array('login_img'=>$auth_customize, 'config'=>$config, 'plans' =>$plans,'blocks'=>$blocks, 'adsense' => $adsense,'blogs' => $blogs,'app_config'=>$app_config), 200); 
   }
   public function faq(){
     $faqs = Faq::all()->toArray();
@@ -61,7 +90,14 @@ class MainController extends Controller
 
   public function slider(){
     $slider = HomeSlider::all()->toArray();
-    return response()->json(array('slider'=>$slider), 200);
+    $app_slider = AppSlider::all()->toArray();
+
+    return response()->json(array('slider'=>$slider,'app_slider'=>$app_slider), 200);
+  }
+
+  public function splashscreen(){
+    $splash_screen = SplashScreen::first();
+    return response()->json(array('splash_screen'=>$splash_screen), 200);
   }
 
   public function menu(){
@@ -80,30 +116,24 @@ class MainController extends Controller
   public function movietv(){
     $auth = Auth::user(); 
     $movieTvSeries = collect();
-    $movie = Movie::with('movie_series')->get(); 
-    $tvseries = TvSeries::with('seasons')->get(); 
+    $movie = Movie::with('movie_series','video_link','comments.subcomments')->get(); 
+    $tvseries = TvSeries::with('seasons.episodes.video_link','comments.subcomments')->get(); 
     $movieTvSeries = $movieTvSeries->push($movie);
     $movieTvSeries = $movieTvSeries->push($tvseries)->flatten()->toArray(); 
-      return response()->json(array('data'=>$movieTvSeries), 200);
+    $top_movies_tv = array();
+    $top_movies_tv = HomeBlock::orderBy('id','desc')->where('is_active','=','1')->get();
+      return response()->json(array('data'=>$movieTvSeries,'top_movies_tv'=>$top_movies_tv), 200);
   }
   public function index(){
-    $auth = Auth::user(); 
-    // $plans = Package::with('pricing_texts','menus')->get()->toArray();
-    // $blocks = LandingPage::orderBy('position', 'asc')->get()->toArray();    
-    $home_translations = HomeTranslation::all()->toArray();
-    // $menu = Menu::all()->toArray();
-    // $movie = Movie::with('comments','comments.subcomments')->get()->toArray();
-    // $tvseries = TvSeries::with('comments','comments.tvsubcomments')->get()->toArray();
-    // $season = Season::all()->toArray();
-    // $episodes = Episode::all()->toArray();
-    // $slider = HomeSlider::orderBy('position', 'asc')->get()->toArray();
+    $auth = Auth::user();    
+    //$home_translations = HomeTranslation::all()->toArray();
     $actor = Actor::all()->toArray();
     $audio =  AudioLanguage::all()->toArray();
     $subtitles = Subtitles::all()->toArray();
     $director = Director::all()->toArray();
     $genre = Genre::all()->toArray();
-    // return response()->json(array( 'auth' =>$auth,'plans'=>$plans,'blocks'=>$blocks,'menu'=>$menu,'movie'=>$movie,'tvseries'=>$tvseries,'season'=>$season,'episodes'=>$episodes, 'slider'=>$slider,'actor'=>$actor,'director'=>$director,'audio'=>$audio,'subtitles '=>$subtitles ,'genre'=>$genre, 'home_translations' => $home_translations), 200);   
-    return response()->json(array( 'auth' =>$auth,'actor'=>$actor,'director'=>$director,'audio'=>$audio,'subtitles '=>$subtitles ,'genre'=>$genre, 'home_translations' => $home_translations), 200);   
+    
+    return response()->json(array( 'auth' =>$auth,'actor'=>$actor,'director'=>$director,'audio'=>$audio,'subtitles '=>$subtitles ,'genre'=>$genre), 200);   
 }
 
   public function userProfile(){
@@ -120,11 +150,12 @@ class MainController extends Controller
     $end = null;    
     $payid = null;
     $active = "0";
+    $screen = null;
+    $planid = null;
+    $downloadlimit = null; 
     $paypal = PaypalSubscription::with('plan')->where('user_id', $user->id)->orderBy('created_at')->get();
-   // $paypal = $user->paypal_subscriptions->sortBy('created_at'); 
     $current_date = Carbon::now()->toDateString();
     if (isset($customer)) {         
-     //return $alldata = $user->asStripeCustomer()->subscriptions->data;
      $alldata = $user->subscriptions;
      $data = $alldata->last();      
     } 
@@ -136,6 +167,7 @@ class MainController extends Controller
     if($stripedate > $paydate){
       if($user->subscribed($data->name) && date($current_date) <= date($data->subscription_to)){
         $current_subscription = $data->name;
+        $plan = Package::where('plan_id',$data->stripe_plan)->first();
         if($user->subscription($data->name)->cancelled()){ 
           $active = "0";
         }
@@ -143,15 +175,19 @@ class MainController extends Controller
           $active = "1";
         }
         $id = $data->id;
+        $planid = $plan->id;
         $payment = 'stripe';
         $start = $data->subscription_from;
         $end = $data->subscription_to;
         $payid = $data->stripe_id;
+        $screen = isset($plan) ? $plan->screens : null;
+        $downloadlimit = isset($plan) ? $plan->downloadlimit : null; 
+
       }
     }
     elseif($stripedate < $paydate){
       if (date($current_date) <= date($last->subscription_to)) {
-        if($last->package_id == (0 || 100) || $last->method == 'free'){
+        if($last->package_id == 0 || $last->package_id == 100 || $last->method == 'free'){
            $current_subscription = null;
            $payment = 'Free';
         }
@@ -160,14 +196,31 @@ class MainController extends Controller
             $payment = $last->method;
         }
         $id = $last->id;
+        $planid = $last->package_id;
         $start = $last->subscription_from;
         $end = $last->subscription_to;
         $active = "$last->status";
         $payid = $last->payment_id;
+        $screen = isset($last->plan) ? $last->plan->screens : null;
+        $downloadlimit = isset($last->plan) ? $last->plan->downloadlimit :  null; 
       }
-    }  
+    }
+    if($active == 1 && $screen > 0) {
+      $multiplescreen = Multiplescreen::where('user_id',$user->id)->first();
+      if(!isset($multiplescreen)){
+        $multiplescreen = Multiplescreen::create([
+          'pkg_id' => $planid,
+          'user_id' => $user->id,
+          'screen1' => $screen >= 1 ? $user->name :  null,
+          'screen2' => $screen >= 2 ? 'screen2' :  null,
+          'screen3' => $screen >= 3 ? 'screen3' :  null,
+          'screen4' => $screen >= 4 ? 'screen4' :  null
+               
+        ]);
+      }
+    }    
       
-    return response()->json(array('code'=>$code->id,'user'=>$user,'paypal' => $paypal, 'current_date'=> $current_date,'payment'=>$payment, 'id'=>$id,'current_subscription'=>$current_subscription, 'payid' => $payid, 'start' => $start, 'end' => $end,'active'=>$active), 200);
+    return response()->json(array('code'=>$code->id,'user'=>$user,'paypal' => $paypal, 'current_date'=> $current_date,'payment'=>$payment, 'id'=>$id,'current_subscription'=>$current_subscription, 'payid' => $payid, 'start' => $start, 'end' => $end,'active'=>$active,'screen' => $screen, 'limit' => $downloadlimit), 200);
   }
 
   public function package(){
@@ -184,15 +237,17 @@ class MainController extends Controller
     return response()->json(array('tvseries'=>$tvseries), 200);            
      
   }
+  
+ 
 
-  public function MovieByCategory($id){
+ public function MovieByCategory($id){
     $auth = Auth::user();
-    $movie = Movie::with('movie_series','video_link','comments','comments.subcomments')
+    $movie = Movie::with('movie_series','video_link','comments.subcomments')
              ->whereHas('menus',function($query) use ($id){
                 $query->where('menu_id', $id);
             })->get(); 
 
-    $tvseries = TvSeries::with('seasons.episodes.video_link','comments','comments.subcomments')
+    $tvseries = TvSeries::with('seasons.episodes.video_link','comments.subcomments')
                   ->whereHas('menus',function($query) use ($id){
                       $query->where('menu_id', $id);
                   })->get();
@@ -423,5 +478,26 @@ class MainController extends Controller
     else{
       return response()->json(array('error'), 401);  
     }
+  }
+
+  public function detail($id){
+    $actor = Actor::find($id);
+    $allmovies = Movie::all();
+    $movies = collect();
+
+    foreach ($allmovies as $key => $movie) {
+
+        $actor_array[]  = $movie->actor_id;
+        
+
+        if(in_array($actor->id, $actor_array)){
+
+              $movies->push($movie);
+
+        }
+
+    }
+
+    return response()->json(array('actormovies'=>$movies,'actor'=>$actor), 200); 
   }
 }

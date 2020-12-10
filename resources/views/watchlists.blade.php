@@ -1,17 +1,66 @@
 @extends('layouts.theme')
-@section('title',"Your Watchlist")
+@section('title',__('staticwords.watchlist'))
 @section('main-wrapper')
   <!-- main wrapper -->
+  @php
+ $withlogin= App\Config::findOrFail(1)->withlogin;
+ $catlog= App\Config::findOrFail(1)->catlog;
+           $auth=Auth::user();
+             $subscribed = null;
+           
+          
+            if (isset($auth)) {
+
+              $current_date = date("d/m/y");
+                  
+              $auth = Illuminate\Support\Facades\Auth::user();
+              if ($auth->is_admin == 1) {
+                $subscribed = 1;
+              } else if ($auth->stripe_id != null) {
+                Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
+                if(isset($invoices) && $invoices != null && count($invoices->data) > 0)
+                
+                {
+                $user_plan_end_date = date("d/m/y", $invoice->lines->data[0]->period->end);
+                $plans = App\Package::all();
+                foreach ($plans as $key => $plan) {
+                  if ($auth->subscriptions($plan->plan_id)) {
+                   
+                  if($current_date <= $user_plan_end_date)
+                  {
+                  
+                      $subscribed = 1;
+                  }
+                      
+                  }
+                } 
+                }
+                
+                
+              } else if (isset($auth->paypal_subscriptions)) {  
+                //Check Paypal Subscription of user
+                $last_payment = $auth->paypal_subscriptions->last();
+                if (isset($last_payment) && $last_payment->status == 1) {
+                  //check last date to current date
+                  $current_date = Illuminate\Support\Carbon::now();
+                  if (date($current_date) <= date($last_payment->subscription_to)) {
+                    $subscribed = 1;
+                  }
+                }
+              }
+            }
+         
+@endphp
   <section class="main-wrapper">
     <div class="container-fluid">
       <div class="watchlist-section">
-        <h5 class="watchlist-heading">{{$header_translations->where('key', 'watchlist')->first->value->value}}</h5>
+        <h5 class="watchlist-heading">{{__('staticwords.watchlist')}}</h5>
         <div class="watchlist-btn-block">
           <div class="btn-group">
             @php
                $auth=Auth::user();
                if(isset($auth) || $auth->is_admin){
-               $nav=App\Menu::all();
+               $nav=App\Menu::orderBy('position','ASC')->get();
              }
             @endphp
               @if (isset($nav))
@@ -27,62 +76,9 @@
           </div>
         </div>
       <!-- Modal -->
-<div id="ageModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header text-danger">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Age Restricted Video</h4>
-      </div>
-       {!! Form::open(['method' => 'POST', 'action' => 'UsersController@update_age']) !!}
-      <div class="modal-body">
-        <h6 style="color: #e74c3c">This is an Age Restricted Video. Please Provide Your Date of Birth</h6><br>
-  
-              
-           <div class="search form-group{{ $errors->has('dob') ? ' has-error' : '' }}">
-                {!! Form::label('dob', 'Date Of Birth') !!}
-
-                <input type="date" class="form-control"  name="dob"  />   
-                <small class="text-danger">{{ $errors->first('dob') }}</small>
-              </div>
-            
-            
-        
-      </div>
-      <div class="modal-footer">
-        <div class="pull-right">      
-              <button type="submit" class="btn btn-primary">Update</button>
-            </div>
-      </div>
-     {!! Form::close() !!}
-    </div>
-
-  </div>
-</div>
-<!-- Modal -->
-<div id="ageWarningModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header text-danger">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Age Restricted Video</h4>
-      </div>
-      <div class="modal-body">
-        <h5 style="color: #c0392b">Sorry! This is Age Restricted Video. You are Not Allowed to Wactch</h5>
-      </div>
-      </div>
-      <div class="modal-footer">
-       
-      </div>
-     {!! Form::close() !!}
-    </div>
-
-  </div>
-</div>
+  @include('modal.agemodal')
+  <!-- Modal -->
+  @include('modal.agewarning')
         @if(isset($movies))
           <div class="watchlist-main-block">
             @foreach($movies as $key => $item)
@@ -90,29 +86,31 @@
               @if($item->tvseries->status == 1)
               <div class="watchlist-block">
                 <div class="watchlist-img-block protip" data-pt-placement="outside" data-pt-title="#prime-show-description-block{{$item->id}}">
-                  <a href="{{url('show/detail',$item->id)}}">
+                  <a href="{{url('show/detail',$item->season_slug)}}">
                     @if($item->thumbnail != null)
-                      <img src="{{asset('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive" alt="genre-image">
+                      <img data-src="{{url('images/tvseries/thumbnails/'.$item->thumbnail)}}" class="img-responsive lazy watchlist-img" alt="genre-image">
                     @elseif($item->tvseries['thumbnail'] != null)
-                      <img src="{{asset('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive" alt="genre-image">
+                      <img data-src="{{url('images/tvseries/thumbnails/'.$item->tvseries->thumbnail)}}" class="img-responsive lazy watchlist-img" alt="genre-image">
                     @else
-                      <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                      <img data-src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive lazy watchlist-img" alt="genre-image">
                     @endif
                   </a>
                 </div>
                 {!! Form::open(['method' => 'DELETE', 'action' => ['WishListController@showdestroy', $item->id]]) !!}
-                  {!! Form::submit("Remove", ["class" => "remove-btn"]) !!}
+                 {{--  {!! Form::submit(__('staticwords.remove'), ["class" => "remove-btn"]) !!} --}}
+                 <button type="submit" class="watchhistory_remove"><i class="fa fa-close" aria-hidden="true"></i></button><br/>
                 {!! Form::close() !!}
+                @if(isset($protip) && $protip == 1)
                 <div id="prime-show-description-block{{$item->id}}" class="prime-description-block">
                   <h5 class="description-heading">{{$item->tvseries['title']}}</h5>
-                  <div class="movie-rating">{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$item->tvseries['rating']}}</div>
+                  <div class="movie-rating">{{__('staticwords.tmdbrating')}} {{$item->tvseries['rating']}}</div>
                   <ul class="description-list">
-                    <li>{{$popover_translations->where('key', 'season')->first->value->value}} {{$item->season_no}}</li>
+                    <li>{{__('staticwords.season')}} {{$item->season_no}}</li>
                     <li>{{$item->publish_year}}</li>
                     <li>{{$item->tvseries['age_req']}}</li>
                     @if($item->subtitle == 1)
                       <li>
-                        {{$popover_translations->where('key', 'subtitles')->first->value->value}}
+                       {{__('staticwords.subtitles')}}
                       </li>
                     @endif
                   </ul>
@@ -125,25 +123,35 @@
                     <a href="#"></a>
                   </div>
                   <div class="des-btn-block">
+                    @if($auth && $subscribed ==1)
+                      @if(isset($item->episodes[0]))
+                        @if($item->tvseries['age_req'] == 'all age' || $age>=str_replace('+', '', $item->tvseries['age_req']) )
+                          @if($item->episodes[0]->video_link['iframeurl'] !="")
+
+                            <a href="#" onclick="playoniframe('{{ $item->episodes[0]->video_link['iframeurl'] }}','{{ $item->tvseries['id'] }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                           </a>
+
+                          @else
+                            <a href="{{ route('watchTvShow',$item->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
+                          @endif
+                        @else
+
+                          <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                         </a>
+                        @endif
+                      @endif
+                      @if($item->trailer_url != null || $item->trailer_url != '')
+                        <a href="{{ route('watchtvTrailer',$item->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                      @endif
+                    @else
+                       @if($item->trailer_url != null || $item->trailer_url != '')
+                        <a href="{{ route('guestwatchtvtrailer',$item->id)  }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                      @endif
+                    @endif
                     
-                          @if(isset($item->episodes[0]))
-                               @if($age>=str_replace('+', '', $item->tvseries['age_req']))
-                            @if($item->episodes[0]->video_link['iframeurl'] !="")
-
-                            <a href="#" onclick="playoniframe('{{ $item->episodes[0]->video_link['iframeurl'] }}','{{ $item->tvseries['id'] }}','tv')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                             </a>
-
-                            @else
-                    <a href="{{ route('watchTvShow',$item->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                      @endif
-                      @else
-
-                            <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                             </a>
-                      @endif
-                      @endif
                   </div>
                 </div>
+                @endif
               </div>
               @endif
               @endif
@@ -159,28 +167,30 @@
              @if($movie->status == 1)
               <div class="watchlist-block">
                 <div class="watchlist-img-block protip" data-pt-placement="outside" data-pt-title="#prime-description-block{{$movie->id}}">
-                  <a href="{{url('movie/detail',$movie->id)}}">
+                  <a href="{{url('movie/detail',$movie->slug)}}">
                     @if($movie->thumbnail != null || $movie->thumbnail != '')
-                      <img src="{{asset('images/movies/thumbnails/'.$movie->thumbnail)}}" class="img-responsive" alt="genre-image">
+                      <img data-src="{{url('images/movies/thumbnails/'.$movie->thumbnail)}}" class="img-responsive lazy watchlist-img" alt="genre-image">
                     @else
-                      <img src="{{asset('images/default-thumbnail.jpg')}}" class="img-responsive" alt="genre-image">
+                      <img data-src="{{url('images/default-thumbnail.jpg')}}" class="img-responsive lazy watchlist-img" alt="genre-image">
                     @endif
                   </a>
                 </div>
                 {!! Form::open(['method' => 'DELETE', 'action' => ['WishListController@moviedestroy', $movie->id]]) !!}
-                    {!! Form::submit("Remove", ["class" => "remove-btn"]) !!}
+                    {{-- {!! Form::submit(__('staticwords.remove'), ["class" => "remove-btn"]) !!} --}}
+                    <button type="submit" class="watchhistory_remove"><i class="fa fa-close" aria-hidden="true"></i></button><br/>
                 {!! Form::close() !!}
+                @if(isset($protip) && $protip == 1)
                 <div id="prime-description-block{{$movie->id}}" class="prime-description-block">
                   <div class="prime-description-under-block">
                     <h5 class="description-heading">{{$movie->title}}</h5>
-                    <div class="movie-rating">{{ $home_translations->where('key', 'TMDB Rating')->first->value->value}} {{$movie->rating}}</div>
+                    <div class="movie-rating">{{__('staticwords.tmdbrating')}} {{$movie->rating}}</div>
                     <ul class="description-list">
-                      <li>{{$movie->duration}} {{$popover_translations->where('key', 'mins')->first->value->value}}</li>
+                      <li>{{$movie->duration}} {{__('staticwords.mins')}}</li>
                       <li>{{$movie->publish_year}}</li>
                       <li>{{$movie->maturity_rating}}</li>
                       @if($movie->subtitle == 1)
                         <li>
-                          {{$popover_translations->where('key', 'subtitles')->first->value->value}}
+                         {{__('staticwords.subtitles')}}
                         </li>
                       @endif
                     </ul>
@@ -189,29 +199,33 @@
                       <a href="#"></a>
                     </div>
                     <div class="des-btn-block">
-                           @if($age>=str_replace('+', '', $movie->maturity_rating))
-                       @if($movie->video_link['iframeurl'] != null)
-                          
-                              <a onclick="playoniframe('{{ $movie->video_link['iframeurl'] }}','{{ $movie->id }}','movie')" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                              </a>
+                      @if($auth && $subscribed ==1)
+                        @if($movie->maturity_rating == 'all age' || $age>=str_replace('+', '', $movie->maturity_rating))
+                          @if($movie->video_link['iframeurl'] != null)
+                            <a href="{{route('watchmovieiframe',$item->id)}}"class="btn btn-play iframe"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                            </a>
 
-                             @else 
-                      <a href="{{ route('watchmovie',$movie->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span></a>
-                       @endif
+                          @else 
+                            <a href="{{ route('watchmovie',$movie->id) }}" class="iframe btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span></a>
+                          @endif
                         @else
-                            <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{$popover_translations->where('key', 'play')->first->value->value}}</span>
-                              </a>
-
-                       @endif
-                      @if($movie->trailer_url != null || $movie->trailer_url != '')
-                       <a href="{{ route('watchTrailer',$movie->id) }}" class="iframe btn btn-default">Watch Trailer</a>
-
-                      
-
+                          <a onclick="myage({{$age}})" class="btn btn-play"><span class="play-btn-icon"><i class="fa fa-play"></i></span> <span class="play-text">{{__('staticwords.playnow')}}</span>
+                          </a>
+                        @endif
+                        @if($movie->trailer_url != null || $movie->trailer_url != '')
+                          <a href="{{ route('watchTrailer',$movie->id) }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                        @endif
+                      @else
+                        @if($movie->trailer_url != null || $movie->trailer_url != '')
+                          <a href="{{ route('guestwatchtrailer',$movie->id) }}" class="iframe btn btn-default">{{__('staticwords.watchtrailer')}}</a>
+                        @endif
                       @endif
+                     
+                      
                     </div>
                   </div>
                 </div>
+                @endif
               </div>
               @endif
                @endif
@@ -243,38 +257,7 @@
 @section('custom-script')
 
 
-  <script>
-   
-      $(document).ready(function(){
-
-        
-        $(".group1").colorbox({rel:'group1'});
-        $(".group2").colorbox({rel:'group2', transition:"fade"});
-        $(".group3").colorbox({rel:'group3', transition:"none", width:"75%", height:"75%"});
-        $(".group4").colorbox({rel:'group4', slideshow:true});
-        $(".ajax").colorbox();
-        $(".youtube").colorbox({iframe:true, innerWidth:640, innerHeight:390});
-        $(".vimeo").colorbox({iframe:true, innerWidth:500, innerHeight:409});
-        $(".iframe").colorbox({iframe:true, width:"100%", height:"100%"});
-        $(".inline").colorbox({inline:true, width:"50%"});
-        $(".callbacks").colorbox({
-          onOpen:function(){ alert('onOpen: colorbox is about to open'); },
-          onLoad:function(){ alert('onLoad: colorbox has started to load the targeted content'); },
-          onComplete:function(){ alert('onComplete: colorbox has displayed the loaded content'); },
-          onCleanup:function(){ alert('onCleanup: colorbox has begun the close process'); },
-          onClosed:function(){ alert('onClosed: colorbox has completely closed'); }
-        });
-
-        $('.non-retina').colorbox({rel:'group5', transition:'none'})
-        $('.retina').colorbox({rel:'group5', transition:'none', retinaImage:true, retinaUrl:true});
-        
-        
-        $("#click").click(function(){ 
-          $('#click').css({"background-color":"#f00", "color":"#fff", "cursor":"inherit"}).text("Open this window again and this message will still be here.");
-          return false;
-        });
-      });
-    </script>
+  
 
     <script>
 
@@ -313,4 +296,5 @@
     }
       
     </script>
+
 @endsection

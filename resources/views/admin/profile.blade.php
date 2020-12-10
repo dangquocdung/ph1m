@@ -48,5 +48,35 @@
         </div>
       </div>
     </div>
+    <br/>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="admin-form-block z-depth-1">
+          <h5 class="admin-form-heading">Change Name</h5>
+           <p class="info">Currnet Name: {{ucfirst($auth->name)}}</p>
+          {!! Form::open(['method' => 'POST', 'action' => 'UserAccountController@update_profile']) !!}
+            <div class="form-group{{ $errors->has('current_name') ? ' has-error' : '' }}">
+              {!! Form::label('current_name', 'Current Name') !!}
+              {!! Form::text('current_name',$auth->name, ['class' => 'form-control','readonly']) !!}
+              <small class="text-danger">{{ $errors->first('current_name') }}</small>
+            </div>
+            <div class="form-group{{ $errors->has('new_name') ? ' has-error' : '' }}">
+              {!! Form::label('new_name', 'New Name') !!}
+              {!! Form::text('new_name',null, ['class' => 'form-control']) !!}
+              <small class="text-danger">{{ $errors->first('new_name') }}</small>
+            </div>
+            <div class="form-group{{ $errors->has('current_password') ? ' has-error' : '' }}">
+              {!! Form::label('current_password', 'Current Password') !!}
+              {!! Form::password('current_password', ['class' => 'form-control']) !!}
+              <small class="text-danger">{{ $errors->first('current_password') }}</small>
+            </div>
+            <div class="btn-group pull-right">
+              <button type="submit" class="btn btn-success"><i class="material-icons left">add_to_photos</i> Update</button>
+            </div>
+            <div class="clear-both"></div>
+          {!! Form::close() !!}
+        </div>
+      </div>
+    </div>
   </div>
 @endsection

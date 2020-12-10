@@ -4,11 +4,11 @@
   <!-- main wrapper -->
   <section id="main-wrapper" class="main-wrapper home-page user-account-section">
     <div class="container-fluid">
-      <h4 class="heading">Complete your payment</h4>
+      <h4 class="heading">{{__('staticwords.completeyourpayment')}}</h4>
       <ul class="bradcump">
-        <li><a href="{{url('account')}}">Dashboard</a></li>
+        <li><a href="{{url('account')}}">{{__('staticwords.dashboard')}}</a></li>
         <li>/</li>
-        <li>Pricing Plan</li>
+        <li>{{__('staticwords.pricingplan')}}</li>
         <li>/</li>
         <li>{{$plan->name}}</li>
       </ul>
@@ -21,21 +21,21 @@
                 <div class="text-center"><small class="text-muted" id="timeleft"></small></div>
                 <script>var countDownDate = {{$etinfo['time_expires']}}000;</script>
                 <div style="background-color:#333; color:#fff;">
-                    <div>You have to send</div>
+                    <div>{{__('staticwords.youhavetosend')}}</div>
                     <span class="h3">{{$tinfo["amount2"]}}</span>
                     <div >{{$tinfo["currency2"]}}</div>
                 </div><br/>
-                <small class="font-size-sm text-muted" >{{$etinfo["recv_confirms"]}} / {{$tinfo["confirms_needed"]}} Confirmations</small>
+                <small class="font-size-sm text-muted" >{{$etinfo["recv_confirms"]}} / {{$tinfo["confirms_needed"]}} {{__('staticwords.confirmation')}}</small>
             </div>
             <div class="" style="padding: 5px;">
               <div class="form-group">
-                  <label for="pmaddress">{{$tinfo["currency2"]}} Address:</label>
+                  <label for="pmaddress">{{$tinfo["currency2"]}} {{__('staticwords.address')}}:</label>
                   <input type="text" class="form-control form-control-alt text-center" id="pmaddress" name="pmaddress" value="{{$etinfo['payment_address']}}" placeholder="BITCOIN ADDRESS" disabled>
-                  <small class="form-text text-muted text-center"><a href="#" onclick="CopyOnClipboardBtcAddress()"><i class="fa fa-copy"></i> Copy on clipboard</a></small>
+                  <small class="form-text text-muted text-center"><a href="#" onclick="CopyOnClipboardBtcAddress()"><i class="fa fa-copy"></i> {{__('staticwords.copyonclipboard')}}</a></small>
               </div>
               <div class="form-group row m-t-20">
-                  <div class="col-sm-6 text-left"><button class="btn btn-primary" type="button" data-toggle="modal" data-target="#QrCodeBtc"><i class="fa fa-qrcode"></i> QR Code</button></div>
-                  <div class="col-sm-6 text-right"><a class="btn btn-primary" href="{{$tinfo['status_url']}}" target="_blank"><i class="fa fa-tasks"></i> Payment status</a></div>
+                  <div class="col-sm-6 text-left"><button class="btn btn-primary" type="button" data-toggle="modal" data-target="#QrCodeBtc"><i class="fa fa-qrcode"></i> {{__('staticwords.qrcode')}}</button></div>
+                  <div class="col-sm-6 text-right"><a class="btn btn-primary" href="{{$tinfo['status_url']}}" target="_blank"><i class="fa fa-tasks"></i> {{__('staticwords.paymentstatus')}}</a></div>
               </div>
             </div>
           </div>
@@ -49,7 +49,7 @@
       <div class="modal-dialog" style="width: 246px; z-index: 99999;">
           <div class="modal-content">
               <img src="{{$tinfo['qrcode_url']}}" alt="QRCODE">
-              <button type="button" class="btn btn-block btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+              <button type="button" class="btn btn-block btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> {{__('staticwords.close')}}</button>
           </div>
       </div>
   </div>

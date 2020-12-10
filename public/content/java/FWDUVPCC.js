@@ -3,18 +3,18 @@
 var FWDUVPCC = function(
 		controller
 		){
-		var self = this;
+		var _s = this;
 		var prototype = FWDUVPCC.prototype;
-		var main = controller.parent;
+		var main = controller.prt;
 	
-		this.session;
-		this.remotePlayer;
-		this.currentTime;
-		this.controller_do = controller;
-		this.mediaStatus;
-		this.isReady;
-		this.playerState;
-		this.isSeeking_bl;
+		_s.session;
+		_s.remotePlayer;
+		_s.currentTime;
+		_s.controller_do = controller;
+		_s.mediaStatus;
+		_s.isReady;
+		_s.playerState;
+		_s.isSeeking_bl;
 		
 		const PLAYER_STATE = {
 		  IDLE: 'IDLE',
@@ -27,369 +27,378 @@ var FWDUVPCC = function(
 		//##########################################//
 		/* initialize  */
 		//##########################################//
-		self.init = function(){
-			self.isReady = false;
+		_s.init = function(){
+			_s.isReady = false;
 			
 			var count = 0;
 		 	var loadCastInterval = setInterval(function(){
 				if(window['chrome'] && window['chrome']['cast'] && window['chrome']['cast'].isAvailable) {
 					console.log('Chormecast API has loaded.');
 					clearInterval(loadCastInterval);	
-					self.initAPI();
+					_s.initAPI();
 				}
 			}, 1000);
-			self.initializeController();
-			self.setupCastingScreen();
+			_s.initializeController();
+			_s.setupCastingScreen();
 		};
 
 		//##########################################//
 		/* initialize controller */
 		//##########################################//
-		this.initializeController =  function(){
-			//controller.addListener(FWDUVPController.CAST, self.startCastingHandler);
-			controller.addListener(FWDUVPController.UNCAST, self.stopCastingHandler);
+		_s.initializeController =  function(){
+			//controller.addListener(FWDUVPController.CAST, _s.startCastingHandler);
+			controller.addListener(FWDUVPController.UNCAST, _s.stopCastingHandler);
 		}
 		
-		this.stopCastingHandler = function(){
-			self.stopCasting();
+		_s.stopCastingHandler = function(){
+			_s.stopCasting();
 		}
 
 
 		//##########################################//
 		/* initialize API */
 		//##########################################//
-		this.initAPI = function(){
+		_s.initAPI = function(){
 			
 			var options = {};
-			self.isReady = true;
+			_s.isReady = true;
 			options.receiverApplicationId = chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID; 
 			options.autoJoinPolicy = chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED;
 			cast.framework.CastContext.getInstance().setOptions(options);
 		
 			FWDUVPlayer.keyboardCurInstance = main;
 			
-		    self.setupCastButton();
-			self.checkButtonState();
-			self.setupPlayerController();
+		    _s.setupCastButton();
+			_s.checkButtonState();
+			_s.setupPlayerController();
 		}
 		
 		//##########################################//
 		/* Setup casting screen*/
 		//##########################################//
-		this.setupCastingScreen =  function(){
-			self.cs_do = new FWDUVPDisplayObject("div");
-			self.cs_do.hasTransform3d_bl = false;
-			self.cs_do.hasTransform2d_bl = false;
-			self.cs_do.setBackfaceVisibility();
-			self.cs_do.getStyle().fontFamily = "Arial";
-			self.cs_do.getStyle().fontSize= "12px";
-			self.cs_do.getStyle().letterSpacing = '0.6px';
-			self.cs_do.getStyle().whiteSpace= "nowrap";
-			self.cs_do.getStyle().textAlign = "center";
-			self.cs_do.getStyle().padding = "10px";
-			self.cs_do.getStyle().paddingLeft = "12px";
-			self.cs_do.getStyle().paddingRight = "12px";
-			self.cs_do.setX(10);
-			self.cs_do.setY(10);
-			self.cs_do.getStyle().background = "#000000BB";
-			self.cs_do.getStyle().color = "#FFF";
-			self.cs_do.setInnerHTML('<img src="' + main.data.skinPath_str + 'cc-icon.png"/><span class="fwdcs_do" style="position: relative;top: -6px;left: 10px;margin-right: 10px"">Connecting to Chromecast</span>');
+		_s.setupCastingScreen =  function(){
+			_s.cs_do = new FWDUVPDisplayObject("div");
+			_s.cs_do.hasTransform3d_bl = false;
+			_s.cs_do.hasTransform2d_bl = false;
+			_s.cs_do.setBackfaceVisibility();
+			_s.cs_do.getStyle().fontFamily = "Arial";
+			_s.cs_do.getStyle().fontSize= "12px";
+			_s.cs_do.getStyle().letterSpacing = '0.6px';
+			_s.cs_do.getStyle().whiteSpace= "nowrap";
+			_s.cs_do.getStyle().textAlign = "center";
+			_s.cs_do.getStyle().padding = "10px";
+			_s.cs_do.getStyle().paddingLeft = "12px";
+			_s.cs_do.getStyle().paddingRight = "12px";
+			_s.cs_do.setX(10);
+			_s.cs_do.setY(10);
+			_s.cs_do.getStyle().background = "#000000BB";
+			_s.cs_do.getStyle().color = "#FFF";
+			_s.cs_do.setInnerHTML('<img src="' + main._d.sknPth + 'cc-icon.png"/><span class="fwdcs_do" style="position: relative;top: -6px;left: 10px;margin-right: 10px"">Connecting to Chromecast</span>');
 		}
 		
 		//##########################################//
 		/* Setup cast button */
 		//##########################################//
-		this.setupCastButton =  function(){
-			self.btn = document.createElement("google-cast-launcher");
-			self.btn.style.display = 'block';
-			self.btn.style.position = 'absolute';
-			self.btn.style.opacity = 0;
+		_s.setupCastButton =  function(){
+			_s.btn = document.createElement("google-cast-launcher");
+			_s.btn.style.display = 'block';
+			_s.btn.style.position = 'absolute';
+			_s.btn.style.opacity = 0;
 			controller.ccBtn_do.screen.removeEventListener("toustart", controller.ccBtn_do.onDown);
 			controller.ccBtn_do.screen.removeEventListener("touchend", controller.ccBtn_do.onMouseUp);
-			controller.ccBtn_do.screen.appendChild(self.btn);
+			controller.ccBtn_do.screen.appendChild(_s.btn);
 			setTimeout(function(){
-				self.btn.style.display = 'block';
+				_s.btn.style.display = 'block';
 			}, 500);
 		}
 		
-		this.checkButtonState = function(){
-			if(!self.isReady) return;
-			if(main.videoType_str != FWDUVPlayer.VIDEO && main.videoType_str != FWDUVPlayer.MP3 || main.videoSourcePath_str.indexOf(".m3u8") != -1){
-				self.controller_do.removeCCButton();
-				self.stopCasting();
+		FWDUVPCC.disableButton = function(){
+			if(_s.btn) _s.btn.style.width = '0';
+			if(_s.controller_do && _s.controller_do.ccBtn_do) _s.controller_do.ccBtn_do.disable();
+		}
+		
+		FWDUVPCC.enableButton = function(){
+			if(_s.btn) _s.btn.style.width = '100%';
+			if(_s.controller_do && _s.controller_do.ccBtn_do) _s.controller_do.ccBtn_do.enable();
+		}
+		
+		_s.checkButtonState = function(){
+			if(!_s.isReady) return;
+			if(main.videoType_str != FWDUVPlayer.VIDEO && main.videoType_str != FWDUVPlayer.MP3 && main.videoType_str != FWDUVPlayer.HLS_JS){
+				_s.controller_do.removeCCButton();
+				_s.stopCasting();
 			}else{
-				self.controller_do.addCCButton();
-				if(self.isCasting){
-					self.mainPlaying_bl = main.isPlaying_bl = false;
+				_s.controller_do.addCCButton();
+				if(_s.isCasting){
+					_s.mainPlaying_bl = main.isPlaying_bl = false;
 				}
 				main.curTimeInSecond = 0;
-				if(self.isCasting) self.loadMedia();
+				if(_s.isCasting) _s.loadMedia();
 			}
 		}
 		
-		this.isValidFormat = function(){
-			if(main.videoType_str == FWDUVPlayer.VIDEO || main.videoType_str == FWDUVPlayer.MP3) return true;
+		_s.isValidFormat = function(){
+			if(main.videoType_str == FWDUVPlayer.VIDEO || main.videoType_str == FWDUVPlayer.MP3 || main.videoType_str == FWDUVPlayer.HLS_JS) return true;
 			return false;
 		}
 		
 		//##########################################//
 		/* Setup remotePlayer controller */
 		//##########################################//
-		this.setupPlayerController = function(){
-			self.remotePlayer = new cast.framework.RemotePlayer();
-			self.remotePlayerController = new cast.framework.RemotePlayerController(self.remotePlayer);
-			self.setVolume();
-			self.remotePlayerController.addEventListener(
+		_s.setupPlayerController = function(){
+			_s.remotePlayer = new cast.framework.RemotePlayer();
+			_s.remotePlayerController = new cast.framework.RemotePlayerController(_s.remotePlayer);
+			_s.setVolume();
+			_s.remotePlayerController.addEventListener(
 				cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED,
 				function(e){
-					if(self.remotePlayer.isConnected){
+					if(_s.remotePlayer.isConnected){
 						controller.ccBtn_do.setButtonState(0);
-						main.main_do.addChild(self.cs_do);
-						self.mainPlaying_bl = main.isPlaying_bl;
+						main.main_do.addChild(_s.cs_do);
+						_s.mainPlaying_bl = main.isPlaying_bl;
 						main.stop();
-						self.loadMedia();
-						self.isCasting = main.isCasting = true;
-						console.log('Connected');
+						_s.loadMedia();
+						_s.isCasting = main.isCasting = true;
 					}else{
-						self.btn.style.left = '0';
+						_s.btn.style.left = '0';
 						controller.ccBtn_do.setButtonState(1);
 						main.curTimeInSecond = 0;
 						main.isCasting = false;
-						self.controller_do.disableSubtitleButton();
+						_s.controller_do.disableSubtitleButton();
 					
-						if(self.playerState == PLAYER_STATE.PLAYING && !self.isMobile_bl
-						  && self.videoSource == main.finalVideoPath_str){
+						if(_s.playerState == PLAYER_STATE.PLAYING && !_s.isMbl
+						  && _s.videoSource == main.finalVideoPath_str){
 							var curTime;
-							curTime = FWDUVPUtils.formatTime(self.currentTime);
+							curTime = FWDUVPUtils.formatTime(_s.currentTime);
 							if(curTime.length == 5) curTime = "00:" + curTime;
 							if(curTime.length == 7) curTime = "0" + curTime;
 							main.castStartAtTime = curTime;
-							self.stop();
+							_s.stop();
 							main.play();
 						}else{
-							self.stop();
+							_s.stop();
 							main.castStartAtTime = undefined;
 						}
 						try{
-							main.main_do.removeChild(self.cs_do);
+							main.main_do.removeChild(_s.cs_do);
 						}catch(e){}
 						
-						self.isStopped_bl = false;
-						self.isCasting = false;
-						self.playerState = undefined;
+						_s.isStopped_bl = false;
+						_s.isCasting = false;
+						_s.playerState = undefined;
 						console.log('Disconnected');
 					}
 				}
 			);
 		}
 		
-		this.play = function(){
-			if(self.playerState == PLAYER_STATE.IDLE){
-				self.loadMedia(true);
-			}else if(self.remotePlayer.isPaused) {
-			  self.remotePlayerController.playOrPause();
+		_s.play = function(){
+			if(_s.playerState == PLAYER_STATE.IDLE){
+				_s.loadMedia(true);
+			}else if(_s.remotePlayer.isPaused) {
+			  _s.remotePlayerController.playOrPause();
 			}
 		};
 		
-		this.pause = function () {
-			self.playerState = PLAYER_STATE.PAUSED;
-			if(!self.remotePlayer.isPaused) {
-			  self.remotePlayerController.playOrPause();
+		_s.pause = function () {
+			_s.playerState = PLAYER_STATE.PAUSED;
+			if(!_s.remotePlayer.isPaused) {
+			  _s.remotePlayerController.playOrPause();
 			}else{
-				self.playerState = PLAYER_STATE.PLAYING;
+				_s.playerState = PLAYER_STATE.PLAYING;
 			}
 		};
 		
-		self.allowToggle = true;
-		this.togglePlayPause = function () {
+		_s.allowToggle = true;
+		_s.togglePlayPause = function () {
 			//bug stops the events to be received
-			 if(self.allowToggle){
-				self.remotePlayerController.playOrPause();
+			 if(_s.allowToggle){
+				_s.remotePlayerController.playOrPause();
 			 }
 		};
 		
-		this.stop = function(){
-			if(!self.isCasting) return;
-			clearTimeout(self.setLoopId_to);
-			clearTimeout(self.loadMediLoopId_to);
-			self.stopToCheckPlaybackComplete();
-			self.remotePlayerController.playOrPause();
-			self.remotePlayerController.stop();
-			self.controller_do.showPlayButton();
-			self.controller_do.disableMainScrubber()
-			if(self.controller_do.ttm) self.controller_do.ttm.hide();
-			if(self.controller_do.thumbnailsPreview_do) self.controller_do.thumbnailsPreview_do.hide();
-			if(self.controller_do.rewindButton_do) self.controller_do.rewindButton_do.disable();
-			if(self.controller_do.downloadButton_do) self.controller_do.downloadButton_do.disable();
-			self.isStopped_bl = true;
-			if(main.largePlayButton_do) main.largePlayButton_do.show();
-			self.playerState = PLAYER_STATE.IDLE;
+		_s.stop = function(){
+			if(!_s.isCasting) return;
+			clearTimeout(_s.setLoopId_to);
+			clearTimeout(_s.loadMediLoopId_to);
+			_s.stopToCheckPlaybackComplete();
+			_s.remotePlayerController.playOrPause();
+			_s.remotePlayerController.stop();
+			_s.controller_do.showPlayButton();
+			_s.controller_do.disableMainScrubber()
+			if(_s.controller_do.ttm) _s.controller_do.ttm.hide();
+			if(_s.controller_do.thumbnailsPreview_do) _s.controller_do.thumbnailsPreview_do.hide();
+			if(_s.controller_do.rewindButton_do) _s.controller_do.rewindButton_do.disable();
+			if(_s.controller_do.downloadButton_do) _s.controller_do.downloadButton_do.disable();
+			_s.isStopped_bl = true;
+			if(main.lrgPlayBtn) main.lrgPlayBtn.show();
+			_s.playerState = PLAYER_STATE.IDLE;
 			main.curTimeInSecond = 0;
-			self.updateDisplay();
+			_s.updateDisplay();
 		}
 		
 		// Scrubb
-		this.startToScrub = function(){
-			self.isSeeking_bl = false;
-			self.allowToggle = false;
+		_s.startToScrub = function(){
+			_s.isSeeking_bl = false;
+			_s.allowToggle = false;
 		}
 		
-		this.stopToScrub = function(){
-			self.isSeeking_bl = false;
-			self.allowToggle = false;
-			clearTimeout(self.allowToToggle);
-			self.allowToToggle = setTimeout(function(){
-				 self.allowToggle = true;
+		_s.stopToScrub = function(){
+			_s.isSeeking_bl = false;
+			_s.allowToggle = false;
+			clearTimeout(_s.allowToToggle);
+			_s.allowToToggle = setTimeout(function(){
+				 _s.allowToggle = true;
 			},2000);
 		}
 		
-		this.seek = function(percent){
-			seekTime = Math.round(percent * self.getDuration());
-			self.remotePlayer.currentTime = seekTime;
-			self.remotePlayerController.seek();
+		_s.seek = function(percent){
+			seekTime = Math.round(percent * _s.getDuration());
+			_s.remotePlayer.currentTime = seekTime;
+			_s.remotePlayerController.seek();
 		}
 		
-		this.getCurrentTime = function () {
-			return  Math.round(this.remotePlayer.currentTime);
+		_s.getCurrentTime = function () {
+			return  Math.round(_s.remotePlayer.currentTime);
 		};
 
-		this.getDuration = function () {
-			return Math.round(this.remotePlayer.duration);
+		_s.getDuration = function () {
+			return Math.round(_s.remotePlayer.duration);
 		};
 		
-		this.scrubbAtTime = function(duration){
-			self.allowToggle = false;
-			clearTimeout(self.allowToToggle);
-			self.allowToToggle = setTimeout(function(){
-				 self.allowToggle = true;
+		_s.scrubbAtTime = function(duration){
+			_s.allowToggle = false;
+			clearTimeout(_s.allowToToggle);
+			_s.allowToToggle = setTimeout(function(){
+				 _s.allowToggle = true;
 			},2000);
-			self.remotePlayer.currentTime = duration;
-			self.remotePlayerController.seek();
+			_s.remotePlayer.currentTime = duration;
+			_s.remotePlayerController.seek();
 		}
 		
 		// Volume
-		this.setVolume = function(){
-			self.remotePlayer.volumeLevel = main.volume;
-			self.remotePlayerController.setVolumeLevel();
+		_s.setVolume = function(){
+			_s.remotePlayer.volumeLevel = main.volume;
+			_s.remotePlayerController.setVolumeLevel();
 		}
 
 		//##########################################//
 		/* Setup remove player events */
 		//##########################################//
-		this.addPlayerEvents =  function(){
+		_s.addPlayerEvents =  function(){
 			
 			// Triggers when the media info or the remotePlayer state changes
-			self.remotePlayerController.addEventListener(
+			_s.remotePlayerController.addEventListener(
 				cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
 				function(event) {
 					var session = cast.framework.CastContext.getInstance().getCurrentSession();
 					if (!session) {
-						self.mediaInfo = null;
-						self.updateDisplay();
+						_s.mediaInfo = null;
+						_s.updateDisplay();
 						return;
 					}
 
 					var media = session.getMediaSession();
 					if (!media) {
-						self.mediaInfo = null;
-						self.updateDisplay();
+						_s.mediaInfo = null;
+						_s.updateDisplay();
 						return;
 					}
 
-					self.mediaInfo = media.media;
+					_s.mediaInfo = media.media;
 					
 					if(media.playerState == PLAYER_STATE.PAUSED) {
-						self.changePlayPauseState(PLAYER_STATE.PAUSED);
+						_s.changePlayPauseState(PLAYER_STATE.PAUSED);
 					}else if(media.playerState == PLAYER_STATE.PLAYING){
-						self.changePlayPauseState(PLAYER_STATE.PLAYING);
+						_s.changePlayPauseState(PLAYER_STATE.PLAYING);
 					}
 					
-					if(self.isStopped_bl) self.updateDisplay();
+					if(_s.isStopped_bl) _s.updateDisplay();
 				}
 			);
 			
-			this.remotePlayerController.addEventListener(
+			_s.remotePlayerController.addEventListener(
 				cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED,
 				function(){
-					if(self.remotePlayer.isPaused) {
-						self.changePlayPauseState(PLAYER_STATE.PAUSED);
-					}else if (this.playerState !== PLAYER_STATE.PLAYING) {
-						self.changePlayPauseState(PLAYER_STATE.PLAYING);
+					if(_s.remotePlayer.isPaused) {
+						_s.changePlayPauseState(PLAYER_STATE.PAUSED);
+					}else if (_s.playerState !== PLAYER_STATE.PLAYING) {
+						_s.changePlayPauseState(PLAYER_STATE.PLAYING);
 					}
 				}
 			 );
 			 
-			this.changePlayPauseState = function(state){
+			_s.changePlayPauseState = function(state){
 				 if(state == PLAYER_STATE.PAUSED) {
-					self.controller_do.showPlayButton();
-					if(main.largePlayButton_do) main.largePlayButton_do.show();
-					self.playerState = PLAYER_STATE.PAUSED;
-				}else if (this.playerState !== PLAYER_STATE.PLAYING) {
-					self.controller_do.showPauseButton();
-					if(main.largePlayButton_do) main.largePlayButton_do.hide();
-					self.playerState = PLAYER_STATE.PLAYING;
-					self.controller_do.enableMainScrubber();
-					if(self.controller_do.rewindButton_do) self.controller_do.rewindButton_do.enable();
-					if(self.controller_do.downloadButton_do) self.controller_do.downloadButton_do.enable();
-					self.startToCheckPlaybackComplete();
-					self.setLoopId_to = setTimeout(function(){
-						self.allowToLoop = true;
+					_s.controller_do.showPlayButton();
+					if(main.lrgPlayBtn) main.lrgPlayBtn.show();
+					_s.playerState = PLAYER_STATE.PAUSED;
+				}else if (_s.playerState !== PLAYER_STATE.PLAYING) {
+					_s.controller_do.showPauseButton();
+					if(main.lrgPlayBtn) main.lrgPlayBtn.hide();
+					_s.playerState = PLAYER_STATE.PLAYING;
+					_s.controller_do.enableMainScrubber();
+					if(_s.controller_do.rewindButton_do) _s.controller_do.rewindButton_do.enable();
+					if(_s.controller_do.downloadButton_do) _s.controller_do.downloadButton_do.enable();
+					_s.startToCheckPlaybackComplete();
+					_s.setLoopId_to = setTimeout(function(){
+						_s.allowToLoop = true;
 					}, 1000);
 				}
-				if(!self.isStopped_bl) self.updateDisplay();
+				if(!_s.isStopped_bl) _s.updateDisplay();
 			}
 			
 			// Update time
-			this.remotePlayerController.addEventListener(
+			_s.remotePlayerController.addEventListener(
 				cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED,
 				function (event){
-					var time = FWDUVPVideoScreen.formatTime(self.getCurrentTime()) + "/" + FWDUVPVideoScreen.formatTime(self.getDuration());
-					self.controller_do.updateTime(time);
-					if(self.getCurrentTime()) self.currentTime = self.getCurrentTime();
-					if(!self.isSeeking_bl){
-						self.controller_do.updateMainScrubber(self.getCurrentTime()/self.getDuration());
+					var time = FWDUVPUtils.formatTime(_s.getCurrentTime()) + "/" + FWDUVPUtils.formatTime(_s.getDuration());
+					_s.controller_do.updateTime(time);
+					if(_s.getCurrentTime()) _s.currentTime = _s.getCurrentTime();
+					if(!_s.isSeeking_bl){
+						_s.controller_do.updateMainScrubber(_s.getCurrentTime()/_s.getDuration());
 					}
 				}
 			);
 			
 			// Update volume
-			this.remotePlayerController.addEventListener(
+			_s.remotePlayerController.addEventListener(
 				cast.framework.RemotePlayerEventType.VOLUME_LEVEL_CHANGED,
 				function(){
-					self.controller_do.updateVolume(self.remotePlayer.volumeLevel);
+					_s.controller_do.updateVolume(_s.remotePlayer.volumeLevel);
 				}
 			 );
 		
 			// Play complete handler
-			this.startToCheckPlaybackComplete = function(){
-				self.stopToCheckPlaybackComplete();
-				self.pbc_int = setInterval(self.checkPlaybackComplete);
+			_s.startToCheckPlaybackComplete = function(){
+				_s.stopToCheckPlaybackComplete();
+				_s.pbc_int = setInterval(_s.checkPlaybackComplete);
 			}
 			
-			this.stopToCheckPlaybackComplete = function(){
-				clearInterval(self.pbc_int);
+			_s.stopToCheckPlaybackComplete = function(){
+				clearInterval(_s.pbc_int);
 			}
 			
-			this.checkPlaybackComplete = function(){
-				if(self.getDuration() > 0) self.isStopped_bl = false;
-				if(self.isSeeking_bl) return;
-				if(self.getCurrentTime() == self.getDuration() || self.getDuration() == 0){	
-					if(!self.isStopped_bl){
-						self.stop();
-						if(self.allowToLoop){
-							if((main.data.stopVideoWhenPlayComplete_bl || main.data.playlist_ar.length == 1)
-							|| (main.data.stopAfterLastVideoHasPlayed_bl && main.data.playlist_ar.length - 1 == main.id)){
-								self.stop();
-							}else if(main.data.shuffle_bl){
+			_s.checkPlaybackComplete = function(){
+				if(_s.getDuration() > 0) _s.isStopped_bl = false;
+				if(_s.isSeeking_bl) return;
+				if(_s.getCurrentTime() == _s.getDuration() || _s.getDuration() == 0){	
+					if(!_s.isStopped_bl){
+						_s.stop();
+						if(_s.allowToLoop){
+							if((main._d.stopVideoWhenPlayComplete_bl || main._d.playlist_ar.length == 1)
+							|| (main._d.stopAfterLastVideoHasPlayed_bl && main._d.playlist_ar.length - 1 == main.id)){
+								_s.stop();
+							}else if(main._d.shuffle_bl){
 								main.playShuffle();
-							}else if(main.data.loop_bl){
-								self.loadMediLoopId_to = setTimeout(function(){
-									self.loadMedia(true);
+							}else if(main._d.loop_bl){
+								_s.loadMediLoopId_to = setTimeout(function(){
+									_s.loadMedia(true);
 								}, 500);
 							}else{
 								main.playNext();
 							}
-							self.allowToLoop = false;
+							_s.allowToLoop = false;
 							return;
 						}
 					}
@@ -399,7 +408,7 @@ var FWDUVPCC = function(
 		}
 	
 		// Load subtitle
-		this.loadSubtitle = function(){
+		_s.loadSubtitle = function(){
 			var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 			var media = castSession.getMediaSession();
 			tracksInfoRequest = new chrome.cast.media.EditTracksInfoRequest([main.ccSS]);
@@ -407,7 +416,7 @@ var FWDUVPCC = function(
 		}
 		
 		// Style subtitle
-		this.styleSubtitle = function(mediaInfo){
+		_s.styleSubtitle = function(mediaInfo){
 			var textTrackStyle = new chrome.cast.media.TextTrackStyle([main.ccSS]);
 			textTrackStyle.backgroundColor = '#00000000', // see http://dev.w3.org/csswg/css-color/#hex-notation
 			textTrackStyle.foregroundColor = '#FFFFFFFF', // see http://dev.w3.org/csswg/css-color/#hex-notation
@@ -424,14 +433,14 @@ var FWDUVPCC = function(
 		}
 		
 		// Load media
-		this.loadMedia = function(autoplay){
+		_s.loadMedia = function(autoplay){
 			
 			var path1 = location.origin;
 			var path2 = location.pathname;
-			self.videoSource = FWDUVPUtils.getValidSource(main.finalVideoPath_str);
+			_s.videoSource = FWDUVPUtils.getValidSource(main.finalVideoPath_str);
 			var posterSource = FWDUVPUtils.getValidSource(main.posterPath_str);
 			
-			var mediaInfo = new chrome.cast.media.MediaInfo(self.videoSource);
+			var mediaInfo = new chrome.cast.media.MediaInfo(_s.videoSource);
 			mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
 			var ct = 'video/mp4';
 			if(main.videoType_str == FWDUVPlayer.MP3){
@@ -441,9 +450,9 @@ var FWDUVPCC = function(
 			mediaInfo.contentType = ct;
 			//mediaInfo.metadata.title = 'test';
 			mediaInfo.metadata.images = [{'url' : posterSource}];
-			self.styleSubtitle(mediaInfo);
+			_s.styleSubtitle(mediaInfo);
 			
-			var subData = main.data.playlist_ar[main.id].subtitleSource;
+			var subData = main._d.playlist_ar[main.id].subtitleSource;
 			
 			if(subData){
 				var tracks = [];
@@ -469,36 +478,36 @@ var FWDUVPCC = function(
 			
 			var request = new chrome.cast.media.LoadRequest(mediaInfo);
 			
-			if(self.mainPlaying_bl || autoplay || main.isThumbClick_bl){
+			if(_s.mainPlaying_bl || autoplay || main.isThumbClick_bl){
 				request.autoplay = true;
 			}else{
 				request.autoplay = false;
-				self.pause();
+				_s.pause();
 			}
 		
-			self.playerState = PLAYER_STATE.BUFFERING;
+			_s.playerState = PLAYER_STATE.BUFFERING;
 			
 			request.currentTime = main.curTimeInSecond;
-			self.setVolume();
-			self.addPlayerEvents();
+			_s.setVolume();
+			_s.addPlayerEvents();
 			cast.framework.CastContext.getInstance().getCurrentSession().loadMedia(request).then(
 				function() {
 					if(subData){
 						var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 						var media = castSession.getMediaSession();
-						self.controller_do.enableSubtitleButton()
+						_s.controller_do.enableSubtitleButton()
 						
 						tracksInfoRequest = new chrome.cast.media.EditTracksInfoRequest([main.ccSS]);
 						media.editTracksInfo(tracksInfoRequest, function(e){
-							if(request.autoplay) self.changePlayPauseState(PLAYER_STATE.PLAYING);
+							if(request.autoplay) _s.changePlayPauseState(PLAYER_STATE.PLAYING);
 						},function(e){console.log(e);});
 					}
-					self.playerState = PLAYER_STATE.LOADED;
+					_s.playerState = PLAYER_STATE.LOADED;
 				},
 				function (errorCode) {
-					self.playerState = PLAYER_STATE.IDLE;
+					_s.playerState = PLAYER_STATE.IDLE;
 					console.log('Remote media load error: ' + errorCode);
-					self.updateDisplay();
+					_s.updateDisplay();
 			  }
 		  )
 		 
@@ -507,7 +516,7 @@ var FWDUVPCC = function(
 		//##########################################//
 		/* Setup remove remotePlayer */
 		//##########################################//
-		this.updateDisplay = function(param){
+		_s.updateDisplay = function(param){
 			var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 		
 			if(castSession && castSession.getMediaSession() && castSession.getMediaSession().media){
@@ -515,29 +524,29 @@ var FWDUVPCC = function(
 				var mediaInfo = media.media;
 				
 				if(mediaInfo.metadata){
-					self.mediaTitle = mediaInfo.metadata.title;
+					_s.mediaTitle = mediaInfo.metadata.title;
 					mediaEpisodeTitle = mediaInfo.metadata.episodeTitle;
 					// Append episode title if present
-					self.mediaTitle = mediaEpisodeTitle ? self.mediaTitle + ': ' + mediaEpisodeTitle : self.mediaTitle;
+					_s.mediaTitle = mediaEpisodeTitle ? _s.mediaTitle + ': ' + mediaEpisodeTitle : _s.mediaTitle;
 					// Do not display mediaTitle if not defined.
-					self.mediaTitle = (self.mediaTitle) ? self.mediaTitle + ' ' : '';
+					_s.mediaTitle = (_s.mediaTitle) ? _s.mediaTitle + ' ' : '';
 					mediaSubtitle = mediaInfo.metadata.subtitle;
 					mediaSubtitle = (mediaSubtitle) ? mediaSubtitle + ' ' : '';
-					self.deviceName = castSession.getCastDevice().friendlyName;
+					_s.deviceName = castSession.getCastDevice().friendlyName;
 				}
 			}
 			var ctn = document.getElementsByClassName("fwdcs_do")[0];
-			if(self.deviceName && ctn) ctn.innerHTML = self.mediaTitle + self.playerState + ' on ' + self.deviceName;
+			if(_s.deviceName && ctn) ctn.innerHTML = _s.mediaTitle + _s.playerState + ' on ' + _s.deviceName;
 		}
 		
-		this.stopCasting = function(){
+		_s.stopCasting = function(){
 			try{
 				var castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 				castSession.endSession(true);
 			}catch(e){}
 		}
 		
-		self.init();
+		_s.init();
 	};
 	
 	/* set prototype */

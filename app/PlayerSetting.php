@@ -16,6 +16,11 @@ class PlayerSetting extends Model
 		'info_window',
 		'skin',
 		'loop_video',
-		'is_resume'
+		'is_resume',
+		'player_google_analytics_id',
+		'subtitle_font_size',
+		'subtitle_color',
+		'chromecast'
+
 	];
 }

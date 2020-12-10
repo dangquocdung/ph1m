@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use App\PaypalSubscription;
 use Illuminate\Http\Request;
 use Auth;
+use App\Multiplescreen;
 use App\User;
 use App\Package;
 use Session;
@@ -408,42 +409,71 @@ class PaytemController extends Controller
        
 
 
-        if ( 'TXN_SUCCESS' === $request['STATUS'] ) {
+        if ( 'TXN_SUCCESS' === $request['STATUS'] ) 
+        {
 
-                $current_date = Carbon::now();
-                $end_date = null;
+            $current_date = Carbon::now();
+            $end_date = null;
 
-                if ($plan->interval == 'month') {
-                        $end_date = Carbon::now()->addMonths($plan->interval_count);
-                } else if ($plan->interval == 'year') {
-                        $end_date = Carbon::now()->addYears($plan->interval_count);
-                } else if ($plan->interval == 'week') {
-                        $end_date = Carbon::now()->addWeeks($plan->interval_count);
-                } else if ($plan->interval == 'day') {
-                        $end_date = Carbon::now()->addDays($plan->interval_count);
+            if ($plan->interval == 'month') {
+                    $end_date = Carbon::now()->addMonths($plan->interval_count);
+            } else if ($plan->interval == 'year') {
+                    $end_date = Carbon::now()->addYears($plan->interval_count);
+            } else if ($plan->interval == 'week') {
+                    $end_date = Carbon::now()->addWeeks($plan->interval_count);
+            } else if ($plan->interval == 'day') {
+                    $end_date = Carbon::now()->addDays($plan->interval_count);
+            }
+
+            $created_subscription = PaypalSubscription::create([
+                    'user_id' => $user_id,
+                    'payment_id' => $request['TXNID'],
+                    'user_name' => $user->name,
+                    'package_id' => $plan->id,
+                    'price' => $plan->amount,
+                    'status' => 1,
+                    'method' => 'PAYTM',
+                    'subscription_from' => $current_date,
+                    'subscription_to' => $end_date
+            ]);
+
+            $transaction_id = $request['TXNID'];
+            $w_email = Config::findOrFail(1)->w_email;
+
+            Session::put('com_email',$w_email);
+            Session::put('user_email',$user->email);
+            
+            if ($created_subscription) {
+              $auth = Auth::user();
+                $screen = $plan->screens;
+                if($screen > 0)
+                {
+                    $multiplescreen = Multiplescreen::where('user_id',$auth->id)->first();
+                     if(isset($multiplescreen))
+                     {
+                        $multiplescreen->update([
+                          'pkg_id' => $plan->id,
+                          'user_id' => $auth->id,
+                          'screen1' => $screen >= 1 ? $auth->name :  null,
+                          'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                          'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                          'screen4' => $screen >= 4 ? 'Screen4' :  null
+                        ]);
+                    }
+                    else{
+                        $multiplescreen = Multiplescreen::create([
+                          'pkg_id' => $plan->id,
+                          'user_id' => $auth->id,
+                          'screen1' => $screen >= 1 ? $auth->name :  null,
+                          'screen2' => $screen >= 2 ? 'Screen2' :  null,
+                          'screen3' => $screen >= 3 ? 'Screen3' :  null,
+                          'screen4' => $screen >= 4 ? 'Screen4' :  null
+                        ]);
+                     }
                 }
-
-                $created_subscription = PaypalSubscription::create([
-                        'user_id' => $user_id,
-                        'payment_id' => $request['TXNID'],
-                        'user_name' => $user->name,
-                        'package_id' => $plan->id,
-                        'price' => $plan->amount,
-                        'status' => 1,
-                        'method' => 'PAYTM',
-                        'subscription_from' => $current_date,
-                        'subscription_to' => $end_date
-                ]);
-
-                $transaction_id = $request['TXNID'];
-                $w_email = Config::findOrFail(1)->w_email;
-
-                Session::put('com_email',$w_email);
-                Session::put('user_email',$user->email);
-                
-                if ($created_subscription) {
-
-                        try{
+                if(env('MAIL_DRIVER') != NULL && env('MAIL_HOST') !=NULL && env('MAIL_PORT') != NULL)
+                {
+                    try{
                                 Mail::send('user.invoice', ['paypal_sub' => $created_subscription, 'invoice' => null], function($message) {
                                         $message->from(Session::get('com_email'))->to(Session::get('user_email'))->subject('Invoice');
                                     });
@@ -454,14 +484,15 @@ class PaytemController extends Controller
                                 dd("Payment Successfully ! but Invoice will not sent because admin not updated the mail setting in admin dashboard ! Redirecting you to homepage... !");
                         }
 
-                        
-                    }
+                }
+                            
+            }
 
-                                    Session::forget('user_email');
-                                    Session::forget('com_email');
-        
+            Session::forget('user_email');
+            Session::forget('com_email');
 
-                return redirect('/')->with('added',"Payment Successfully ! You're now a subscriber ! ");
+
+            return redirect('/')->with('added',"Payment Successfully ! You're now a subscriber ! ");
                
 
         } else if( 'TXN_FAILURE' === $request['STATUS'] ){

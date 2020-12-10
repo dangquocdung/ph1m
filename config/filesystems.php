@@ -169,6 +169,7 @@ return [
         'secret' => env('secret'),
         'region' => env('region'),
         'bucket' => env('bucket'),
+        'url'    => env('url'),
     ],
       ],
 

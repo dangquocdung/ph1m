@@ -2,51 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Audio;
+use App\Config;
+use App\Episode;
+use App\LiveEvent;
+use App\Menu;
 use App\Movie;
 use App\Season;
-use App\WatchHistory;
-use App\Episode;
-use App\Menu;
 use App\TvSeries;
+use App\User;
+use App\WatchHistory;
 use Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
-
 
 class WatchController extends Controller
 {
     public function watch($id)
     {
-    	$movie = Movie::findorfail($id);
-    	return view('watch',compact('movie'));
+        $movie = Movie::findorfail($id);
+        return view('watch', compact('movie'));
+    }
+
+    public function watchtvtrailer($id)
+    {
+        $season = Season::find($id);
+        return view('watchtv', compact('season'));
     }
 
     public function watchTV($id)
     {
-    	$season = Season::find($id);
-        
-    	return view('watchTvShow',compact('season'));
+        $season = Season::find($id);
+        if ($season->is_protect == 1) {
+            $password = $season->password;
+            $pass = md5($password);
+        }
+
+        return view('watchTvShow', compact('season', 'pass'));
     }
 
     public function watchMovie($id)
     {
         $movie = Movie::findorfail($id);
-        return view('watchMovie',compact('movie'));
+        if ($movie->is_protect == 1) {
+            $password = $movie->password;
+            $pass = md5($password);
+        }
+
+        return view('watchMovie', compact('movie', 'pass'));
     }
 
     public function watchEpisode($id)
-    {  
+    {
         $episode = Episode::find($id);
-        $season  = Season::find($episode->seasons_id);
-        return view('episodeplayer',compact('episode','season'));
+        $season = Season::find($episode->seasons_id);
+        return view('episodeplayer', compact('episode', 'season'));
     }
 
+    public function watchhistory()
+    {
 
-
-    public function watchhistory(){
-     
-         $auth=Auth::user()->id;
-        $watchistory=WatchHistory::where('user_id',$auth)->get();
+        $auth = Auth::user()->id;
+        $watchistory = WatchHistory::where('user_id', $auth)->get();
         $items = collect();
 
         foreach ($watchistory as $value) {
@@ -58,7 +74,7 @@ class WatchController extends Controller
 
                 $ts = TvSeries::find($value->tv_id);
 
-                if(isset($ts)){
+                if (isset($ts)) {
                     $x = count($ts->seasons);
 
                     if ($x == 0) {
@@ -67,7 +83,6 @@ class WatchController extends Controller
                         $items->push($ts->seasons[0]);
                     }
                 }
-
 
             }
         }
@@ -89,37 +104,72 @@ class WatchController extends Controller
         // set url path for generted links
         // $paginatedItems->setPath($request->url());
         // return $paginatedItems;
-       
-         $menu = Menu::first();
 
-         
-        return view('watchhistory', ['pusheditems' => $paginatedItems, 'menuu' => $menu]);
-       
-     
-    
+        $menu = Menu::first();
+
+        $age = 0;
+        $config = Config::first();
+        if ($config->age_restriction == 1) {
+            if (Auth::user()) {
+                $user_id = Auth::user()->id;
+                $user = User::findOrfail($user_id);
+                $age = $user->age;
+            }
+
+        } else {
+            $age = 100;
+        }
+
+        return view('watchhistory', ['pusheditems' => $paginatedItems, 'menuu' => $menu, 'age' => $age]);
+
     }
 
-    public function watchistorydelete(){
-
-        $auth=Auth::user()->id;
-        $history=WatchHistory::where('user_id',$auth)->delete();
-        return redirect('/')->with('updated','Your Watch History Has Been Deleted');
-
-    }
-        public function showdestroy($id)
+    public function watchistorydelete()
     {
-       
-        $auth=Auth::user()->id;
-          $show = WatchHistory::where('tv_id', $id)->where('user_id',$auth)->first();
-          $show->delete();
-          return back();
+
+        $auth = Auth::user()->id;
+        $history = WatchHistory::where('user_id', $auth)->delete();
+        return redirect('/')->with('updated', 'Your Watch History Has Been Deleted');
+
+    }
+    public function showdestroy($id)
+    {
+
+        $auth = Auth::user()->id;
+        $show = WatchHistory::where('tv_id', $id)->where('user_id', $auth)->first();
+        $show->delete();
+        return back();
     }
 
     public function moviedestroy($id)
     {
-        $auth=Auth::user()->id;
-          $movie = WatchHistory::where('movie_id', $id)->where('user_id',$auth)->first();
-          $movie->delete();
-          return back();
+        $auth = Auth::user()->id;
+        $movie = WatchHistory::where('movie_id', $id)->where('user_id', $auth)->first();
+        $movie->delete();
+        return back();
     }
+    public function watchEvent($id)
+    {
+        $liveevent = LiveEvent::findorfail($id);
+
+        return view('watchEvent', compact('liveevent'));
+    }
+
+    public function watchAudio($id)
+    {
+        $audio = Audio::findorfail($id);
+        if ($audio->is_protect == 1) {
+            $password = $audio->password;
+            $pass = md5($password);
+        }
+
+        return view('watchaudio', compact('audio', 'pass'));
+    }
+
+    public function watchMovieiframe($id)
+    {
+        $movie = Movie::findorfail($id);
+        return view('watchMovieiframe', compact('movie'));
+    }
+
 }

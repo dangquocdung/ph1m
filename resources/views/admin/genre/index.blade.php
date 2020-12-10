@@ -32,7 +32,7 @@
       </div>
     </div>
     <div class="content-block box-body">
-      <table id="genreTable" class="table table-hover">
+      <table id="genreTable" class="table table-hover" style="width:100%">
         <thead>
           <tr class="table-heading-row">
             <th>
@@ -42,17 +42,19 @@
               </div>
               
             </th>
+            <th>Sort</th>
+            <th>Image</th>
             <th>Genre Name</th>
             <th>Created At</th>
              <th>Updated At</th>
             <th>Actions</th>
           </tr>
         </thead>
-        @if ($genres)
-          <tbody>
-         
-          </tbody>
-        @endif
+
+        <tbody id="tablecontents">
+          
+        </tbody>
+        
       </table>
     </div>
   </div>
@@ -72,7 +74,8 @@
   </script>
    <script>
     $(function () {
-      
+      "use strict";
+
       var table = $('#genreTable').DataTable({
           processing: true,
           serverSide: true,
@@ -85,8 +88,10 @@
           columns: [
               
               {data: 'checkbox', name: 'checkbox',orderable: false, searchable: false},
+               {data: 'sort', name: 'sort'},
+               {data: 'image', name: 'image'},
               {data: 'name', name: 'name'},
-              
+               
                 {data: 'created_at', name: 'created_at'},
             
             {data: 'updated_at', name: 'updated_at'},
@@ -97,9 +102,48 @@
           dom : 'lBfrtip',
           buttons : [
             'csv','excel','pdf','print'
-          ],
-          order : [[0,'desc']]
+          ]
+          
       });
+
+      $( "#tablecontents" ).sortable({
+          items: "tr",
+          cursor: 'move',
+          opacity: 0.6,
+          update: function() {
+              sendOrderToServer();
+          }
+        });
+
+        function sendOrderToServer() {
+
+          var order = [];
+          var token = $('meta[name="csrf-token"]').attr('content');
+          $('tr.row1').each(function(index,element) {
+            order.push({
+              id: $(this).attr('data-id'),
+              position: index+1
+            });
+          });
+
+          $.ajax({
+            type: "GET", 
+            dataType: "json", 
+            url: "{{ url('genre-sort') }}",
+            data: {
+               order: order,
+              _token: token
+            },
+            success: function(response) {
+                if (response.status == "success") {
+                  console.log(response);
+                } else {
+                  console.log(response);
+                }
+            }
+          });
+        }
+
       
     });
   </script>

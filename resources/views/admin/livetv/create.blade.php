@@ -158,26 +158,32 @@
         
 
         <div id="movie_title" class="form-group{{ $errors->has('title') ? ' has-error' : '' }}">
-          {!! Form::label('title', 'Movie Title') !!}
-          <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Enter movie title Eg:Avatar"></i>
+          {!! Form::label('title', 'LiveTv Title') !!}
+          <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Enter livetv title Eg:Avatar"></i>
           {!! Form::text('title', null, ['class' => 'form-control', 'placeholder' => 'Please enter movie title']) !!}
+          <small class="text-danger">{{ $errors->first('title') }}</small>
+        </div>
+        <div id="movie_slug" class="form-group{{ $errors->has('slug') ? ' has-error' : '' }}">
+          {!! Form::label('title', 'LiveTv Slug') !!}
+          <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Enter livetv slug Eg:avatar-example"></i>
+          {!! Form::text('title', null, ['class' => 'form-control', 'placeholder' => 'Please enter livetv slug']) !!}
           <small class="text-danger">{{ $errors->first('title') }}</small>
         </div>
         <input type="text" name="live" value="1" hidden="true">
         <div id="movie_id" style="display: none;" class="form-group{{ $errors->has('title2') ? ' has-error' : '' }}">
-          {!! Form::label('title', 'Movie ID') !!}
-          <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter movie ID (TMDB ID)"></i>
-          {!! Form::text('title2', null, ['class' => 'form-control', 'placeholder' => 'Please enter movie ID (TMDB ID)']) !!}
+          {!! Form::label('title', 'LiveTv ID') !!}
+          <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please enter livetv ID (TMDB ID)"></i>
+          {!! Form::text('title2', null, ['class' => 'form-control', 'placeholder' => 'Please enter livetv ID (TMDB ID)']) !!}
           <small class="text-danger">{{ $errors->first('title2') }}</small>
         </div>
         {{-- select to upload code start from here --}}
         <div class="form-group{{ $errors->has('selecturl') ? ' has-error' : '' }}">
           {!! Form::label('selecturls', 'Add Video') !!}
           <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please select one of the options to add Video/Movie"></i>
-          {!! Form::select('selecturl', array('' => '','iframeurl' => 'IFrame URL',
+          {!! Form::select('selecturl', array('iframeurl' => 'IFrame URL',
        
-           'youtubeapi' =>'Youtube API', 'vimeoapi' => 'Vimeo API',
-           'customurl' => 'Custom URL/ Youtube URL/ Vimeo URL', 'uploadvideo'=>'Upload Video'), null, ['class' => 'form-control select2','id'=>'selecturl']) !!}
+           
+           'customurl' => 'Custom URL/ Youtube URL/ Vimeo URL'), null, ['class' => 'form-control select2','id'=>'selecturl']) !!}
            <small class="text-danger">{{ $errors->first('selecturl') }}</small>
          </div>
 
@@ -208,6 +214,8 @@
             </div>
           </div>
         </div>
+
+     
 
         {{-- youtube and vimeo url --}}
         <div id="ready_url" style="display: none;" class="form-group{{ $errors->has('ready_url') ? ' has-error' : '' }}">
@@ -342,6 +350,31 @@
       </div>
     </div>
 
+    <div class="form-group{{ $errors->has('is_protect') ? ' has-error' : '' }}">
+      <div class="row">
+        <div class="col-xs-6">
+          {!! Form::label('is_protect', 'Protected Video ?') !!}
+        </div>
+        <div class="col-xs-5 pad-0">
+          <label class="switch">
+            <input type="checkbox" name="is_protect" class="checkbox-switch" id="is_protect">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <small class="text-danger">{{ $errors->first('is_protect') }}</small>
+      </div>
+    </div>
+    <div class="search form-group{{ $errors->has('password') ? ' has-error' : '' }} is_protect" style="display: none;">
+      {!! Form::label('password', 'Protected Password For Video') !!}
+      {!! Form::password('password', null, ['class' => 'form-control','id'=>'password']) !!}
+      <span toggle="#password" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+      <small class="text-danger">{{ $errors->first('password') }}</small>
+    </div>
+
+
+
     <div style="display: none;" id="subtitle_section">
 
      <div class="pad_plus_border">
@@ -447,6 +480,23 @@
     {!! Form::textarea('detail', null, ['class' => 'form-control materialize-textarea', 'rows' => '5']) !!}
     <small class="text-danger">{{ $errors->first('detail') }}</small>
   </div>
+  
+  <div class="form-group{{ $errors->has('livetvicon') ? ' has-error' : '' }}">
+    <div class="row">
+      <div class="col-xs-6">
+        {!! Form::label('livetvicon', 'Live Tv Icon show') !!}
+      </div>
+      <div class="col-xs-5 pad-0">
+        <label class="switch">
+          {!! Form::checkbox('livetvicon', 1, 0, ['class' => 'checkbox-switch']) !!}
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+    <div class="col-xs-12">
+      <small class="text-danger">{{ $errors->first('livetvicon') }}</small>
+    </div>
+  </div>
 
 <div class="btn-group pull-right">
   <button type="reset" class="btn btn-info"><i class="material-icons left">toys</i> Reset</button>
@@ -540,23 +590,20 @@
 </script>
 <script>
   $(document).ready(function(){
-   $("#selecturl").select2({
-    placeholder: "Add Video Through...",
-
-  });
+   $('#ifbox').show();
    $('#selecturl').change(function(){  
      selecturl = document.getElementById("selecturl").value;
       if (selecturl == 'iframeurl') {
     $('#ifbox').show();
     $('#uploadvideo').hide();
-
+    $('#audio_url').hide();
     $('#ready_url').hide();
     $('#subtitle_section').hide();
 
   }else if (selecturl == 'uploadvideo') {
    $('#uploadvideo').show();
    $('#ready_url').hide();
-
+  
    $('#ifbox').hide();
    $('#subtitle_section').show();
 
@@ -564,7 +611,7 @@
    $('#ifbox').hide();
    $('#uploadvideo').hide();
    $('#ready_url').show();
-
+  
    $('#subtitle_section').show();
    $('#ready_url_text').text('Enter Custom URL or Vimeo or Youtube URL');
  }
@@ -574,6 +621,7 @@
 
    $('#ifbox').hide();
    $('#subtitle_section').hide();
+  
    $('#ready_url_text').text('Import From Youtube API');
 
  }else if(selecturl=='vimeoapi'){
@@ -583,7 +631,9 @@
 
    $('#subtitle_section').hide();
    $('#ready_url_text').text('Import From Vimeo API');
+  
  }
+
 
 
 });
@@ -640,6 +690,14 @@
     }
     else if($(this).prop("checked") == false){
       $('.movie_id').fadeOut();
+    }
+  });
+  $('input[name="is_protect"]').click(function(){
+    if($(this).prop("checked") == true){
+      $('.is_protect').fadeIn();
+    }
+    else if($(this).prop("checked") == false){
+      $('.is_protect').fadeOut();
     }
   });
 });
@@ -865,5 +923,17 @@
           }
         });
   });
+</script>
+<script type="text/javascript">
+    $(".toggle-password").click(function() {
+
+  $(this).toggleClass("fa-eye fa-eye-slash");
+  var input = $($(this).attr("toggle"));
+  if (input.attr("type") == "password") {
+    input.attr("type", "text");
+  } else {
+    input.attr("type", "password");
+  }
+});
 </script>
 @endsection

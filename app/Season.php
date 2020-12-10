@@ -4,13 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
-use CyrildeWit\EloquentViewable\Viewable;
-use CyrildeWit\EloquentViewable\Contracts\Viewable as ViewableContract;
+use CyrildeWit\EloquentViewable\InteractsWithViews;
+use CyrildeWit\EloquentViewable\Contracts\Viewable;
 
-class Season extends Model implements ViewableContract
+class Season extends Model implements Viewable
 {
     use HasTranslations;
-    use Viewable;
+    use InteractsWithViews;
 
     public $translatable = ['detail'];
 
@@ -43,7 +43,11 @@ class Season extends Model implements ViewableContract
       'tmdb_id',
       'tmdb',
       'detail',
-      'actor_id'
+      'actor_id',
+      'is_protect',
+      'season_slug',
+      'password',
+      'trailer_url'
     ];
 
     public function episodes() {

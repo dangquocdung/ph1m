@@ -20,4 +20,7 @@ class PackageMenu extends Model
     'package_id',
     'updated_at' 
   ];
+  public function menu(){
+      return $this->belongsTo('App\Menu','menu_id','id');
+    }
 }

@@ -4,14 +4,14 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
-use CyrildeWit\EloquentViewable\Viewable;
-use CyrildeWit\EloquentViewable\Contracts\Viewable as ViewableContract;
+use CyrildeWit\EloquentViewable\InteractsWithViews;
+use CyrildeWit\EloquentViewable\Contracts\Viewable;
 
-class Movie extends Model implements ViewableContract
+class Movie extends Model implements Viewable
 {
     use HasTranslations;
 
-    use Viewable;
+    use InteractsWithViews;
 
     public $translatable = ['detail','keyword','description'];
 
@@ -52,8 +52,6 @@ class Movie extends Model implements ViewableContract
       'upload_video',
       'maturity_rating',
       'subtitle',
-      'subtitle_list',
-      'subtitle_files',
       'publish_year',
       'released',
       'featured',
@@ -62,7 +60,11 @@ class Movie extends Model implements ViewableContract
       'audio_files',
       'type',
       'live',
+      'livetvicon',
       'status',
+      'is_protect',
+      'password',
+      'slug',
       'created_by'
     ];
     
@@ -109,5 +111,12 @@ class Movie extends Model implements ViewableContract
     }
     public function getUserRatingAttribute(){
       return round($this->ratings()->avg('rating'),2);
+    }
+    public function multilinks(){
+      return $this->hasMany('App\MultipleLinks','movie_id');
+    }
+
+    public function user(){
+      return $this->belongsTo('App\User','created_by','id');
     }
 }

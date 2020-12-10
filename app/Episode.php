@@ -55,6 +55,11 @@ class Episode extends Model
 
     public function subtitles()
     {
-      return $this->hasMany('App\Subtitles','m_t_id');
+      return $this->hasMany('App\Subtitles','ep_id');
     }
+     public function multilinks(){
+      return $this->hasMany('App\MultipleLinks','episode_id');
+    }
+
+    
 }

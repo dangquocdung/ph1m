@@ -26,8 +26,8 @@ class SubController extends Controller
      */
     public function create()
     {
-          $package = Package::pluck('name', 'id')->all();
-          return view('admin.userplan.create'compact('package'));
+          $package = Package::pluck('name','id')->all();
+          return view('admin.userplan.create',compact('package'));
     }
 
     /**

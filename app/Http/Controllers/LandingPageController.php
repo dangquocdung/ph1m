@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\LandingPage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator; 
+use Illuminate\Support\Facades\Validator;
 
 class LandingPageController extends Controller
 {
@@ -37,37 +37,33 @@ class LandingPageController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {   
+    {
         $input = $request->all();
 
-        if ($file = $request->file('image'))
-        {
-          $name = 'landing_page_' . time() . $file->getClientOriginalName();
-          $file->move('images/main-home/', $name);
-          $input['image'] = $name;
-        }   
-
-        if (!isset($input['button']))
-        {
-          $input['button'] = 0;
+        if ($file = $request->file('image')) {
+            $name = 'landing_page_' . time() . $file->getClientOriginalName();
+            $file->move('images/main-home/', $name);
+            $input['image'] = $name;
         }
 
-        if (!isset($input['left']))
-        {
-          $input['left'] = 0;
+        if (!isset($input['button'])) {
+            $input['button'] = 0;
         }
 
-        if (!isset($input['button_link']))
-        {
-          $input['button_link'] = 'register';
+        if (!isset($input['left'])) {
+            $input['left'] = 0;
+        }
+
+        if (!isset($input['button_link'])) {
+            $input['button_link'] = 'register';
         } else {
-          $input['button_link'] = 'login';
+            $input['button_link'] = 'login';
         }
 
-        $input['position'] = (LandingPage::count()+1);
+        $input['position'] = (LandingPage::count() + 1);
 
         LandingPage::create($input);
-        
+
         return back()->with('added', 'Landing page block has been added');
     }
 
@@ -106,38 +102,34 @@ class LandingPageController extends Controller
         $input = $request->all();
         $landing_page = LandingPage::findOrFail($id);
 
-        if ($file = $request->file('image'))
-        {
-          $name = 'landing_page_' . time() . $file->getClientOriginalName();
-          if ($landing_page->image != null) {
-            $content = @file_get_contents(public_path() . '/images/main-home/'. $landing_page->image);
-            if ($content) { 
-              unlink(public_path() . '/images/main-home/'. $landing_page->image);
+        if ($file = $request->file('image')) {
+            $name = 'landing_page_' . time() . $file->getClientOriginalName();
+            if ($landing_page->image != null) {
+                $content = @file_get_contents(public_path() . '/images/main-home/' . $landing_page->image);
+                if ($content) {
+                    unlink(public_path() . '/images/main-home/' . $landing_page->image);
+                }
             }
-          }
-          $file->move('images/main-home/', $name);
-          $input['image'] = $name;
-        }   
-
-        if (!isset($input['button']))
-        {
-          $input['button'] = 0;
+            $file->move('images/main-home/', $name);
+            $input['image'] = $name;
         }
 
-        if (!isset($input['left']))
-        {
-          $input['left'] = 0;
+        if (!isset($input['button'])) {
+            $input['button'] = 0;
         }
 
-        if (!isset($input['button_link']))
-        {
-          $input['button_link'] = 'register';
+        if (!isset($input['left'])) {
+            $input['left'] = 0;
+        }
+
+        if (!isset($input['button_link'])) {
+            $input['button_link'] = 'register';
         } else {
-          $input['button_link'] = 'login';
+            $input['button_link'] = 'login';
         }
 
         $landing_page->update($input);
-        
+
         return redirect('admin/customize/landing-page')->with('updated', 'Landing page block has been updated');
     }
 
@@ -151,9 +143,9 @@ class LandingPageController extends Controller
         $landing_page = LandingPage::findOrFail($id);
 
         if ($landing_page->image != null) {
-            $content = @file_get_contents(public_path() . '/images/main-home/'. $landing_page->image);
-            if ($content) { 
-              unlink(public_path() . '/images/main-home/'. $landing_page->image);
+            $content = @file_get_contents(public_path() . '/images/main-home/' . $landing_page->image);
+            if ($content) {
+                unlink(public_path() . '/images/main-home/' . $landing_page->image);
             }
         }
         $landing_page->delete();
@@ -162,58 +154,52 @@ class LandingPageController extends Controller
 
     public function reposition(Request $request)
     {
-      if($request->item != null)
-      {
-          $items = explode('&', $request->item);
-          $all_ids = collect();
-          foreach ($items as $key => $value) {
-              $all_ids->push(substr($value, 7));
-          }
+        if ($request->item != null) {
+            $items = explode('&', $request->item);
+            $all_ids = collect();
+            foreach ($items as $key => $value) {
+                $all_ids->push(substr($value, 7));
+            }
 
-          $i = 0;
+            $i = 0;
 
-          foreach($all_ids as $id)
-          {
-              $i++;
-              $item = LandingPage::findOrFail($id);
-              $item->position = $i;
-              $item->save();
-          }
+            foreach ($all_ids as $id) {
+                $i++;
+                $item = LandingPage::findOrFail($id);
+                $item->position = $i;
+                $item->save();
+            }
 
-          return response()->json(['success' => true]);
+            return response()->json(['success' => true]);
 
-      }
-
-      else
-      {
-          return response()->json(['success' => false]);
-      }
+        } else {
+            return response()->json(['success' => false]);
+        }
     }
-
 
     public function bulk_delete(Request $request)
     {
-      $validator = Validator::make($request->all(), [
-          'checked' => 'required',
-      ]);
+        $validator = Validator::make($request->all(), [
+            'checked' => 'required',
+        ]);
 
-      if ($validator->fails()) {
-          return back()->with('deleted', 'Please select one of them to delete');
-      }
-
-      foreach ($request->checked as $checked) {
-        $block = LandingPage::findOrFail($checked);
-
-        if ($block->image != null) {
-            $content = @file_get_contents(public_path() . '/images/main-home/'. $block->image);
-            if ($content) { 
-              unlink(public_path() . '/images/main-home/'. $block->image);
-            }
+        if ($validator->fails()) {
+            return back()->with('deleted', 'Please select one of them to delete');
         }
 
-        $block->delete();
-      }
+        foreach ($request->checked as $checked) {
+            $block = LandingPage::findOrFail($checked);
 
-      return back()->with('deleted', 'Landing page blocks has been deleted');   
+            if ($block->image != null) {
+                $content = @file_get_contents(public_path() . '/images/main-home/' . $block->image);
+                if ($content) {
+                    unlink(public_path() . '/images/main-home/' . $block->image);
+                }
+            }
+
+            $block->delete();
+        }
+
+        return back()->with('deleted', 'Landing page blocks has been deleted');
     }
 }

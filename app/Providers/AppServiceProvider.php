@@ -4,21 +4,20 @@ namespace App\Providers;
 
 use App\AuthCustomize;
 use App\Config;
-use App\FooterTranslation;
-use App\HeaderTranslation;
-use App\HomeTranslation;
 use App\Language;
 use App\Menu;
 use App\Package;
 use App\seo;
 use App\Button;
-use App\PopoverTranslation;
+use App\ChatSetting;
+use App\Helpers\SeoHelper;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
-use Braintree_Configuration;
+
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,22 +28,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        
         Schema::defaultStringLength(191);
-        Braintree_Configuration::environment(env('BTREE_ENVIRONMENT'));
-        Braintree_Configuration::merchantId(env('BTREE_MERCHANT_ID'));
-        Braintree_Configuration::publicKey(env('BTREE_PUBLIC_KEY'));
-        Braintree_Configuration::privateKey(env('BTREE_PRIVATE_KEY'));
 
-        view()->composer('*', function ($view)
+        if (\DB::connection()->getDatabaseName()) {
+
+            if (Schema::hasTable('configs') && Schema::hasTable('seos')) {
+                 SeoHelper::settings();
+            }
+
+             if (Schema::hasTable('auth_customizes') && Schema::hasTable('configs') && Schema::hasTable('buttons') && Schema::hasTable('languages') && Schema::hasTable('users') && Schema::hasTable('chat_settings')) {
+
+            view()->composer('*', function ($view)
         {
             $auth_customize = AuthCustomize::first();
-            $header_translations = HeaderTranslation::all(); 
-            $footer_translations = FooterTranslation::all(); 
-            $home_translations = HomeTranslation::all(); 
-            $popover_translations = PopoverTranslation::all(); 
             $languages = Language::all(); 
             $auth = Auth::user();
-            $config = Config::findOrFail(1);
+            $config = Config::find(1);
             $com_name = $config->w_name;
             $com_add = $config->invoice_add;
             $catlog = $config->catlog;
@@ -70,39 +70,47 @@ class AppServiceProvider extends ServiceProvider
             $payu_payment = $config->payu_payment;
             $braintree = $config->braintree;
             $paystack = $config->paystack;
-              $coinpay = $config->coinpay;
+            $coinpay = $config->coinpay;
             $preloader = $config->preloader;
-            $button = Button::findOrFail(1);
+            $button = Button::find(1);
             $inspect = $button->inspect;
             $rightclick = $button->rightclick;
             $goto = $button->goto;
             $color = $config->color;
+            $uc_browser = $button->uc_browser;
+            $protip = $button->protip;
             $color_dark = $config->color_dark;
+            $remove_subscription =$button->remove_subscription;
+             
 
-            $seo = seo::findOrFail(1);
+
+            $seo = seo::find(1);
             $fb = $seo->fb;
             $google = $seo->google;
             $description = $seo->description;
             $keyword = $seo->keyword;
             $author = $seo->author;
 
+           
+
             $omdbApiKey = env('OMDB_API_KEY');
             $tmdbApiKey = env('TMDB_API_KEY');
 
             $view->with(['paytm_payment' => $paytm_payment, 'author' => $author,'color' => $color,'color_dark' => $color_dark,'description' => $description,'keyword' => $keyword,'goto' => $goto,
-                'fb' => $fb,'google' => $google,'rightclick' => $rightclick,'inspect'=>$inspect, 
-                'company_name' => $com_name, 'w_email' => $com_email, 'invoice_add' => $com_add, 
+                'fb' => $fb,'google' => $google,'rightclick' => $rightclick,'inspect'=>$inspect, 'uc_browser'=>$uc_browser, 'company_name' => $com_name, 'w_email' => $com_email, 'invoice_add' => $com_add, 
                 'auth' => $auth, 'prime_main_slider' => $prime_main_slider, 'prime_genre_slider' => $prime_genre_slider, 
                 'prime_footer' => $prime_footer, 'prime_movie_single' => $prime_movie_single, 'omdbapikey'=>$omdbApiKey,
                 'tmdbapikey'=>$tmdbApiKey,'currency_code' => $currency_code, 'currency_symbol' => $currency_symbol, 
                 'logo'=> $logo, 'favicon'=> $favicon, 'term_con' => $term_con, 'pri_pol' => $pri_pol,
                  'refund_pol' => $refund_pol, 'copyright' => $copyright, 'w_title' => $w_title, 'languages' => $languages, 
-                 'header_translations' => $header_translations, 'footer_translations' => $footer_translations, 
-                 'home_translations' => $home_translations, 'popover_translations' => $popover_translations, 
                 'braintree' => $braintree, 'paystack' => $paystack, 'coinpay' => $coinpay, 
                  'stripe_payment' => $stripe_payment, 'paypal_payment' => $paypal_payment,
-                 'payu_payment' => $payu_payment, 'auth_customize' => $auth_customize, 'preloader' => $preloader]);
+                 'payu_payment' => $payu_payment, 'auth_customize' => $auth_customize, 'preloader' => $preloader,'protip'=>$protip,'remove_subscription'=>$remove_subscription,'config'=>$config]);
         });
+        }
+      }
+
+        
     }
 
     /**

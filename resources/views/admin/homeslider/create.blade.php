@@ -22,6 +22,7 @@
                 <small class="text-danger">{{ $errors->first('prime_main_slider') }}</small>
               </div>
             </div>
+          
             <div id="movie_id_block" class="form-group{{ $errors->has('movie_id') ? ' has-error' : '' }}">
               {!! Form::label('movie_id', 'Select Slide For Movie') !!}
               <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Please select slide for movie"></i>
@@ -33,7 +34,8 @@
               {!! Form::select('tv_series_id', $tv_series_list, null, ['class' => 'form-control select2', 'placeholder' => '']) !!}
               <small class="text-danger">{{ $errors->first('tv_series_id') }}</small>
             </div>
-            <div class="form-group{{ $errors->has('slide_image') ? ' has-error' : '' }} input-file-block">
+          
+            <div class="form-group{{ $errors->has('slide_image') ? ' has-error' : '' }} input-file-block" id="slider_image" >
               {!! Form::label('slide_image', 'Slide Image') !!}
               <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Upload slide image"></i>
               {!! Form::file('slide_image', ['class' => 'input-file', 'id'=>'slide_image']) !!}
@@ -44,6 +46,9 @@
               <p class="info">Choose slide image</p>
               <small class="text-danger">{{ $errors->first('slide_image') }}</small>
             </div>
+
+            
+
             <div class="form-group{{ $errors->has('active') ? ' has-error' : '' }}">
               <div class="row">
                 <div class="col-xs-3">
@@ -93,6 +98,8 @@
           };
 
       });
+
+     
       
     });
   </script>

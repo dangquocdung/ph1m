@@ -8,8 +8,9 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Auth;
-use Stripe\Customer;
-use Stripe\Stripe;
+use Stripe;
+use Laravel\Cashier\Cashier;
+
 
 class SendInvoiceMailable extends Mailable
 {
@@ -33,11 +34,18 @@ class SendInvoiceMailable extends Mailable
     public function build()
     {
         $paypal_sub = null;
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
         $auth = Auth::user();
-        $customer = Customer::retrieve($auth->stripe_id);
-        $invoice = $customer->invoices();
+        $user = Cashier::findBillable($auth->stripe_id);
+        if($user){
+            $invoices = $user->invoices();
 
-        return $this->view('user.invoice', compact('invoice', 'paypal_sub'));
+            $invoice= $invoices[0];
+        }
+        
+
+        // dd($invoice->lines->data[0]->plan->amount);
+
+        return $this->view('user.invoice', compact('invoice', 'paypal_sub'))->subject('Send Invoice Mailable !');
     }
 }

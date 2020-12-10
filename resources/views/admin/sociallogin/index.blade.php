@@ -21,6 +21,7 @@
 		$fb_login_status = App\Config::select('fb_login')->where('id','=',1)->first();
 		$google_login_status = App\Config::select('google_login')->where('id','=',1)->first();
 		$gitlab_login_status = App\Config::select('gitlab_login')->where('id','=',1)->first();
+		$amazon_login_status = App\Config::select('amazon_login')->where('id','=',1)->first();
 
 		@endphp
 		<div class="col-md-6">
@@ -171,6 +172,62 @@
 			
 
 		</div>
+		
+		<div class="col-md-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<i class="fa fa-amazon"></i> Amazon Login Setting
+				</div>
+				
+				<div class="panel-body">
+					
+			<form action="{{  route('key.amazon') }}" method="POST">
+		     {{ csrf_field() }}
+
+			<div class="form-group">
+				<label for="">Enable AMAZON Login: </label>
+				<input {{ $amazon_login_status->amazon_login == 1 ? 'checked' : "" }} type="checkbox" class="toggle-input" name="amazon_lab_check" id="amazon_lab_check">
+             <label for="amazon_lab_check"></label>
+			</div>
+			
+			<div style="{{ $amazon_login_status->amazon_login == 1 ? '' : "display: none
+			" }}" id="amazon_lab_box">
+				<div class="form-group">
+		    	<label for="">AMAZON LOGIN ID:</label>
+				<input type="text" @if(isset($env_files['AMAZON_LOGIN_ID']))value="{{ $env_files['AMAZON_LOGIN_ID'] }}" @endif name="AMAZON_LOGIN_ID" class="form-control" >
+		    	</div>
+			
+			
+				<div class="search form-group">
+					<label for="">AMAZON Login Secret:</label>
+				<input type="password" @if(isset($env_files['AMAZON_LOGIN_SECRET']))value="{{ $env_files['AMAZON_LOGIN_SECRET'] }}" @endif name="AMAZON_LOGIN_SECRET" class="form-control" id="amazon-password-field3" >
+				
+				<span toggle="#amazon-password-field3" class="fa fa-fw fa-eye field-icon toggle-password">
+				</span>
+				
+				</div>
+			
+				<div class="form-group">
+					<label for="">AMAZON Redirect URL:</label>
+					<input type="text" placeholder="https://yoursite.com/auth/amazon/callback" @if(isset($env_files['AMAZON_LOGIN_REDIRECT'])) value="{{ $env_files['AMAZON_LOGIN_REDIRECT'] }}" @endif name="AMAZON_LOGIN_REDIRECT" class="form-control">
+				</div>
+			
+			
+			
+			</div>
+
+
+			<button type="submit" class="btn btn-md btn-primary">
+				<i class="fa fa-save"></i> Save
+			</button>
+		    
+			</form>
+				</div>
+			</div>
+			
+
+		</div>
+
 	</div>
 	</div>
 </div>
@@ -227,6 +284,13 @@
    		$('#git_lab_box').show('fast');
 	}else{
 		$('#git_lab_box').hide('fast');
+	}
+ });
+ $('#amazon_lab_check').on('change',function(){
+ 	if ($('#amazon_lab_check').is(':checked')){
+   		$('#amazon_lab_box').show('fast');
+	}else{
+		$('#amazon_lab_box').hide('fast');
 	}
  });
 

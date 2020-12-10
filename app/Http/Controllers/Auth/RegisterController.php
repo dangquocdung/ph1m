@@ -14,7 +14,6 @@ use App\Mail\WelcomeUser;
 use App\Config;
 use Carbon\Carbon;
 use Notification;
-use App\HeaderTranslation;
 use App\Notifications\MyNotification;
 use App\PaypalSubscription;
 
@@ -59,6 +58,24 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+      $config = Config::first();
+      if($config->captcha == 1){
+        return Validator::make($data, [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'g-recaptcha-response' => 'required|captcha',
+        ], [
+            'name.required' => 'Please Choose a name',
+            'email.required' => 'Email is required !',
+            'email.email' => 'Email must be in valid format',
+            'email.unique' => 'This email is already taken, Please choose another',
+            'password.required' => 'Password cannot be empty',
+            'password.confirmed' => "Password doesn't match",
+            'password.min' => 'Password length must be greater than 6'
+        ]);
+      }
+      else{
         return Validator::make($data, [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -72,6 +89,8 @@ class RegisterController extends Controller
             'password.confirmed' => "Password doesn't match",
             'password.min' => 'Password length must be greater than 6'
         ]);
+      }
+        
     }
 
     /**
@@ -94,7 +113,7 @@ class RegisterController extends Controller
         if($config->free_sub==1){
           $thisuser=User::findOrfail($user->id);
           $this->freesubscribe($thisuser);
-      }
+        }
 
       if($config->verify_email == 1){
 
@@ -124,10 +143,30 @@ class RegisterController extends Controller
 
     }
 
-}
+  }
+  return $user;
+ 
 } 
+
+public function sendEmail($thisUser){
+    Mail::to($thisUser['email'])->send(new verifyEmail($thisUser));
+    
+}
+
+public function verifyEmailFirst(){
+  $config = Config::first();
+  if($config->verify_email ==1){
+     Session::flash('success', 'Verification Email has been sent to your email');
+  }
+  else{
+    Session::flash('success', 'Your Registration is successfull !');
+  }
+ 
+  return redirect()->route('login');
+}
+
 public function freesubscribe($thisuser){
-     $header_translations = HeaderTranslation::all(); 
+    
     $config=Config::first();
     $start=Carbon::now();
     $end=$start->addDays($config->free_days);
@@ -144,25 +183,18 @@ public function freesubscribe($thisuser){
         'subscription_to' => $end
     ]);
     $ps=PaypalSubscription::where('user_id',$thisuser->id)->first();
-   $to= Str::substr($ps->subscription_to,0, 10);
-   $from= Str::substr($ps->subscription_from,0, 10);
-    $title=$config->free_days.' Days '.$header_translations->where('key', 'Free Trial')->first->value->value;
-$desc=$header_translations->where('key', 'Free Trial Text')->first->value->value.' '.$from.' to '.$to;
-$movie_id=NULL;
-$tvid=NULL;
-$user=$thisuser->id;
+    $to= Str::substr($ps->subscription_to,0, 10);
+     $from= Str::substr($ps->subscription_from,0, 10);
+    $title=$config->free_days.' Days '.__('staticwords.freetrial');
+    $desc=__('staticwords.freetrialtext').' '.$from.' to '.$to;
+    $movie_id=NULL;
+    $tvid=NULL;
+    $user=$thisuser->id;
        User::findOrFail($thisuser->id)->notify(new MyNotification($title,$desc,$movie_id,$tvid,$user));
 
 
 }
-public function sendEmail($thisUser){
-    Mail::to($thisUser['email'])->send(new verifyEmail($thisUser));
-}
 
-public function verifyEmailFirst(){
-  Session::flash('added', 'Verification Email has been sent to your email');
-  return redirect()->route('login');
-}
 
 public function sendEmailDone($email, $verifyToken){
     $user = User::where(['email' => $email, 'verifyToken' => $verifyToken])->first();
@@ -171,8 +203,8 @@ public function sendEmailDone($email, $verifyToken){
         User::where(['email' => $email, 'verifyToken' => $verifyToken])->update(['status'=>'1','verifyToken'=>NULL]);
         Session::flash('success', 'Email Verification Successfull');
 
-        Mail :: to($user->email)->send(new WelcomeUser($user));
-        return redirect()->route('login',$user);
+        Mail::to($user->email)->send(new WelcomeUser($user));
+        return redirect()->route('login');
     }else{
         return 'user not found';
     }

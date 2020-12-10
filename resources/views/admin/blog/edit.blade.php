@@ -29,7 +29,32 @@
                 {!! Form::textarea('detail', null, ['id' => 'detail','autocomplete'=>'off', 'class' => 'form-control ckeditor', '']) !!}
                 <small class="text-danger">{{ $errors->first('detail') }}</small>
             </div>
-
+            <div class="menu-block">
+              <h6 class="menu-block-heading">Please Select Menu</h6>
+              @if (isset($menus) && count($menus) > 0)
+                <ul>
+                     <li>
+                      <div class="inline">
+                        <input type="checkbox" class="filled-in material-checkbox-input all" name="menu[]" value="100" id="checkbox{{100}}" >
+                        <label for="checkbox{{100}}" class="material-checkbox"></label>
+                      </div>
+                      All Menus
+                    </li>
+                  @foreach ($menus as $menu)
+                  
+                    
+                    <li>
+                      <div class="inline">
+                        <input @foreach($blog->blog_m as $getbm) @if($getbm->menu_id == $menu->id) checked @endif @endforeach type="checkbox" class="filled-in material-checkbox-input one" name="menu[]" value="{{$menu->id}}" id="checkbox{{$menu->id}}">
+                        <label for="checkbox{{$menu->id}}" class="material-checkbox"  ></label>
+                      </div>
+                      {{$menu->name}}
+                    </li>
+                   
+                  @endforeach
+                </ul>
+              @endif
+            </div>
             <div class="form-group{{ $errors->has('is_active') ? ' has-error' : '' }} switch-main-block">
             <div class="row">
               <div class="col-xs-4">
@@ -61,8 +86,8 @@
 @endsection
 
 @section('custom-script')
-	<script>
-		$(document).ready(function(){
+  <script>
+    $(document).ready(function(){
       $('.upload-image-main-block').hide();
       $('.for-custom-image input').click(function(){
         if($(this).prop("checked") == true){
@@ -73,6 +98,87 @@
         }
       });
     });
-	</script>
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var check = [];
+    
+    $('.one').each(function(index){
+
+      if($(this).is(':checked')){
+        check.push(1);
+      }else{
+        check.push(0);
+      }
+
+    });
+   
+    var flag = 1;
+
+    if (jQuery.inArray(0, check) == -1) {
+            flag = 1;
+
+        } else {
+            flag = 0;
+        }
+
+     if(flag == 0){
+      $('.all').prop('checked',false);
+     }else{
+       $('.all').prop('checked',true);
+     }
+
+  });
+
+    // if one checkbox is unchecked remove checked on all menu option
+
+    $(".one").click(function(){
+      if($(this).is(':checked'))
+      {
+       
+        var checked = [];
+       $('.one').each(function(){
+        if($(this).is(':checked')){
+          checked.push(1);
+        }else{
+          checked.push(0);
+        }
+       })
+       
+       var flag = 1;
+
+    if (jQuery.inArray(0, checked) == -1) {
+            flag = 1;
+
+        } else {
+            flag = 0;
+        }
+
+       if(flag == 0){
+        $('.all').prop('checked',false);
+       }else{
+         $('.all').prop('checked',true);
+       }
+      }
+      else{
+        
+        $('.all').prop('checked',false);
+      }
+    });
+
+// when click all menu  option all checkbox are checked
+
+    $(".all").click(function(){
+      if($(this).is(':checked')){
+        $('.one').prop('checked',true);
+      }
+      else{
+        $('.one').prop('checked',false);
+      }
+    })
+
+  </script>
+
  
 @endsection

@@ -12,7 +12,7 @@ $decodedeURL = $decodedeURL . "/";
 $url .= $decodedeURL;
 
 $dirHandle = opendir($dir); 
-$imlBody .= '{"folder":[';
+$imlBody = '{"folder":[';
 $main_ar = array();
 $all_ar = array();
 $ar = array();
@@ -30,13 +30,13 @@ sort($main_ar);
 for($i=0;$i<count($main_ar);$i++){
 	$videoPath = $main_ar[$i];
 	
-	for($j=0;$j<count($all_ar);$j++){
+	/*for($j=0;$j<count($all_ar);$j++){
 		if(substr($videoPath, 0, strrpos($videoPath, ".")) . "-mobile.mp4" === $all_ar[$j]){
 			$videoPath =  $url.$videoPath . "," . $url.$all_ar[$j];
 		}else if(substr($videoPath, 0, strrpos($videoPath, ".")) . "-mobile.mp3" === $all_ar[$j]){
 			$videoPath =  $url.$videoPath . "," . $url.$all_ar[$j];
 		}
-	}
+	}*/
 	if(strrpos($videoPath, "http") === false){
 		$ar[$i] = $url.$videoPath;
 	}else{
